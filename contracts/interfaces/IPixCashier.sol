@@ -149,7 +149,9 @@ interface IPixCashier is IPixCashierTypes {
      * @dev Returns the data of multiple cash-in operations.
      * @param txIds The off-chain transaction identifiers of the operations.
      */
-    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory cashIns);
+    function getCashIns(
+        bytes32[] memory txIds
+    ) external view returns (CashInOperation[] memory cashIns);
 
     /**
      * @dev Returns the data of a cash-in batch operation.
@@ -197,7 +199,10 @@ interface IPixCashier is IPixCashierTypes {
      * @param limit The maximum number of returned identifiers.
      * @return txIds The array of requested identifiers.
      */
-    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory txIds);
+    function getPendingCashOutTxIds(
+        uint256 index,
+        uint256 limit
+    ) external view returns (bytes32[] memory txIds);
 
     /**
      * @dev Returns the data of a single cash-out operation.
@@ -223,11 +228,7 @@ interface IPixCashier is IPixCashierTypes {
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function cashIn(
-        address account,
-        uint256 amount,
-        bytes32 txId
-    ) external;
+    function cashIn(address account, uint256 amount, bytes32 txId) external;
 
     /**
      * @dev Executes a batch of cash-in operations.
@@ -263,11 +264,7 @@ interface IPixCashier is IPixCashierTypes {
      * @param amount The amount of tokens to be cash-outed.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function requestCashOutFrom(
-        address account,
-        uint256 amount,
-        bytes32 txId
-    ) external;
+    function requestCashOutFrom(address account, uint256 amount, bytes32 txId) external;
 
     /**
      * @dev Initiates a batch of cash-out operations from some other accounts.

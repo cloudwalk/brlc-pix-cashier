@@ -166,7 +166,10 @@ contract PixCashier is
     /**
      * See {IPixCashier-getPendingCashOutTxIds}.
      */
-    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory txIds) {
+    function getPendingCashOutTxIds(
+        uint256 index,
+        uint256 limit
+    ) external view returns (bytes32[] memory txIds) {
         uint256 len = _pendingCashOutTxIds.length();
         if (len <= index || limit == 0) {
             txIds = new bytes32[](0);
@@ -193,7 +196,9 @@ contract PixCashier is
     /**
      * @dev See {IPixCashier-getCashIns}.
      */
-    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory cashIns) {
+    function getCashIns(
+        bytes32[] memory txIds
+    ) external view returns (CashInOperation[] memory cashIns) {
         uint256 len = txIds.length;
         cashIns = new CashInOperation[](len);
         for (uint256 i = 0; i < len; i++) {
@@ -277,7 +282,11 @@ contract PixCashier is
         bytes32[] memory txIds,
         bytes32 batchId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (accounts.length == 0 || accounts.length != amounts.length || accounts.length != txIds.length) {
+        if (
+            accounts.length == 0 ||
+            accounts.length != amounts.length ||
+            accounts.length != txIds.length
+        ) {
             revert InvalidBatchArrays();
         }
         if (_cashInBatches[batchId].status == CashInBatchStatus.Executed) {
@@ -290,7 +299,12 @@ contract PixCashier is
         CashInExecutionResult[] memory executionResults = new CashInExecutionResult[](txIds.length);
 
         for (uint256 i = 0; i < accounts.length; i++) {
-            executionResults[i] = _cashIn(accounts[i], amounts[i], txIds[i], CashInExecutionPolicy.Skip);
+            executionResults[i] = _cashIn(
+                accounts[i],
+                amounts[i],
+                txIds[i],
+                CashInExecutionPolicy.Skip
+            );
         }
 
         _cashInBatches[batchId].status = CashInBatchStatus.Executed;
@@ -367,7 +381,9 @@ contract PixCashier is
      * - All the values in the input `txIds` array must not be zero.
      * - All the cash-out operations corresponded the values in the input `txIds` array must have the pending status.
      */
-    function confirmCashOutBatch(bytes32[] memory txIds) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    function confirmCashOutBatch(
+        bytes32[] memory txIds
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         uint256 len = txIds.length;
         if (len == 0) {
             revert EmptyTransactionIdsArray();
@@ -403,7 +419,9 @@ contract PixCashier is
      * - All the values in the input `txIds` array must not be zero.
      * - All the cash-out operations corresponded the values in the input `txIds` array must have the pending status.
      */
-    function reverseCashOutBatch(bytes32[] memory txIds) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    function reverseCashOutBatch(
+        bytes32[] memory txIds
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         uint256 len = txIds.length;
         if (len == 0) {
             revert EmptyTransactionIdsArray();
@@ -422,7 +440,7 @@ contract PixCashier is
         uint256 amount,
         bytes32 txId,
         CashInExecutionPolicy policy
-    ) internal returns (CashInExecutionResult){
+    ) internal returns (CashInExecutionResult) {
         if (account == address(0)) {
             revert ZeroAccount();
         }
@@ -497,19 +515,9 @@ contract PixCashier is
         _cashOutBalances[account] = newCashOutBalance;
         _pendingCashOutTxIds.add(txId);
 
-        emit RequestCashOut(
-            account,
-            amount,
-            newCashOutBalance,
-            txId,
-            sender
-        );
+        emit RequestCashOut(account, amount, newCashOutBalance, txId, sender);
 
-        IERC20Upgradeable(_token).safeTransferFrom(
-            account,
-            address(this),
-            amount
-        );
+        IERC20Upgradeable(_token).safeTransferFrom(account, address(this), amount);
     }
 
     /**
@@ -537,20 +545,10 @@ contract PixCashier is
         operation.status = targetStatus;
 
         if (targetStatus == CashOutStatus.Confirmed) {
-            emit ConfirmCashOut(
-                account,
-                amount,
-                newCashOutBalance,
-                txId
-            );
+            emit ConfirmCashOut(account, amount, newCashOutBalance, txId);
             IERC20Mintable(_token).burn(amount);
         } else {
-            emit ReverseCashOut(
-                account,
-                amount,
-                newCashOutBalance,
-                txId
-            );
+            emit ReverseCashOut(account, amount, newCashOutBalance, txId);
             IERC20Upgradeable(_token).safeTransfer(account, amount);
         }
     }

@@ -51,6 +51,8 @@ abstract contract PixCashierStorageV3 is IPixCashierTypes {
  * e.g. PixCashierStorage<versionNumber>, so finally it would look like
  * "contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2".
  */
-abstract contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2, PixCashierStorageV3 {
-
-}
+abstract contract PixCashierStorage is
+    PixCashierStorageV1,
+    PixCashierStorageV2,
+    PixCashierStorageV3
+{}

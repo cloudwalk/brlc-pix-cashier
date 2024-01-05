@@ -12,7 +12,7 @@ This repository contains Pix Cashier smart contracts.</br>
 
 ## Build and test
 
-``` sh
+```sh
 # Install all dependencies
 npm install
 
@@ -24,8 +24,9 @@ npx hardhat test
 ```
 
 ## Networks and deployments
+
 Information about deployments across all the networks can be found [here](./docs/deployed-contracts.json).
 
 ## Licensing
-This project is released under the MIT License, see [LICENSE](./LICENSE).
 
+This project is released under the MIT License, see [LICENSE](./LICENSE).

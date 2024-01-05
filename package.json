@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "4.9.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "hardhat-contract-sizer": "^2.10.0",
+    "prettier": "^2.8.8",
+    "prettier-plugin-solidity": "^1.2.0"
+  },
+  "scripts": {
+    "test": "npx hardhat test",
+    "prettier": "prettier --write 'contracts/**/*.sol'"
+  }
+}

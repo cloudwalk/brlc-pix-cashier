@@ -158,7 +158,7 @@ describe("Contract 'PixCashier'", async () => {
 
   beforeEach(async () => {
     // Deploy the token mock contract
-    const TokenMock: ContractFactory = await ethers.getContractFactory("ERC20UpgradeableMock");
+    const TokenMock: ContractFactory = await ethers.getContractFactory("ERC20TokenMock");
     tokenMock = await TokenMock.deploy();
     await tokenMock.deployed();
     await proveTx(tokenMock.initialize("ERC20 Test", "TEST"));

@@ -37,9 +37,7 @@ describe("Contract 'PausableExtUpgradeable'", async () => {
     return { pausableExtMock };
   }
 
-  async function deployAndConfigurePausableExtMock(): Promise<{
-    pausableExtMock: Contract;
-  }> {
+  async function deployAndConfigurePausableExtMock(): Promise<{ pausableExtMock: Contract }> {
     const { pausableExtMock } = await deployPausableExtMock();
     await proveTx(pausableExtMock.grantRole(pauserRole, pauser.address));
     return { pausableExtMock };

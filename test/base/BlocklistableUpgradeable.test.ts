@@ -46,9 +46,7 @@ describe("Contract 'BlocklistableUpgradeable'", async () => {
     return { blocklistableMock };
   }
 
-  async function deployAndConfigureBlocklistableMock(): Promise<{
-    blocklistableMock: Contract;
-  }> {
+  async function deployAndConfigureBlocklistableMock(): Promise<{ blocklistableMock: Contract }> {
     const { blocklistableMock } = await deployBlocklistableMock();
     await proveTx(blocklistableMock.grantRole(blocklisterRole, blocklister.address));
     return { blocklistableMock };

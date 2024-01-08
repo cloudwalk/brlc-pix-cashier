@@ -38,9 +38,7 @@ describe("Contract 'AccessControlExtUpgradeable'", async () => {
     userAddresses = [users[0].address, users[1].address, users[2].address];
   });
 
-  async function deployAccessControlExtMock(): Promise<{
-    accessControlExtMock: Contract;
-  }> {
+  async function deployAccessControlExtMock(): Promise<{ accessControlExtMock: Contract }> {
     const accessControlExtMock: Contract = await upgrades.deployProxy(accessControlExtMockFactory);
     await accessControlExtMock.deployed();
     return { accessControlExtMock };

@@ -149,9 +149,7 @@ interface IPixCashier is IPixCashierTypes {
      * @dev Returns the data of multiple cash-in operations.
      * @param txIds The off-chain transaction identifiers of the operations.
      */
-    function getCashIns(
-        bytes32[] memory txIds
-    ) external view returns (CashInOperation[] memory cashIns);
+    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory cashIns);
 
     /**
      * @dev Returns the data of a cash-in batch operation.
@@ -199,10 +197,7 @@ interface IPixCashier is IPixCashierTypes {
      * @param limit The maximum number of returned identifiers.
      * @return txIds The array of requested identifiers.
      */
-    function getPendingCashOutTxIds(
-        uint256 index,
-        uint256 limit
-    ) external view returns (bytes32[] memory txIds);
+    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory txIds);
 
     /**
      * @dev Returns the data of a single cash-out operation.

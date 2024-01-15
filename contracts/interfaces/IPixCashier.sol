@@ -12,7 +12,7 @@ interface IPixCashierTypes {
      * The possible values:
      * - Nonexistent ----- The operation does not exist (the default value).
      * - Executed -------- The operation was executed as a common mint.
-     * - PremintExecuted - The operation was executed as a premint with a release time.
+     * - PremintExecuted - The operation was executed as a premint with some predetermined release time.
      */
     enum CashInStatus {
         Nonexistent,    // 0
@@ -236,7 +236,7 @@ interface IPixCashier is IPixCashierTypes {
     function cashIn(address account, uint256 amount, bytes32 txId) external;
 
     /**
-     * @dev Executes a cash-in operation as a premint with a release time.
+     * @dev Executes a cash-in operation as a premint with some predetermined release time.
      *
      * This function is expected to be called by a limited number of accounts
      * that are allowed to execute cash-in operations.

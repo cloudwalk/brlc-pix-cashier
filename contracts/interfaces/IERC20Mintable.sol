@@ -17,7 +17,7 @@ interface IERC20Mintable {
     function mint(address account, uint256 amount) external returns (bool);
 
     /**
-     * @notice Premints tokens.
+     * @dev Premints tokens.
      *
      * @param account The address of a tokens recipient.
      * @param amount The amount of tokens to premint.

@@ -461,9 +461,9 @@ contract PixCashier is
     }
 
     /**
-     * @dev Executes a cash-in operation internally depending on the target status and execution policy.
+     * @dev Executes a cash-in operation internally depending on the release time and execution policy.
      *
-     * Emits the `CashIn` event and mints token if the target status is `Executed`.
+     * If the release time is zero then the operation is executed as a common mint otherwise as a premint.
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.

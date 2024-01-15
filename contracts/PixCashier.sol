@@ -171,10 +171,7 @@ contract PixCashier is
     /**
      * See {IPixCashier-getPendingCashOutTxIds}.
      */
-    function getPendingCashOutTxIds(
-        uint256 index,
-        uint256 limit
-    ) external view returns (bytes32[] memory txIds) {
+    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory txIds) {
         uint256 len = _pendingCashOutTxIds.length();
         if (len <= index || limit == 0) {
             txIds = new bytes32[](0);
@@ -201,9 +198,7 @@ contract PixCashier is
     /**
      * @dev See {IPixCashier-getCashIns}.
      */
-    function getCashIns(
-        bytes32[] memory txIds
-    ) external view returns (CashInOperation[] memory cashIns) {
+    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory cashIns) {
         uint256 len = txIds.length;
         cashIns = new CashInOperation[](len);
         for (uint256 i = 0; i < len; i++) {
@@ -409,9 +404,7 @@ contract PixCashier is
      * - All the values in the input `txIds` array must not be zero.
      * - All the cash-out operations corresponded the values in the input `txIds` array must have the pending status.
      */
-    function confirmCashOutBatch(
-        bytes32[] memory txIds
-    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    function confirmCashOutBatch(bytes32[] memory txIds) external whenNotPaused onlyRole(CASHIER_ROLE) {
         uint256 len = txIds.length;
         if (len == 0) {
             revert EmptyTransactionIdsArray();
@@ -447,9 +440,7 @@ contract PixCashier is
      * - All the values in the input `txIds` array must not be zero.
      * - All the cash-out operations corresponded the values in the input `txIds` array must have the pending status.
      */
-    function reverseCashOutBatch(
-        bytes32[] memory txIds
-    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    function reverseCashOutBatch(bytes32[] memory txIds) external whenNotPaused onlyRole(CASHIER_ROLE) {
         uint256 len = txIds.length;
         if (len == 0) {
             revert EmptyTransactionIdsArray();

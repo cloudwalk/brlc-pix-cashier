@@ -96,7 +96,7 @@ contract PixCashier is
     /**
      * @dev The provided release time for the premint operation is inappropriate.
      */
-    error InnapropriatePremintReleaseTime();
+    error InappropriatePremintReleaseTime();
 
     // -------------------- Functions --------------------------------
 
@@ -284,7 +284,7 @@ contract PixCashier is
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         if (releaseTime == 0) {
-            revert InnapropriatePremintReleaseTime();
+            revert InappropriatePremintReleaseTime();
         }
         _cashIn(account, amount, txId, releaseTime, CashInExecutionPolicy.Revert);
     }

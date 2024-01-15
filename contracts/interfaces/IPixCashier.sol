@@ -10,12 +10,14 @@ interface IPixCashierTypes {
      * @dev Possible statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Nonexistent - The operation does not exist (the default value).
-     * - Executed ---- The operation was executed.
+     * - Nonexistent ----- The operation does not exist (the default value).
+     * - Executed -------- The operation was executed as a common mint.
+     * - PremintExecuted - The operation was executed as a premint with a release time.
      */
     enum CashInStatus {
-        Nonexistent, // 0
-        Executed     // 1
+        Nonexistent,    // 0
+        Executed,       // 1
+        PremintExecuted // 2
     }
 
     /**
@@ -100,6 +102,14 @@ interface IPixCashier is IPixCashierTypes {
         address indexed account, // The account that receives tokens.
         uint256 amount,          // The amount of tokens to receive.
         bytes32 indexed txId     // The off-chain transaction identifier.
+    );
+
+    /// @dev Emitted when a new cash-in operation is executed as a premint.
+    event CashInPremint(
+        address indexed account, // The account that receives tokens.
+        uint256 amount,          // The amount of tokens to receive.
+        bytes32 indexed txId,    // The off-chain transaction identifier.
+        uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
     );
 
     /// @dev Emitted when a new batch of cash-in operations is executed.
@@ -212,7 +222,7 @@ interface IPixCashier is IPixCashierTypes {
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOut[] memory cashOuts);
 
     /**
-     * @dev Executes a cash-in operation.
+     * @dev Executes a cash-in operation as a common mint.
      *
      * This function is expected to be called by a limited number of accounts
      * that are allowed to execute cash-in operations.
@@ -226,7 +236,27 @@ interface IPixCashier is IPixCashierTypes {
     function cashIn(address account, uint256 amount, bytes32 txId) external;
 
     /**
-     * @dev Executes a batch of cash-in operations.
+     * @dev Executes a cash-in operation as a premint with a release time.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInPremint} event.
+     *
+     * @param account The address of the tokens recipient.
+     * @param amount The amount of tokens to be received.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     */
+    function cashInPremint(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external;
+
+    /**
+     * @dev Executes a batch of cash-in operations as common mints.
      *
      * This function is expected to be called by a limited number of accounts
      * that are allowed to execute cash-in operations.

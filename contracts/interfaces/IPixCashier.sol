@@ -72,14 +72,14 @@ interface IPixCashierTypes {
 
     /// @dev Structure with data of a single cash-in operation.
     struct CashInOperation {
-        CashInStatus status;  // The status of the cash-in operation according to the {CashInStatus} enum.
-        address account;      // The owner of tokens to cash-in.
-        uint256 amount;       // The amount of tokens to cash-in.
+        CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
+        address account;     // The owner of tokens to cash-in.
+        uint256 amount;      // The amount of tokens to cash-in.
     }
 
     /// @dev Structure with data of a batch cash-in operation.
     struct CashInBatchOperation {
-        CashInBatchStatus status;  // The status of the cash-in batch operation according to the {CashInBatchStatus}.
+        CashInBatchStatus status; // The status of the cash-in batch operation according to the {CashInBatchStatus}.
     }
 
     /// @dev Structure with data of a single cash-in operation.

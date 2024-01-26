@@ -55,7 +55,11 @@ interface PixCashierState {
   cashOutBalancePerAccount: Map<string, number>;
 }
 
-function checkCashOutEquality(actualOnChainCashOut: any, expectedCashOut: TestCashOut, cashOutIndex: number) {
+function checkCashOutEquality(
+  actualOnChainCashOut: Record<string, unknown>,
+  expectedCashOut: TestCashOut,
+  cashOutIndex: number
+) {
   if (expectedCashOut.status == CashOutStatus.Nonexistent) {
     expect(actualOnChainCashOut.account).to.equal(
       ethers.constants.AddressZero,
@@ -82,7 +86,11 @@ function checkCashOutEquality(actualOnChainCashOut: any, expectedCashOut: TestCa
   }
 }
 
-function checkCashInEquality(actualOnChainCashIn: any, expectedCashIn: TestCashIn, cashInIndex: number) {
+function checkCashInEquality(
+  actualOnChainCashIn: Record<string, unknown>,
+  expectedCashIn: TestCashIn,
+  cashInIndex: number
+) {
   if (expectedCashIn.status == CashInStatus.Nonexistent) {
     expect(actualOnChainCashIn.account).to.equal(
       ethers.constants.AddressZero,
@@ -104,7 +112,7 @@ function checkCashInEquality(actualOnChainCashIn: any, expectedCashIn: TestCashI
 }
 
 function checkCashInBatchEquality(
-  actualOnChainCashInBatch: any,
+  actualOnChainCashInBatch: Record<string, unknown>,
   expectedCashInBatch: TestCashInBatch,
   cashInBatchIndex: number
 ) {
@@ -231,10 +239,10 @@ describe("Contract 'PixCashier'", async () => {
 
   async function checkCashInStructuresOnBlockchain(cashIns: TestCashIn[]) {
     const txIds: string[] = cashIns.map(cashIn => cashIn.txId);
-    const actualCashIns: any[] = await pixCashier.getCashIns(txIds);
+    const actualCashIns: Record<string, unknown>[] = await pixCashier.getCashIns(txIds);
     for (let i = 0; i < cashIns.length; ++i) {
       const cashIn: TestCashIn = cashIns[i];
-      const actualCashIn: any = await pixCashier.getCashIn(cashIn.txId);
+      const actualCashIn: Record<string, unknown> = await pixCashier.getCashIn(cashIn.txId);
       checkCashInEquality(actualCashIn, cashIn, i);
       checkCashInEquality(actualCashIns[i], cashIn, i);
     }
@@ -242,10 +250,10 @@ describe("Contract 'PixCashier'", async () => {
 
   async function checkCashInBatchStructuresOnBlockchain(cashInBatches: TestCashInBatch[]) {
     const batchIds: string[] = cashInBatches.map(cashInBatch => cashInBatch.batchId);
-    const actualCashInBatches: any[] = await pixCashier.getCashInBatches(batchIds);
+    const actualCashInBatches: Record<string, unknown>[] = await pixCashier.getCashInBatches(batchIds);
     for (let i = 0; i < cashInBatches.length; ++i) {
       const cashInBatch: TestCashInBatch = cashInBatches[i];
-      const actualCashInBatch: any = await pixCashier.getCashInBatch(cashInBatch.batchId);
+      const actualCashInBatch: Record<string, unknown> = await pixCashier.getCashInBatch(cashInBatch.batchId);
       checkCashInBatchEquality(actualCashInBatch, cashInBatch, i);
       checkCashInBatchEquality(actualCashInBatches[i], cashInBatch, i);
     }
@@ -253,10 +261,10 @@ describe("Contract 'PixCashier'", async () => {
 
   async function checkCashOutStructuresOnBlockchain(cashOuts: TestCashOut[]) {
     const txIds: string[] = cashOuts.map(cashOut => cashOut.txId);
-    const actualCashOuts: any[] = await pixCashier.getCashOuts(txIds);
+    const actualCashOuts: Record<string, unknown>[] = await pixCashier.getCashOuts(txIds);
     for (let i = 0; i < cashOuts.length; ++i) {
       const cashOut: TestCashOut = cashOuts[i];
-      const actualCashOut: any = await pixCashier.getCashOut(cashOut.txId);
+      const actualCashOut: Record<string, unknown> = await pixCashier.getCashOut(cashOut.txId);
       checkCashOutEquality(actualCashOut, cashOut, i);
       checkCashOutEquality(actualCashOuts[i], cashOut, i);
     }

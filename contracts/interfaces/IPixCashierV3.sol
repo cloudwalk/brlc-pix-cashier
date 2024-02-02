@@ -226,7 +226,7 @@ interface IPixCashierV3 is IPixCashierV3Types {
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function cashIn(address account, uint64 amount, bytes32 txId) external;
+    function cashIn(address account, uint256 amount, bytes32 txId) external;
 
     /**
      * @dev Executes a cash-in operation as a premint with some predetermined release time.
@@ -243,7 +243,7 @@ interface IPixCashierV3 is IPixCashierV3Types {
      */
     function cashInPremint(
         address account,
-        uint64 amount,
+        uint256 amount,
         bytes32 txId,
         uint256 releaseTime
     ) external;
@@ -264,7 +264,7 @@ interface IPixCashierV3 is IPixCashierV3Types {
      */
     function cashInBatch(
         address[] memory accounts,
-        uint64[] memory amounts,
+        uint256[] memory amounts,
         bytes32[] memory txIds,
         bytes32 batchId
     ) external;
@@ -282,7 +282,7 @@ interface IPixCashierV3 is IPixCashierV3Types {
      * @param amount The amount of tokens to be cash-outed.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function requestCashOutFrom(address account, uint64 amount, bytes32 txId) external;
+    function requestCashOutFrom(address account, uint256 amount, bytes32 txId) external;
 
     /**
      * @dev Initiates a batch of cash-out operations from some other accounts.
@@ -299,7 +299,7 @@ interface IPixCashierV3 is IPixCashierV3Types {
      */
     function requestCashOutFromBatch(
         address[] memory accounts,
-        uint64[] memory amounts,
+        uint256[] memory amounts,
         bytes32[] memory txIds
     ) external;
 

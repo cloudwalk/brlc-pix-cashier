@@ -154,6 +154,7 @@ describe("Contract 'PixCashierV3'", async () => {
   const REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED = "BlocklistedAccount";
   const REVERT_ERROR_IF_ACCOUNT_IS_ZERO = "ZeroAccount";
   const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "ZeroAmount";
+  const REVERT_ERROR_IF_AMOUNT_EXCESS = "AmountExcess";
   const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "CashInAlreadyExecuted";
   const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "ZeroTxId";
   const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "TokenMintingFailure";
@@ -423,6 +424,13 @@ describe("Contract 'PixCashierV3'", async () => {
       await expect(
         pixCashier.connect(cashier).cashIn(user.address, 0, TRANSACTION_ID1)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
+      const amount = BigNumber.from("0x10000000000000000");
+      await expect(
+        pixCashier.connect(cashier).cashIn(user.address, amount, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
@@ -739,6 +747,13 @@ describe("Contract 'PixCashierV3'", async () => {
       await expect(
         pixCashier.connect(cashier).requestCashOutFrom(cashOut.account.address, 0, cashOut.txId)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
+      const amount = BigNumber.from("0x10000000000000000");
+      await expect(
+        pixCashier.connect(cashier).requestCashOutFrom(cashOut.account.address, amount, cashOut.txId)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {

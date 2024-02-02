@@ -67,6 +67,9 @@ contract PixCashierV3 is
     /// @dev The length of the one of the batch arrays is different to the others.
     error InvalidBatchArrays();
 
+    /// @dev The operation amount exceeds the maximum allowed value.
+    error AmountExcess();
+
     /**
      * @dev The cash-in operation with the provided off-chain transaction is already executed.
      * @param txId The off-chain transaction identifiers of the operation.
@@ -252,7 +255,7 @@ contract PixCashierV3 is
      */
     function cashIn(
         address account,
-        uint64 amount,
+        uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _cashIn(account, amount, txId, 0, CashInExecutionPolicy.Revert);
@@ -270,7 +273,7 @@ contract PixCashierV3 is
      */
     function cashInPremint(
         address account,
-        uint64 amount,
+        uint256 amount,
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
@@ -296,7 +299,7 @@ contract PixCashierV3 is
      */
     function cashInBatch(
         address[] memory accounts,
-        uint64[] memory amounts,
+        uint256[] memory amounts,
         bytes32[] memory txIds,
         bytes32 batchId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
@@ -344,7 +347,7 @@ contract PixCashierV3 is
      */
     function requestCashOutFrom(
         address account,
-        uint64 amount,
+        uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _requestCashOut(_msgSender(), account, amount, txId);
@@ -363,7 +366,7 @@ contract PixCashierV3 is
      */
     function requestCashOutFromBatch(
         address[] memory accounts,
-        uint64[] memory amounts,
+        uint256[] memory amounts,
         bytes32[] memory txIds
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         if (accounts.length != amounts.length || accounts.length != txIds.length) {
@@ -472,6 +475,9 @@ contract PixCashierV3 is
         if (amount == 0) {
             revert ZeroAmount();
         }
+        if (amount > type(uint64).max) {
+            revert AmountExcess();
+        }
         if (txId == 0) {
             revert ZeroTxId();
         }
@@ -524,6 +530,9 @@ contract PixCashierV3 is
         }
         if (amount == 0) {
             revert ZeroAmount();
+        }
+        if (amount > type(uint64).max) {
+            revert AmountExcess();
         }
         if (txId == 0) {
             revert ZeroTxId();

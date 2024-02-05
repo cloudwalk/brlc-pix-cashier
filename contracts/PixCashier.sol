@@ -93,6 +93,11 @@ contract PixCashier is
      */
     error InappropriateCashOutAccount(bytes32 txId, address account);
 
+    /**
+     * @dev The provided release time for the premint operation is inappropriate.
+     */
+    error InappropriatePremintReleaseTime();
+
     // -------------------- Functions --------------------------------
 
     /**
@@ -254,7 +259,29 @@ contract PixCashier is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashIn(account, amount, txId, CashInExecutionPolicy.Revert);
+        _cashIn(account, amount, txId, 0, CashInExecutionPolicy.Revert);
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremint}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `amount`, `txId` and `releaseTime` values must not be zero.
+     * - The cash-in operation with the provided `txId` must not be already executed.
+     */
+    function cashInPremint(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+        _cashIn(account, amount, txId, releaseTime, CashInExecutionPolicy.Revert);
     }
 
     /**
@@ -298,6 +325,7 @@ contract PixCashier is
                 accounts[i],
                 amounts[i],
                 txIds[i],
+                0,
                 CashInExecutionPolicy.Skip
             );
         }
@@ -424,12 +452,22 @@ contract PixCashier is
     }
 
     /**
-     * @dev See {PixCashier-cashIn}.
+     * @dev Executes a cash-in operation internally depending on the release time and execution policy.
+     *
+     * If the release time is zero then the operation is executed as a common mint otherwise as a premint.
+     *
+     * @param account The address of the tokens recipient.
+     * @param amount The amount of tokens to be received.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the tokens will be released.
+     * @param policy The execution policy of the operation.
+     * @return The result of the operation according to the appropriate enum.
      */
     function _cashIn(
         address account,
         uint256 amount,
         bytes32 txId,
+        uint256 releaseTime,
         CashInExecutionPolicy policy
     ) internal returns (CashInExecutionResult) {
         if (account == address(0)) {
@@ -453,16 +491,24 @@ contract PixCashier is
             }
         }
 
-        _cashIns[txId] = CashInOperation({
-            status: CashInStatus.Executed,
-            account: account,
-            amount: amount
-        });
-
-        emit CashIn(account, amount, txId);
-
-        if (!IERC20Mintable(_token).mint(account, amount)) {
-            revert TokenMintingFailure();
+        if (releaseTime == 0) {
+            _cashIns[txId] = CashInOperation({
+                status: CashInStatus.Executed,
+                account: account,
+                amount: amount
+            });
+            emit CashIn(account, amount, txId);
+            if (!IERC20Mintable(_token).mint(account, amount)) {
+                revert TokenMintingFailure();
+            }
+        } else {
+            _cashIns[txId] = CashInOperation({
+                status: CashInStatus.PremintExecuted,
+                account: account,
+                amount: amount
+            });
+            emit CashInPremint(account, amount, txId, releaseTime);
+            IERC20Mintable(_token).premint(account, amount, releaseTime);
         }
 
         return CashInExecutionResult.Success;

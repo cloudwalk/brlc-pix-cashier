@@ -4,11 +4,13 @@ pragma solidity 0.8.16;
 
 import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
+import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
+
 /**
  * @title ERC20TokenMock contract
  * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes
  */
-contract ERC20TokenMock is ERC20Upgradeable {
+contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
     bool public mintResult;
 
     /**
@@ -29,6 +31,17 @@ contract ERC20TokenMock is ERC20Upgradeable {
     function mint(address account, uint256 amount) external returns (bool) {
         _mint(account, amount);
         return mintResult;
+    }
+
+    /**
+     * @dev Executes the mint function ignoring the release time parameter.
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to premint.
+     * @param releaseTime The timestamp when the tokens will be released.
+     */
+    function premint(address account, uint256 amount, uint256 releaseTime) external {
+        releaseTime;
+        _mint(account, amount);
     }
 
     /**

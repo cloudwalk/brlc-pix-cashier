@@ -485,7 +485,8 @@ contract PixCashierV3 is
             revert BlocklistedAccount(account);
         }
 
-        if (_cashInOperations[txId].status != CashInStatus.Nonexistent) {
+        CashInOperation storage operation = _cashInOperations[txId];
+        if (operation.status != CashInStatus.Nonexistent) {
             if (policy == CashInExecutionPolicy.Skip) {
                 return CashInExecutionResult.AlreadyExecuted;
             } else {
@@ -493,22 +494,16 @@ contract PixCashierV3 is
             }
         }
 
+        operation.account = account;
+        operation.amount = uint64(amount);
         if (releaseTime == 0) {
-            _cashInOperations[txId] = CashInOperation({
-                status: CashInStatus.Executed,
-                account: account,
-                amount: uint64(amount)
-            });
+            operation.status = CashInStatus.Executed;
             emit CashIn(account, amount, txId);
             if (!IERC20Mintable(_token).mint(account, amount)) {
                 revert TokenMintingFailure();
             }
         } else {
-            _cashInOperations[txId] = CashInOperation({
-                status: CashInStatus.PremintExecuted,
-                account: account,
-                amount: uint64(amount)
-            });
+            operation.status = CashInStatus.PremintExecuted;
             emit CashInPremint(account, amount, txId, releaseTime);
             IERC20Mintable(_token).premint(account, amount, releaseTime);
         }

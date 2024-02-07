@@ -143,106 +143,6 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-underlyingToken}.
-     */
-    function underlyingToken() external view returns (address) {
-        return _token;
-    }
-
-    /**
-     * @dev See {IPixCashierV3-cashOutBalanceOf}.
-     */
-    function cashOutBalanceOf(address account) external view returns (uint256) {
-        return _cashOutBalances[account];
-    }
-
-    /**
-     * @dev See {IPixCashierV3-pendingCashOutCounter}.
-     */
-    function pendingCashOutCounter() external view returns (uint256) {
-        return _pendingCashOutTxIds.length();
-    }
-
-    /**
-     * See {IPixCashierV3-getPendingCashOutTxIds}.
-     */
-    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
-        uint256 len = _pendingCashOutTxIds.length();
-        bytes32[] memory txIds;
-        if (len <= index || limit == 0) {
-            txIds = new bytes32[](0);
-        } else {
-            len -= index;
-            if (len > limit) {
-                len = limit;
-            }
-            txIds = new bytes32[](len);
-            for (uint256 i = 0; i < len; i++) {
-                txIds[i] = _pendingCashOutTxIds.at(index);
-                index++;
-            }
-        }
-        return txIds;
-    }
-
-    /**
-     * @dev See {IPixCashierV3-getCashIn}.
-     */
-    function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
-        return _cashInOperations[txId];
-    }
-
-    /**
-     * @dev See {IPixCashierV3-getCashIns}.
-     */
-    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
-        uint256 len = txIds.length;
-        CashInOperation[] memory cashInOperations = new CashInOperation[](len);
-        for (uint256 i = 0; i < len; i++) {
-            cashInOperations[i] = _cashInOperations[txIds[i]];
-        }
-        return cashInOperations;
-    }
-
-    /**
-     * @dev See {IPixCashierV3-getCashInBatch}.
-     */
-    function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory) {
-        return _cashInBatchOperations[batchId];
-    }
-
-    /**
-     * @dev See {IPixCashierV3-getCashInBatches}.
-     */
-    function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory) {
-        uint256 len = batchIds.length;
-        CashInBatchOperation[] memory cashInBatches = new CashInBatchOperation[](len);
-        for (uint256 i = 0; i < len; i++) {
-            cashInBatches[i] = _cashInBatchOperations[batchIds[i]];
-        }
-        return cashInBatches;
-    }
-
-    /**
-     * @dev See {IPixCashierV3-getCashOut}.
-     */
-    function getCashOut(bytes32 txIds) external view returns (CashOutOperation memory) {
-        return _cashOutOperations[txIds];
-    }
-
-    /**
-     * @dev See {IPixCashierV3-getCashOuts}.
-     */
-    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
-        uint256 len = txIds.length;
-        CashOutOperation[] memory cashOutOperations = new CashOutOperation[](len);
-        for (uint256 i = 0; i < len; i++) {
-            cashOutOperations[i] = _cashOutOperations[txIds[i]];
-        }
-        return cashOutOperations;
-    }
-
-    /**
      * @dev See {IPixCashierV3-cashIn}.
      *
      * Requirements:
@@ -447,6 +347,106 @@ contract PixCashierV3 is
         for (uint256 i = 0; i < len; i++) {
             _processCashOut(txIds[i], CashOutStatus.Reversed);
         }
+    }
+
+    /**
+     * @dev See {IPixCashierV3-getCashIn}.
+     */
+    function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
+        return _cashInOperations[txId];
+    }
+
+    /**
+     * @dev See {IPixCashierV3-getCashIns}.
+     */
+    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
+        uint256 len = txIds.length;
+        CashInOperation[] memory cashInOperations = new CashInOperation[](len);
+        for (uint256 i = 0; i < len; i++) {
+            cashInOperations[i] = _cashInOperations[txIds[i]];
+        }
+        return cashInOperations;
+    }
+
+    /**
+     * @dev See {IPixCashierV3-getCashInBatch}.
+     */
+    function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory) {
+        return _cashInBatchOperations[batchId];
+    }
+
+    /**
+     * @dev See {IPixCashierV3-getCashInBatches}.
+     */
+    function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory) {
+        uint256 len = batchIds.length;
+        CashInBatchOperation[] memory cashInBatches = new CashInBatchOperation[](len);
+        for (uint256 i = 0; i < len; i++) {
+            cashInBatches[i] = _cashInBatchOperations[batchIds[i]];
+        }
+        return cashInBatches;
+    }
+
+    /**
+     * @dev See {IPixCashierV3-getCashOut}.
+     */
+    function getCashOut(bytes32 txIds) external view returns (CashOutOperation memory) {
+        return _cashOutOperations[txIds];
+    }
+
+    /**
+     * @dev See {IPixCashierV3-getCashOuts}.
+     */
+    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
+        uint256 len = txIds.length;
+        CashOutOperation[] memory cashOutOperations = new CashOutOperation[](len);
+        for (uint256 i = 0; i < len; i++) {
+            cashOutOperations[i] = _cashOutOperations[txIds[i]];
+        }
+        return cashOutOperations;
+    }
+
+    /**
+     * See {IPixCashierV3-getPendingCashOutTxIds}.
+     */
+    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
+        uint256 len = _pendingCashOutTxIds.length();
+        bytes32[] memory txIds;
+        if (len <= index || limit == 0) {
+            txIds = new bytes32[](0);
+        } else {
+            len -= index;
+            if (len > limit) {
+                len = limit;
+            }
+            txIds = new bytes32[](len);
+            for (uint256 i = 0; i < len; i++) {
+                txIds[i] = _pendingCashOutTxIds.at(index);
+                index++;
+            }
+        }
+        return txIds;
+    }
+
+    /**
+     * @dev See {IPixCashierV3-cashOutBalanceOf}.
+     */
+    function cashOutBalanceOf(address account) external view returns (uint256) {
+        return _cashOutBalances[account];
+    }
+
+    /**
+     * @dev See {IPixCashierV3-pendingCashOutCounter}.
+     */
+    function pendingCashOutCounter() external view returns (uint256) {
+        return _pendingCashOutTxIds.length();
+    }
+
+    /**
+     * @dev See {IPixCashierV3-underlyingToken}.
+     */
+    function underlyingToken() external view returns (address) {
+        return _token;
     }
 
     /**

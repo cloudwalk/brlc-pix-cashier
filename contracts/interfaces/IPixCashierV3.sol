@@ -145,76 +145,6 @@ interface IPixCashierV3 is IPixCashierV3Types {
     );
 
     /**
-     * @dev Returns the address of the underlying token.
-     */
-    function underlyingToken() external view returns (address);
-
-    /**
-     * @dev Returns the data of a single cash-in operation.
-     * @param txId The off-chain transaction identifier of the operation.
-     */
-    function getCashIn(bytes32 txId) external view returns (CashInOperation memory);
-
-    /**
-     * @dev Returns the data of multiple cash-in operations.
-     * @param txIds The off-chain transaction identifiers of the operations.
-     */
-    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory);
-
-    /**
-     * @dev Returns the data of a cash-in batch operation.
-     * @param batchId The off-chain identifier of the cash-in batch operation.
-     */
-    function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory);
-
-    /**
-     * @dev Returns the data of multiple cash-in batch operations.
-     * @param batchIds The off-chain identifiers of the cash-in batch operations.
-     */
-    function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory);
-
-    /**
-     * @dev Returns the pending cash-out balance for an account.
-     * @param account The address of the account.
-     */
-    function cashOutBalanceOf(address account) external view returns (uint256);
-
-    /**
-     * @dev Returns the pending cash-out operation counter.
-     */
-    function pendingCashOutCounter() external view returns (uint256);
-
-    /**
-     * @dev Returns the off-chain transaction identifiers of pending cash-out operations.
-     *
-     * No guarantees are made on the ordering of the identifiers in the returned array.
-     * When you can't prevent confirming and reversing of cash-out operations during calling this function several
-     * times to sequentially read of all available identifiers the following procedure is recommended:
-     *
-     * - 1. Call the `processedCashOutCounter()` function and remember the returned value as C1.
-     * - 2. Call this function several times with needed values of `index` and `limit` like (0,5), (5,5), (10,5), ...
-     * - 3. Execute step 2 until the length of the returned array becomes less than the `limit` value.
-     * - 4. Call the `processedCashOutCounter()` function and remember the returned value as C2.
-     * - 5. If C1 == C2 the result of function calls is consistent. Else repeat the procedure from step 1.
-     * @param index The first index in the internal array of pending identifiers to fetch.
-     * @param limit The maximum number of returned identifiers.
-     * @return txIds The array of requested identifiers.
-     */
-    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory);
-
-    /**
-     * @dev Returns the data of a single cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
-     */
-    function getCashOut(bytes32 txId) external view returns (CashOutOperation memory);
-
-    /**
-     * @dev Returns the data of multiple cash-out operations.
-     * @param txIds The off-chain transaction identifiers of the operations.
-     */
-    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory);
-
-    /**
      * @dev Executes a cash-in operation as a common mint.
      *
      * This function is expected to be called by a limited number of accounts
@@ -354,4 +284,74 @@ interface IPixCashierV3 is IPixCashierV3Types {
      * @param txIds The off-chain transaction identifiers of the operations.
      */
     function reverseCashOutBatch(bytes32[] memory txIds) external;
+
+    /**
+     * @dev Returns the data of a single cash-in operation.
+     * @param txId The off-chain transaction identifier of the operation.
+     */
+    function getCashIn(bytes32 txId) external view returns (CashInOperation memory);
+
+    /**
+     * @dev Returns the data of multiple cash-in operations.
+     * @param txIds The off-chain transaction identifiers of the operations.
+     */
+    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory);
+
+    /**
+     * @dev Returns the data of a cash-in batch operation.
+     * @param batchId The off-chain identifier of the cash-in batch operation.
+     */
+    function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory);
+
+    /**
+     * @dev Returns the data of multiple cash-in batch operations.
+     * @param batchIds The off-chain identifiers of the cash-in batch operations.
+     */
+    function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory);
+
+    /**
+     * @dev Returns the data of a single cash-out operation.
+     * @param txId The off-chain transaction identifier of the operation.
+     */
+    function getCashOut(bytes32 txId) external view returns (CashOutOperation memory);
+
+    /**
+     * @dev Returns the data of multiple cash-out operations.
+     * @param txIds The off-chain transaction identifiers of the operations.
+     */
+    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory);
+
+    /**
+     * @dev Returns the off-chain transaction identifiers of pending cash-out operations.
+     *
+     * No guarantees are made on the ordering of the identifiers in the returned array.
+     * When you can't prevent confirming and reversing of cash-out operations during calling this function several
+     * times to sequentially read of all available identifiers the following procedure is recommended:
+     *
+     * - 1. Call the `processedCashOutCounter()` function and remember the returned value as C1.
+     * - 2. Call this function several times with needed values of `index` and `limit` like (0,5), (5,5), (10,5), ...
+     * - 3. Execute step 2 until the length of the returned array becomes less than the `limit` value.
+     * - 4. Call the `processedCashOutCounter()` function and remember the returned value as C2.
+     * - 5. If C1 == C2 the result of function calls is consistent. Else repeat the procedure from step 1.
+     * @param index The first index in the internal array of pending identifiers to fetch.
+     * @param limit The maximum number of returned identifiers.
+     * @return txIds The array of requested identifiers.
+     */
+    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory);
+
+    /**
+     * @dev Returns the pending cash-out balance for an account.
+     * @param account The address of the account.
+     */
+    function cashOutBalanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Returns the pending cash-out operation counter.
+     */
+    function pendingCashOutCounter() external view returns (uint256);
+
+    /**
+     * @dev Returns the address of the underlying token.
+     */
+    function underlyingToken() external view returns (address);
 }

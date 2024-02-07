@@ -208,7 +208,7 @@ contract PixCashierV3 is
      * @dev See {IPixCashierV3-getCashInBatch}.
      */
     function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory) {
-        return _cashInBatches[batchId];
+        return _cashInBatchOperations[batchId];
     }
 
     /**
@@ -218,7 +218,7 @@ contract PixCashierV3 is
         uint256 len = batchIds.length;
         CashInBatchOperation[] memory cashInBatches = new CashInBatchOperation[](len);
         for (uint256 i = 0; i < len; i++) {
-            cashInBatches[i] = _cashInBatches[batchIds[i]];
+            cashInBatches[i] = _cashInBatchOperations[batchIds[i]];
         }
         return cashInBatches;
     }
@@ -309,7 +309,7 @@ contract PixCashierV3 is
         ) {
             revert InvalidBatchArrays();
         }
-        if (_cashInBatches[batchId].status == CashInBatchStatus.Executed) {
+        if (_cashInBatchOperations[batchId].status == CashInBatchStatus.Executed) {
             revert CashInBatchAlreadyExecuted(batchId);
         }
         if (batchId == 0) {
@@ -328,7 +328,7 @@ contract PixCashierV3 is
             );
         }
 
-        _cashInBatches[batchId].status = CashInBatchStatus.Executed;
+        _cashInBatchOperations[batchId].status = CashInBatchStatus.Executed;
 
         emit CashInBatch(batchId, txIds, executionResults);
     }

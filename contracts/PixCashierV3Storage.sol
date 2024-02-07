@@ -16,7 +16,7 @@ abstract contract PixCashierV3StorageV1 is IPixCashierV3Types {
     mapping(bytes32 => CashInOperation) internal _cashInOperations;
 
     /// @dev The mapping of a cash-in batch operation structure for a given off-chain identifier.
-    mapping(bytes32 => CashInBatchOperation) internal _cashInBatches;
+    mapping(bytes32 => CashInBatchOperation) internal _cashInBatchOperations;
 
     /// @dev The mapping of a cash-out operation structure for a given off-chain transaction identifier.
     mapping(bytes32 => CashOutOperation) internal _cashOutOperations;

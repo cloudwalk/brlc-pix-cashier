@@ -18,10 +18,8 @@ import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 /**
  * @title PixCashierV3 contract
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Wrapper contract for PIX cash-in and cash-out operations.
- *
- * Only accounts that have {CASHIER_ROLE} role can execute the cash-in operations and process the cash-out operations.
- * About roles see https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl.
  */
 contract PixCashierV3 is
     PixCashierV3Storage,
@@ -34,6 +32,8 @@ contract PixCashierV3 is
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
 
+    // -------------------- Constants --------------------------------
+
     /// @dev The role of this contract owner.
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
@@ -42,80 +42,78 @@ contract PixCashierV3 is
 
     // -------------------- Errors -----------------------------------
 
-    /// @dev The zero token address has been passed as a function argument.
+    /// @dev Throws if the provided token address is zero.
     error ZeroTokenAddress();
 
-    /// @dev The zero account has been passed as a function argument.
+    /// @dev Throws if the provided account address is zero.
     error ZeroAccount();
 
-    /// @dev The zero token amount has been passed as a function argument.
+    /// @dev Thrown if the provided amount is zero.
     error ZeroAmount();
 
-    /// @dev The zero off-chain transaction identifier has been passed as a function argument.
+    /// @dev Throws if the provided off-chain transaction identifier is zero.
     error ZeroTxId();
 
-    /// @dev The zero off-chain transaction batch identifier has been passed as a function argument.
+    /// @dev Thrown if the provided off-chain transaction batch identifier is zero.
     error ZeroBatchId();
 
-    /// @dev An empty array of off-chain transaction identifiers has been passed as a function argument.
+    /// @dev Thrown when the provided array of off-chain transaction identifiers is empty.
     error EmptyTransactionIdsArray();
 
-    /// @dev The minting of tokens failed when processing an `cashIn` operation.
+    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
     error TokenMintingFailure();
 
-    /// @dev The length of the one of the batch arrays is different to the others.
+    /// @dev Thrown if the bath arrays are empty or have different lengths.
     error InvalidBatchArrays();
 
-    /// @dev The operation amount exceeds the maximum allowed value.
+    /// @dev Thrown if the provided amount exceeds the maximum allowed value.
     error AmountExcess();
 
     /**
-     * @dev The cash-in operation with the provided off-chain transaction is already executed.
+     * @dev Thrown if the cash-in operation with the provided txId is already executed.
      * @param txId The off-chain transaction identifiers of the operation.
      */
     error CashInAlreadyExecuted(bytes32 txId);
 
     /**
-     * @dev The cash-in batch operation with the provided off-chain transaction is already executed.
+     * @dev Thrown if the cash-in batch operation with the provided batchId is already executed.
      * @param batchId The off-chain transaction identifiers of the operation.
      */
     error CashInBatchAlreadyExecuted(bytes32 batchId);
 
     /**
-     * @dev The cash-out operation with the provided off-chain transaction identifier has an inappropriate status.
+     * @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
      * @param txId The off-chain transaction identifiers of the operation.
      * @param status The current status of the operation.
      */
     error InappropriateCashOutStatus(bytes32 txId, CashOutStatus status);
 
     /**
-     * @dev The cash-out operation with the provided txId cannot executed for the given account.
+     * @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
      * @param txId The off-chain transaction identifiers of the operation.
      * @param account The account that must be used for the operation.
      */
     error InappropriateCashOutAccount(bytes32 txId, address account);
 
     /**
-     * @dev The provided release time for the premint operation is inappropriate.
+     * @dev Thrown if the provided release time for the premint operation is inappropriate.
      */
     error InappropriatePremintReleaseTime();
 
-    // -------------------- Functions --------------------------------
+    // -------------------- Initializers -----------------------------
 
     /**
-     * @dev The initialize function of the upgradable contract.
-     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable
-     *
-     * Requirements:
-     *
-     * - The passed token address must not be zero.
-     *
+     * @dev Initializer of the upgradable contract.
      * @param token_ The address of the token to set as the underlying one.
      */
     function initialize(address token_) external initializer {
         __PixCashier_init(token_);
     }
 
+    /**
+     * @dev Internal initializer of the upgradable contract.
+     * @param token_ The address of the token to set as the underlying one.
+     */
     function __PixCashier_init(address token_) internal onlyInitializing {
         __Context_init_unchained();
         __ERC165_init_unchained();
@@ -129,6 +127,15 @@ contract PixCashierV3 is
         __PixCashier_init_unchained(token_);
     }
 
+    /**
+     * @dev Unchained internal initializer of the upgradable contract.
+     *
+     * Requirements:
+     *
+     * - The passed address of the underlying token must not be zero.
+     *
+     * @param token_ The address of the token to set as the underlying one
+     */
     function __PixCashier_init_unchained(address token_) internal onlyInitializing {
         if (token_ == address(0)) {
             revert ZeroTokenAddress();
@@ -142,10 +149,12 @@ contract PixCashierV3 is
         _setupRole(OWNER_ROLE, _msgSender());
     }
 
+    // -------------------- Functions --------------------------------
+
     /**
-     * @dev See {IPixCashierV3-cashIn}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -161,9 +170,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-cashInPremint}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -183,16 +192,16 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-cashInBatch}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements
+     * @dev Requirements:
      *
      * - The length of each passed array must be equal.
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
      * - The provided `account`, `amount`, and `txId` values must not be zero.
      * - The provided `accounts`, `amounts`, `txIds` arrays must not be empty and must have the same length.
-     * - The provided `batchId` must not be zero
+     * - The provided `batchId` must not be zero.
      * - The cash-in batch operation with the provided `batchId` must not be already executed.
      * - Each cash-in operation with the provided identifier from the `txIds` array must not be already executed.
      */
@@ -234,9 +243,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-requestCashOutFrom}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -253,9 +262,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-requestCashOutFromBatch}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -278,9 +287,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-confirmCashOut}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -292,9 +301,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-confirmCashOutBatch}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -314,9 +323,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-reverseCashOut}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -328,9 +337,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-reverseCashOutBatch}.
+     * @inheritdoc IPixCashierV3
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
@@ -349,15 +358,17 @@ contract PixCashierV3 is
         }
     }
 
+    // -------------------- View functions ---------------------------
+
     /**
-     * @dev See {IPixCashierV3-getCashIn}.
+     * @inheritdoc IPixCashierV3
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _cashInOperations[txId];
     }
 
     /**
-     * @dev See {IPixCashierV3-getCashIns}.
+     * @inheritdoc IPixCashierV3
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -369,14 +380,14 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-getCashInBatch}.
+     * @inheritdoc IPixCashierV3
      */
     function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory) {
         return _cashInBatchOperations[batchId];
     }
 
     /**
-     * @dev See {IPixCashierV3-getCashInBatches}.
+     * @inheritdoc IPixCashierV3
      */
     function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory) {
         uint256 len = batchIds.length;
@@ -388,14 +399,14 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-getCashOut}.
+     * @inheritdoc IPixCashierV3
      */
     function getCashOut(bytes32 txIds) external view returns (CashOutOperation memory) {
         return _cashOutOperations[txIds];
     }
 
     /**
-     * @dev See {IPixCashierV3-getCashOuts}.
+     * @inheritdoc IPixCashierV3
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -407,7 +418,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * See {IPixCashierV3-getPendingCashOutTxIds}.
+     * @inheritdoc IPixCashierV3
      */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
@@ -429,25 +440,27 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {IPixCashierV3-cashOutBalanceOf}.
+     * @inheritdoc IPixCashierV3
      */
     function cashOutBalanceOf(address account) external view returns (uint256) {
         return _cashOutBalances[account];
     }
 
     /**
-     * @dev See {IPixCashierV3-pendingCashOutCounter}.
+     * @inheritdoc IPixCashierV3
      */
     function pendingCashOutCounter() external view returns (uint256) {
         return _pendingCashOutTxIds.length();
     }
 
     /**
-     * @dev See {IPixCashierV3-underlyingToken}.
+     * @inheritdoc IPixCashierV3
      */
     function underlyingToken() external view returns (address) {
         return _token;
     }
+
+    // -------------------- Internal functions ---------------------------
 
     /**
      * @dev Executes a cash-in operation internally depending on the release time and execution policy.
@@ -511,7 +524,11 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {PixCashierV3-requestCashOut}.
+     * @dev Executes a cash-out request operation internally.
+     * @param sender The address of the caller of the operation.
+     * @param account The account on that behalf the operation is made.
+     * @param amount The amount of tokens to be cash-outed.
+     * @param txId The off-chain transaction identifier of the operation.
      */
     function _requestCashOut(
         address sender,
@@ -557,7 +574,9 @@ contract PixCashierV3 is
     }
 
     /**
-     * @dev See {PixCashierV3-confirmCashOut} and {PixCashierV3-reverseCashOut}.
+     * @notice Processes a previously requested cash-out operation internally.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param targetStatus The target status of the cash-out operation.
      */
     function _processCashOut(bytes32 txId, CashOutStatus targetStatus) internal {
         if (txId == 0) {

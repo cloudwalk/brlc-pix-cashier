@@ -97,6 +97,8 @@ interface IPixCashierV3Types {
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
 interface IPixCashierV3 is IPixCashierV3Types {
+    // -------------------- Events -----------------------------------
+
     /// @dev Emitted when a new cash-in operation is executed.
     event CashIn(
         address indexed account, // The account that receives tokens.
@@ -143,6 +145,8 @@ interface IPixCashierV3 is IPixCashierV3Types {
         uint256 balance,         // The new pending cash-out balance of the account.
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
+
+    // -------------------- Functions --------------------------------
 
     /**
      * @dev Executes a cash-in operation as a common mint.
@@ -285,6 +289,8 @@ interface IPixCashierV3 is IPixCashierV3Types {
      */
     function reverseCashOutBatch(bytes32[] memory txIds) external;
 
+    // -------------------- View functions ---------------------------
+
     /**
      * @dev Returns the data of a single cash-in operation.
      * @param txId The off-chain transaction identifier of the operation.
@@ -332,7 +338,7 @@ interface IPixCashierV3 is IPixCashierV3Types {
      * - 2. Call this function several times with needed values of `index` and `limit` like (0,5), (5,5), (10,5), ...
      * - 3. Execute step 2 until the length of the returned array becomes less than the `limit` value.
      * - 4. Call the `processedCashOutCounter()` function and remember the returned value as C2.
-     * - 5. If C1 == C2 the result of function calls is consistent. Else repeat the procedure from step 1.
+     * - 5. If C1 == C2 the result of function calls is consistent, else repeat the procedure from step 1.
      * @param index The first index in the internal array of pending identifiers to fetch.
      * @param limit The maximum number of returned identifiers.
      * @return txIds The array of requested identifiers.

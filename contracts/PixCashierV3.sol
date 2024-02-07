@@ -24,12 +24,11 @@ import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
  * About roles see https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControl.
  */
 contract PixCashierV3 is
+    PixCashierV3Storage,
     AccessControlExtUpgradeable,
     BlocklistableUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
-    StoragePlaceholder200,
-    PixCashierV3Storage,
     IPixCashierV3
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;

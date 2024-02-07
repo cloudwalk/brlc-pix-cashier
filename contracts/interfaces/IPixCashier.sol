@@ -3,9 +3,9 @@
 pragma solidity 0.8.16;
 
 /**
- * @title PixCashierV3 types interface
+ * @title PixCashier types interface
  */
-interface IPixCashierV3Types {
+interface IPixCashierTypes {
     /**
      * @dev Possible statuses of a cash-in operation as an enum.
      *
@@ -93,10 +93,10 @@ interface IPixCashierV3Types {
 }
 
 /**
- * @title PixCashierV3 interface
+ * @title PixCashier interface
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
-interface IPixCashierV3 is IPixCashierV3Types {
+interface IPixCashier is IPixCashierTypes {
     // -------------------- Events -----------------------------------
 
     /// @dev Emitted when a new cash-in operation is executed.

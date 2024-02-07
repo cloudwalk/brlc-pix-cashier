@@ -3,12 +3,12 @@
 pragma solidity 0.8.16;
 
 import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import { IPixCashierV3Types } from "./interfaces/IPixCashierV3.sol";
+import { IPixCashierTypes } from "./interfaces/IPixCashier.sol";
 
 /**
- * @title PixCashierV3 storage version 1
+ * @title PixCashier storage version 1
  */
-abstract contract PixCashierV3StorageV1 is IPixCashierV3Types {
+abstract contract PixCashierStorageV1 is IPixCashierTypes {
     /// @dev The address of the underlying token.
     address internal _token;
 
@@ -29,15 +29,15 @@ abstract contract PixCashierV3StorageV1 is IPixCashierV3Types {
 }
 
 /**
- * @title PixCashierV3 storage
- * @dev Contains storage variables of the {PixCashierV3} contract.
+ * @title PixCashier storage
+ * @dev Contains storage variables of the {PixCashier} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.
  * See https://github.com/compound-finance/compound-protocol.
- * When we need to add new storage variables, we create a new version of PixCashierV3Storage
- * e.g. PixCashierV3Storage<versionNumber>, so finally it would look like
- * "contract PixCashierV3Storage is PixCashierV3StorageV1, PixCashierV3StorageV2".
+ * When we need to add new storage variables, we create a new version of PixCashierStorage
+ * e.g. PixCashierStorage<versionNumber>, so finally it would look like
+ * "contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2".
  */
-abstract contract PixCashierV3Storage is PixCashierV3StorageV1 {
+abstract contract PixCashierStorage is PixCashierStorageV1 {
     uint256[43] private __gap;
 }

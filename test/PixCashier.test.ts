@@ -136,7 +136,7 @@ function checkCashInBatchEquality(
   );
 }
 
-describe("Contract 'PixCashierV3'", async () => {
+describe("Contract 'PixCashier'", async () => {
   const TRANSACTION_ID1 = ethers.utils.formatBytes32String("MOCK_TRANSACTION_ID1");
   const TRANSACTION_ID2 = ethers.utils.formatBytes32String("MOCK_TRANSACTION_ID2");
   const TRANSACTION_ID3 = ethers.utils.formatBytes32String("MOCK_TRANSACTION_ID3");
@@ -188,7 +188,7 @@ describe("Contract 'PixCashierV3'", async () => {
     await proveTx(tokenMock.initialize("ERC20 Test", "TEST"));
 
     // Deploy the being tested contract
-    PixCashier = await ethers.getContractFactory("PixCashierV3");
+    PixCashier = await ethers.getContractFactory("PixCashier");
     pixCashier = await PixCashier.deploy();
     await pixCashier.deployed();
     await proveTx(pixCashier.initialize(tokenMock.address));

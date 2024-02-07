@@ -11,22 +11,22 @@ import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
 
-import { PixCashierV3Storage } from "./PixCashierV3Storage.sol";
-import { IPixCashierV3 } from "./interfaces/IPixCashierV3.sol";
+import { PixCashierStorage } from "./PixCashierStorage.sol";
+import { IPixCashier } from "./interfaces/IPixCashier.sol";
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 /**
- * @title PixCashierV3 contract
+ * @title PixCashier contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Wrapper contract for PIX cash-in and cash-out operations.
  */
-contract PixCashierV3 is
-    PixCashierV3Storage,
+contract PixCashier is
+    PixCashierStorage,
     AccessControlExtUpgradeable,
     BlocklistableUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
-    IPixCashierV3
+    IPixCashier
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
@@ -151,7 +151,7 @@ contract PixCashierV3 is
     // -------------------- Functions --------------------------------
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -169,7 +169,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -191,7 +191,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -242,7 +242,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -261,7 +261,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -286,7 +286,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -300,7 +300,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -322,7 +322,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -336,7 +336,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      *
      * @dev Requirements:
      *
@@ -360,14 +360,14 @@ contract PixCashierV3 is
     // -------------------- View functions ---------------------------
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _cashInOperations[txId];
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -379,14 +379,14 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory) {
         return _cashInBatchOperations[batchId];
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory) {
         uint256 len = batchIds.length;
@@ -398,14 +398,14 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getCashOut(bytes32 txIds) external view returns (CashOutOperation memory) {
         return _cashOutOperations[txIds];
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -417,7 +417,7 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
@@ -439,21 +439,21 @@ contract PixCashierV3 is
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function cashOutBalanceOf(address account) external view returns (uint256) {
         return _cashOutBalances[account];
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function pendingCashOutCounter() external view returns (uint256) {
         return _pendingCashOutTxIds.length();
     }
 
     /**
-     * @inheritdoc IPixCashierV3
+     * @inheritdoc IPixCashier
      */
     function underlyingToken() external view returns (address) {
         return _token;

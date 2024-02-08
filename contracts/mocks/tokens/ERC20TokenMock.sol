@@ -3,6 +3,7 @@
 pragma solidity 0.8.16;
 
 import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
 
@@ -10,7 +11,7 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
  * @title ERC20TokenMock contract
  * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes
  */
-contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
+contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
     bool public mintResult;
 
     /**
@@ -21,6 +22,9 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
     function initialize(string memory name_, string memory symbol_) public initializer {
         __ERC20_init(name_, symbol_);
         mintResult = true;
+
+        // Only to provide the 100 % test coverage
+        _authorizeUpgrade(address(0));
     }
 
     /**
@@ -54,5 +58,12 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
 
     function setMintResult(bool _newMintResult) external {
         mintResult = _newMintResult;
+    }
+
+    /**
+     * @dev The upgrade authorization function for UUPSProxy.
+     */
+    function _authorizeUpgrade(address newImplementation) internal pure override {
+        newImplementation; // Suppresses a compiler warning about the unused variable
     }
 }

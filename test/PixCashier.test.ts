@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { BigNumber, Contract, ContractFactory } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -167,6 +167,7 @@ describe("Contract 'PixCashier'", async () => {
   const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "InappropriatePremintReleaseTime";
 
   let PixCashier: ContractFactory;
+  let TokenMock: ContractFactory;
   let pixCashier: Contract;
   let tokenMock: Contract;
   let deployer: SignerWithAddress;
@@ -182,16 +183,14 @@ describe("Contract 'PixCashier'", async () => {
 
   beforeEach(async () => {
     // Deploy the token mock contract
-    const TokenMock: ContractFactory = await ethers.getContractFactory("ERC20TokenMock");
-    tokenMock = await TokenMock.deploy();
+    TokenMock = await ethers.getContractFactory("ERC20TokenMock");
+    tokenMock = await upgrades.deployProxy(TokenMock, ["ERC20 Test", "TEST"]);
     await tokenMock.deployed();
-    await proveTx(tokenMock.initialize("ERC20 Test", "TEST"));
 
     // Deploy the being tested contract
     PixCashier = await ethers.getContractFactory("PixCashier");
-    pixCashier = await PixCashier.deploy();
+    pixCashier = await upgrades.deployProxy(PixCashier, [tokenMock.address]);
     await pixCashier.deployed();
-    await proveTx(pixCashier.initialize(tokenMock.address));
 
     // Accounts
     [deployer, cashier, user, secondUser, thirdUser] = await ethers.getSigners();
@@ -358,6 +357,26 @@ describe("Contract 'PixCashier'", async () => {
       anotherPixCashier.initialize(ethers.constants.AddressZero)
     ).to.be.revertedWithCustomError(PixCashier, REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO);
   });
+
+  describe("Upgrading", async () => {
+    it("Executes as expected if it is called by an owner", async () => {
+      await upgrades.upgradeProxy(
+        pixCashier,
+        PixCashier.connect(deployer),
+        { redeployImplementation: "always" }
+      );
+    });
+    it("Is reverted if the caller does not have the owner role", async () => {
+      await expect(
+        upgrades.upgradeProxy(
+          pixCashier,
+          PixCashier.connect(user),
+          { redeployImplementation: "always" }
+        )
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(user.address, ownerRole));
+    });
+  });
+
 
   describe("Function 'cashIn()'", async () => {
     const tokenAmount: number = 100;

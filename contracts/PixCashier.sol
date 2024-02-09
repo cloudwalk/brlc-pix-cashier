@@ -101,7 +101,7 @@ contract PixCashier is
      */
     error InappropriatePremintReleaseTime();
 
-    // -------------------- Initializers and service functions -------
+    // -------------------- Initializers -----------------------------
 
     /**
      * @dev Initializer of the upgradable contract.
@@ -149,14 +149,6 @@ contract PixCashier is
         _setRoleAdmin(CASHIER_ROLE, OWNER_ROLE);
 
         _grantRole(OWNER_ROLE, _msgSender());
-    }
-
-    /**
-     * @dev The version of the standard upgrade function without the second parameter for backward compatibility.
-     * @custom:oz-upgrades-unsafe-allow-reachable delegatecall
-     */
-    function upgradeTo(address newImplementation) external {
-        upgradeToAndCall(newImplementation, "");
     }
 
     // -------------------- Functions --------------------------------
@@ -623,5 +615,15 @@ contract PixCashier is
     function _authorizeUpgrade(address newImplementation) internal view override {
         newImplementation; // Suppresses a compiler warning about the unused variable
         _checkRole(OWNER_ROLE);
+    }
+
+    // -------------------- Service functions ------------------------
+
+    /**
+     * @dev The version of the standard upgrade function without the second parameter for backward compatibility.
+     * @custom:oz-upgrades-unsafe-allow-reachable delegatecall
+     */
+    function upgradeTo(address newImplementation) external {
+        upgradeToAndCall(newImplementation, "");
     }
 }

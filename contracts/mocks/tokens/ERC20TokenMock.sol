@@ -14,6 +14,8 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
 contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
     bool public mintResult;
 
+    // -------------------- Initializers -----------------------------
+
     /**
      * @dev The initialize function of the upgradable contract.
      * @param name_ The name of the token to set for this ERC20-comparable contract.
@@ -26,6 +28,8 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
         // Only to provide the 100 % test coverage
         _authorizeUpgrade(address(0));
     }
+
+    // -------------------- Functions --------------------------------
 
     /**
      * @dev Calls the appropriate internal function to mint needed amount of tokens for an account.
@@ -59,6 +63,8 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
     function setMintResult(bool _newMintResult) external {
         mintResult = _newMintResult;
     }
+
+    // -------------------- Internal functions -----------------------
 
     /**
      * @dev The upgrade authorization function for UUPSProxy.

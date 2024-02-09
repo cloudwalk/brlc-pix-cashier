@@ -21,7 +21,7 @@ abstract contract RescuableUpgradeable is AccessControlExtUpgradeable {
     /// @dev The role of rescuer that is allowed to rescue tokens locked up in the contract.
     bytes32 public constant RESCUER_ROLE = keccak256("RESCUER_ROLE");
 
-    // -------------------- Functions --------------------------------
+    // -------------------- Initializers -----------------------------
 
     /**
      * @dev The internal initializer of the upgradable contract.
@@ -45,6 +45,8 @@ abstract contract RescuableUpgradeable is AccessControlExtUpgradeable {
     function __Rescuable_init_unchained(bytes32 rescuerRoleAdmin) internal onlyInitializing {
         _setRoleAdmin(RESCUER_ROLE, rescuerRoleAdmin);
     }
+
+    // -------------------- Functions --------------------------------
 
     /**
      * @dev Withdraws ERC20 tokens locked up in the contract.

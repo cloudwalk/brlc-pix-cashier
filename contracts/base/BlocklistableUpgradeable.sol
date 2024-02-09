@@ -16,7 +16,6 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
     /// @dev The role of the blocklister that is allowed to blocklist and unblocklist accounts.
     bytes32 public constant BLOCKLISTER_ROLE = keccak256("BLOCKLISTER_ROLE");
 
-
     /**
      * @dev The first storage slot of the contract data.
      *
@@ -63,7 +62,7 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
         _;
     }
 
-    // -------------------- Functions --------------------------------
+    // -------------------- Initializers -----------------------------
 
     /**
      * @dev The internal initializer of the upgradable contract.
@@ -87,6 +86,8 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
     function __Blocklistable_init_unchained(bytes32 blocklisterRoleAdmin) internal onlyInitializing {
         _setRoleAdmin(BLOCKLISTER_ROLE, blocklisterRoleAdmin);
     }
+
+    // -------------------- Functions --------------------------------
 
     /**
      * @dev Adds an account to the blocklist.
@@ -152,6 +153,8 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
         emit Blocklisted(sender);
     }
 
+    // -------------------- View functions ---------------------------
+
     /**
      * @dev Checks if an account is blocklisted.
      * @param account The address to check for presence in the blocklist.
@@ -160,6 +163,8 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
     function isBlocklisted(address account) public view returns (bool) {
         return _getBlocklistableStorage()._blocklisted[account];
     }
+
+    // -------------------- Private functions ------------------------
 
     /**
      * @dev Returns the contract storage structure.

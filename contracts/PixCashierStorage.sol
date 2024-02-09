@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.16;
+pragma solidity ^0.8.20;
 
-import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IPixCashierTypes } from "./interfaces/IPixCashier.sol";
 
 /**
@@ -25,7 +25,7 @@ abstract contract PixCashierStorageV1 is IPixCashierTypes {
     mapping(address => uint256) internal _cashOutBalances;
 
     /// @dev The set of off-chain transaction identifiers that correspond the pending cash-out operations.
-    EnumerableSetUpgradeable.Bytes32Set internal _pendingCashOutTxIds;
+    EnumerableSet.Bytes32Set internal _pendingCashOutTxIds;
 }
 
 /**

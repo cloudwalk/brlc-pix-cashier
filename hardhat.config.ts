@@ -5,7 +5,7 @@ import "hardhat-contract-sizer";
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.16",
+    version: "0.8.22",
     settings: {
       optimizer: {
         enabled: true,
@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
       }
     },
     ganache: {
-      url: "http://127.0.0.1:7545",
+      url: "http://127.0.0.1:8333",
       accounts: {
         mnemonic: "test test test test test test test test test test test junk"
       }

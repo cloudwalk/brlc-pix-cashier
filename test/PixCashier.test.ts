@@ -1,10 +1,11 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { BigNumber, Contract, ContractFactory } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { proveTx } from "../test-utils/eth";
-import { countNumberArrayTotal, createRevertMessageDueToMissingRole } from "../test-utils/misc";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { proveTx } from "../test-utils/eth";
+import { countNumberArrayTotal } from "../test-utils/misc";
 
 enum CashInStatus {
   Nonexistent = 0,
@@ -146,9 +147,10 @@ describe("Contract 'PixCashier'", async () => {
   const BATCH_ID_STUB2 = ethers.utils.formatBytes32String("MOCK_BATCH_ID2");
   const BATCH_ID_ZERO = ethers.constants.HashZero;
 
-  const REVERT_MESSAGE_IF_CONTRACT_IS_ALREADY_INITIALIZED = "Initializable: contract is already initialized";
-  const REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED = "Pausable: paused";
-  const REVERT_MESSAGE_IF_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE = "ERC20: transfer amount exceeds balance";
+  const REVERT_ERROR_IF_CONTRACT_INITIALIZATION_IS_INVALID = "InvalidInitialization";
+  const REVERT_ERROR_IF_CONTRACT_IS_PAUSED = "EnforcedPause";
+  const REVERT_ERROR_IF_ERC20_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE = "ERC20InsufficientBalance";
+  const REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
 
   const REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO = "ZeroTokenAddress";
   const REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED = "BlocklistedAccount";
@@ -347,7 +349,7 @@ describe("Contract 'PixCashier'", async () => {
   it("The initialize function can't be called more than once", async () => {
     await expect(
       pixCashier.initialize(tokenMock.address)
-    ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_ALREADY_INITIALIZED);
+    ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_INITIALIZATION_IS_INVALID);
   });
 
   it("The initialize function is reverted if the passed token address is zero", async () => {
@@ -373,10 +375,12 @@ describe("Contract 'PixCashier'", async () => {
           PixCashier.connect(user),
           { redeployImplementation: "always" }
         )
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(user.address, ownerRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(user.address, ownerRole);
     });
   });
-
 
   describe("Function 'cashIn()'", async () => {
     const tokenAmount: number = 100;
@@ -416,13 +420,16 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).cashIn(user.address, tokenAmount, TRANSACTION_ID1)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).cashIn(user.address, tokenAmount, TRANSACTION_ID1)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if the account is blocklisted", async () => {
@@ -520,13 +527,16 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if the premint release time is zero", async () => {
@@ -604,13 +614,16 @@ describe("Contract 'PixCashier'", async () => {
       const users = [user.address, secondUser.address, thirdUser.address];
       await expect(
         pixCashier.connect(cashier).cashInBatch(users, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).cashInBatch(userAddresses, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if one of the account addresses is zero", async () => {
@@ -739,13 +752,19 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).requestCashOutFrom(cashOut.account.address, cashOut.amount, cashOut.txId)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).requestCashOutFrom(cashOut.account.address, cashOut.amount, cashOut.txId)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(
+        deployer.address,
+        cashierRole
+      );
     });
 
     it("Is reverted if the account is blocklisted", async () => {
@@ -815,7 +834,10 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(tokenMock.mint(cashOut.account.address, cashOut.amount - 1));
       await expect(
         pixCashier.connect(cashier).requestCashOutFrom(cashOut.account.address, cashOut.amount, cashOut.txId)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE);
+      ).to.be.revertedWithCustomError(
+        tokenMock,
+        REVERT_ERROR_IF_ERC20_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE
+      ).withArgs(cashOut.account.address, anyValue, anyValue);
     });
   });
 
@@ -904,13 +926,19 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).requestCashOutFromBatch(accounts, amounts, TRANSACTIONS_ARRAY)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).requestCashOutFromBatch(accounts, amounts, TRANSACTIONS_ARRAY)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(
+        deployer.address,
+        cashierRole
+      );
     });
 
     it("Is reverted if the length of any passed arrays is different to others", async () => {
@@ -973,7 +1001,10 @@ describe("Contract 'PixCashier'", async () => {
       const amounts = [cashOut.amount, secondCashOut.amount, thirdCashOut.amount + 1];
       await expect(
         pixCashier.connect(cashier).requestCashOutFromBatch(accounts, amounts, TRANSACTIONS_ARRAY)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE);
+      ).to.be.revertedWithCustomError(
+        tokenMock,
+        REVERT_ERROR_IF_ERC20_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE
+      ).withArgs(thirdCashOut.account.address, anyValue, anyValue);
     });
   });
 
@@ -1008,13 +1039,16 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).confirmCashOut(cashOut.txId)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).confirmCashOut(cashOut.txId)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
@@ -1085,13 +1119,16 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).confirmCashOutBatch(txIds)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).confirmCashOutBatch(txIds)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if the off-chain transaction IDs array is empty", async () => {
@@ -1154,13 +1191,16 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).reverseCashOut(cashOut.txId)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).reverseCashOut(cashOut.txId)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
@@ -1231,13 +1271,16 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(pixCashier.pause());
       await expect(
         pixCashier.connect(cashier).reverseCashOutBatch(txIds)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
     });
 
     it("Is reverted if the caller does not have the cashier role", async () => {
       await expect(
         pixCashier.connect(deployer).reverseCashOutBatch(txIds)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
     });
 
     it("Is reverted if the off-chain transaction IDs array is empty", async () => {

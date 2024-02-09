@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.20;
 
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 import { AccessControlExtUpgradeable } from "./AccessControlExtUpgradeable.sol";
 
@@ -65,10 +65,4 @@ abstract contract PausableExtUpgradeable is AccessControlExtUpgradeable, Pausabl
     function unpause() public onlyRole(PAUSER_ROLE) {
         _unpause();
     }
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     */
-    uint256[50] private __gap;
 }

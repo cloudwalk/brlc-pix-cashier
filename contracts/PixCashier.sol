@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.22;
 
-import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import { BlocklistableUpgradeable } from "./base/BlocklistableUpgradeable.sol";
@@ -30,8 +30,8 @@ contract PixCashier is
     UUPSUpgradeable,
     IPixCashier
 {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
+    using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     // -------------------- Constants --------------------------------
 
@@ -101,7 +101,7 @@ contract PixCashier is
      */
     error InappropriatePremintReleaseTime();
 
-    // -------------------- Initializers -----------------------------
+    // -------------------- Initializers and service functions -------
 
     /**
      * @dev Initializer of the upgradable contract.
@@ -124,7 +124,6 @@ contract PixCashier is
         __Pausable_init_unchained();
         __PausableExt_init_unchained(OWNER_ROLE);
         __Rescuable_init_unchained(OWNER_ROLE);
-        __ERC1967Upgrade_init_unchained();
         __UUPSUpgradeable_init_unchained();
 
         __PixCashier_init_unchained(token_);
@@ -149,7 +148,15 @@ contract PixCashier is
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
         _setRoleAdmin(CASHIER_ROLE, OWNER_ROLE);
 
-        _setupRole(OWNER_ROLE, _msgSender());
+        _grantRole(OWNER_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev The version of the standard upgrade function without the second parameter for backward compatibility.
+     * @custom:oz-upgrades-unsafe-allow-reachable delegatecall
+     */
+    function upgradeTo(address newImplementation) external {
+        upgradeToAndCall(newImplementation, "");
     }
 
     // -------------------- Functions --------------------------------
@@ -573,7 +580,7 @@ contract PixCashier is
 
         emit RequestCashOut(account, amount, newCashOutBalance, txId, sender);
 
-        IERC20Upgradeable(_token).safeTransferFrom(account, address(this), amount);
+        IERC20(_token).safeTransferFrom(account, address(this), amount);
     }
 
     /**
@@ -606,7 +613,7 @@ contract PixCashier is
             IERC20Mintable(_token).burn(amount);
         } else {
             emit ReverseCashOut(account, amount, newCashOutBalance, txId);
-            IERC20Upgradeable(_token).safeTransfer(account, amount);
+            IERC20(_token).safeTransfer(account, amount);
         }
     }
 

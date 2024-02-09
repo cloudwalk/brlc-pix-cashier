@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.20;
 
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -24,7 +24,7 @@ contract BlocklistableUpgradeableMock is BlocklistableUpgradeable, UUPSUpgradeab
      * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
     function initialize() public initializer {
-        _setupRole(OWNER_ROLE, _msgSender());
+        _grantRole(OWNER_ROLE, _msgSender());
         __Blocklistable_init(OWNER_ROLE);
 
         // Only to provide the 100 % test coverage

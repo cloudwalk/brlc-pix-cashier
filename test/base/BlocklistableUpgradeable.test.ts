@@ -1,7 +1,7 @@
 import { ethers, network, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { proveTx } from "../../test-utils/eth";
 
@@ -25,14 +25,14 @@ describe("Contract 'BlocklistableUpgradeable'", async () => {
 
   const REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED = "BlocklistedAccount";
 
-  const ownerRole: string = ethers.utils.id("OWNER_ROLE");
-  const blocklisterRole: string = ethers.utils.id("BLOCKLISTER_ROLE");
+  const ownerRole: string = ethers.id("OWNER_ROLE");
+  const blocklisterRole: string = ethers.id("BLOCKLISTER_ROLE");
 
   let blocklistableMockFactory: ContractFactory;
 
-  let deployer: SignerWithAddress;
-  let blocklister: SignerWithAddress;
-  let user: SignerWithAddress;
+  let deployer: HardhatEthersSigner;
+  let blocklister: HardhatEthersSigner;
+  let user: HardhatEthersSigner;
 
   before(async () => {
     [deployer, blocklister, user] = await ethers.getSigners();
@@ -41,7 +41,7 @@ describe("Contract 'BlocklistableUpgradeable'", async () => {
 
   async function deployBlocklistableMock(): Promise<{ blocklistableMock: Contract }> {
     const blocklistableMock: Contract = await upgrades.deployProxy(blocklistableMockFactory);
-    await blocklistableMock.deployed();
+    await blocklistableMock.waitForDeployment();
 
     return { blocklistableMock };
   }
@@ -61,7 +61,7 @@ describe("Contract 'BlocklistableUpgradeable'", async () => {
       expect(await blocklistableMock.BLOCKLISTER_ROLE()).to.equal(blocklisterRole);
 
       // The role admins
-      expect(await blocklistableMock.getRoleAdmin(ownerRole)).to.equal(ethers.constants.HashZero);
+      expect(await blocklistableMock.getRoleAdmin(ownerRole)).to.equal(ethers.ZeroHash);
       expect(await blocklistableMock.getRoleAdmin(blocklisterRole)).to.equal(ownerRole);
 
       // The deployer should have the owner role, but not the other roles

@@ -30,7 +30,7 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
      * @custom:storage-location erc7201:cloudwalk.storage.Blocklistable
      */
     struct BlocklistableStorage {
-        mapping(address => bool) _blocklisted; // Mapping of presence in the blocklist for a given address.
+        mapping(address => bool) blocklisted; // Mapping of presence in the blocklist for a given address.
     }
 
     // -------------------- Events -----------------------------------
@@ -56,7 +56,7 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
      * @param account The address to check for presence in the blocklist.
      */
     modifier notBlocklisted(address account) {
-        if (_getBlocklistableStorage()._blocklisted[account]) {
+        if (_getBlocklistableStorage().blocklisted[account]) {
             revert BlocklistedAccount(account);
         }
         _;
@@ -102,11 +102,11 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
      */
     function blocklist(address account) public onlyRole(BLOCKLISTER_ROLE) {
         BlocklistableStorage storage s = _getBlocklistableStorage();
-        if (s._blocklisted[account]) {
+        if (s.blocklisted[account]) {
             return;
         }
 
-        s._blocklisted[account] = true;
+        s.blocklisted[account] = true;
 
         emit Blocklisted(account);
     }
@@ -124,11 +124,11 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
      */
     function unBlocklist(address account) public onlyRole(BLOCKLISTER_ROLE) {
         BlocklistableStorage storage s = _getBlocklistableStorage();
-        if (!s._blocklisted[account]) {
+        if (!s.blocklisted[account]) {
             return;
         }
 
-        s._blocklisted[account] = false;
+        s.blocklisted[account] = false;
 
         emit UnBlocklisted(account);
     }
@@ -143,11 +143,11 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
         address sender = _msgSender();
         BlocklistableStorage storage s = _getBlocklistableStorage();
 
-        if (s._blocklisted[sender]) {
+        if (s.blocklisted[sender]) {
             return;
         }
 
-        s._blocklisted[sender] = true;
+        s.blocklisted[sender] = true;
 
         emit SelfBlocklisted(sender);
         emit Blocklisted(sender);
@@ -161,7 +161,7 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
      * @return True if the account is present in the blocklist.
      */
     function isBlocklisted(address account) public view returns (bool) {
-        return _getBlocklistableStorage()._blocklisted[account];
+        return _getBlocklistableStorage().blocklisted[account];
     }
 
     // -------------------- Private functions ------------------------

@@ -1,0 +1,379 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xA12D982b8b2a554058c1145956A4409A67770cbd",
+      "txHash": "0xe57e31ca6d1ce0e5ae94d6252d0f59cb6423ecce375bbf53cc9fc5bf75ea71e0",
+      "kind": "uups"
+    },
+    {
+      "address": "0xC8774b07F5751BD74EC009aE085a3e6e795d6aE8",
+      "txHash": "0x58cc0e9cc224bd6f731be353c1392ced7d57d032fa88018d5d512286cd79c8ab",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "8b9b84d996401548b01a7fe662ca21fe41a4e3d85092ad8a8e8afbd93fa7c7d3": {
+      "address": "0x76609A48C31e5BeEe557047bac6330460Fe0b6BD",
+      "txHash": "0x5dd859a7c95aff9c73755d60fd9dd9b09767b81cfa0d633857d682c286043941",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "_token",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "PixCashierStorageV1",
+            "src": "contracts\\PixCashierStorage.sol:13"
+          },
+          {
+            "label": "_cashInOperations",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperation)5663_storage)",
+            "contract": "PixCashierStorageV1",
+            "src": "contracts\\PixCashierStorage.sol:16"
+          },
+          {
+            "label": "_cashInBatchOperations",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_struct(CashInBatchOperation)5668_storage)",
+            "contract": "PixCashierStorageV1",
+            "src": "contracts\\PixCashierStorage.sol:19"
+          },
+          {
+            "label": "_cashOutOperations",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_bytes32,t_struct(CashOutOperation)5677_storage)",
+            "contract": "PixCashierStorageV1",
+            "src": "contracts\\PixCashierStorage.sol:22"
+          },
+          {
+            "label": "_cashOutBalances",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PixCashierStorageV1",
+            "src": "contracts\\PixCashierStorage.sol:25"
+          },
+          {
+            "label": "_pendingCashOutTxIds",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_struct(Bytes32Set)3230_storage",
+            "contract": "PixCashierStorageV1",
+            "src": "contracts\\PixCashierStorage.sol:28"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_array(t_uint256)43_storage",
+            "contract": "PixCashierStorage",
+            "src": "contracts\\PixCashierStorage.sol:46"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)34_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(BlocklistableStorage)1105_storage": {
+            "label": "struct BlocklistableUpgradeable.BlocklistableStorage",
+            "members": [
+              {
+                "label": "blocklisted",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)93_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)321_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)43_storage": {
+            "label": "uint256[43]",
+            "numberOfBytes": "1376"
+          },
+          "t_enum(CashInBatchStatus)5640": {
+            "label": "enum IPixCashierTypes.CashInBatchStatus",
+            "members": [
+              "Nonexistent",
+              "Executed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(CashInStatus)5636": {
+            "label": "enum IPixCashierTypes.CashInStatus",
+            "members": [
+              "Nonexistent",
+              "Executed",
+              "PremintExecuted"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(CashOutStatus)5654": {
+            "label": "enum IPixCashierTypes.CashOutStatus",
+            "members": [
+              "Nonexistent",
+              "Pending",
+              "Reversed",
+              "Confirmed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInBatchOperation)5668_storage)": {
+            "label": "mapping(bytes32 => struct IPixCashierTypes.CashInBatchOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInOperation)5663_storage)": {
+            "label": "mapping(bytes32 => struct IPixCashierTypes.CashInOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(CashOutOperation)5677_storage)": {
+            "label": "mapping(bytes32 => struct IPixCashierTypes.CashOutOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Bytes32Set)3230_storage": {
+            "label": "struct EnumerableSet.Bytes32Set",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3036_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(CashInBatchOperation)5668_storage": {
+            "label": "struct IPixCashierTypes.CashInBatchOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInBatchStatus)5640",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashInOperation)5663_storage": {
+            "label": "struct IPixCashierTypes.CashInOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInStatus)5636",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashOutOperation)5677_storage": {
+            "label": "struct IPixCashierTypes.CashOutOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashOutStatus)5654",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Set)3036_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:cloudwalk.storage.Blocklistable": [
+            {
+              "contract": "BlocklistableUpgradeable",
+              "label": "blocklisted",
+              "type": "t_mapping(t_address,t_bool)",
+              "src": "contracts\\base\\BlocklistableUpgradeable.sol:33",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

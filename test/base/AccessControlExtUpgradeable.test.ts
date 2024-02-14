@@ -135,7 +135,7 @@ describe("Contract 'AccessControlExtUpgradeable'", async () => {
         const { accessControlExtMock } = await setUpFixture(deployAccessControlExtMock);
 
         await expect(
-          accessControlExtMock.connect(attacker).grantRoleBatch(userRole, [])
+          (accessControlExtMock.connect(attacker) as Contract).grantRoleBatch(userRole, [])
         ).to.be.revertedWithCustomError(
           accessControlExtMock,
           REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
@@ -197,7 +197,7 @@ describe("Contract 'AccessControlExtUpgradeable'", async () => {
           const { accessControlExtMock } = await setUpFixture(deployAccessControlExtMock);
 
           await expect(
-            accessControlExtMock.connect(attacker).revokeRoleBatch(userRole, [])
+            (accessControlExtMock.connect(attacker) as Contract).revokeRoleBatch(userRole, [])
           ).to.be.revertedWithCustomError(
             accessControlExtMock,
             REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT

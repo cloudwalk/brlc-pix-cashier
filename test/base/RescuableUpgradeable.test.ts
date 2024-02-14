@@ -120,7 +120,8 @@ describe("Contract 'RescuableUpgradeable'", async () => {
         tokenMockAddress
       } = await setUpFixture(deployAndConfigureAllContracts);
 
-      const tx = rescuableMock.connect(rescuer).rescueERC20(tokenMockAddress, deployer.address, TOKEN_AMOUNT);
+      const rescuableMockConnected = rescuableMock.connect(rescuer) as Contract;
+      const tx = rescuableMockConnected.rescueERC20(tokenMockAddress, deployer.address, TOKEN_AMOUNT);
       await expect(tx).to.changeTokenBalances(
         tokenMock,
         [rescuableMock, deployer, rescuer],

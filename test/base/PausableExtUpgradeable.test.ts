@@ -89,7 +89,7 @@ describe("Contract 'PausableExtUpgradeable'", async () => {
     it("Executes successfully and emits the correct event", async () => {
       const { pausableExtMock } = await setUpFixture(deployAndConfigurePausableExtMock);
 
-      await expect(pausableExtMock.connect(pauser).pause())
+      await expect((pausableExtMock.connect(pauser) as Contract).pause())
         .to.emit(pausableExtMock, "Paused")
         .withArgs(pauser.address);
 
@@ -110,9 +110,9 @@ describe("Contract 'PausableExtUpgradeable'", async () => {
   describe("Function 'unpause()'", async () => {
     it("Executes successfully and emits the correct event", async () => {
       const { pausableExtMock } = await setUpFixture(deployAndConfigurePausableExtMock);
-      await proveTx(pausableExtMock.connect(pauser).pause());
+      await proveTx((pausableExtMock.connect(pauser) as Contract).pause());
 
-      await expect(pausableExtMock.connect(pauser).unpause())
+      await expect((pausableExtMock.connect(pauser) as Contract).unpause())
         .to.emit(pausableExtMock, "Unpaused")
         .withArgs(pauser.address);
 

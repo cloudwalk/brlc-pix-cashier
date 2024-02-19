@@ -2641,9 +2641,9 @@
         }
       }
     },
-    "67362befc6d83ad40c22096a99fe17d78f07400e5f1dc715dbb0ac27f763f2d5": {
-      "address": "0x6d84706C0d9216315D3e1090eC3b9AF5f8d1D267",
-      "txHash": "0x645b4220947f12a49d05708577c310c4ad2125979e786ef7e567e17c4d78418e",
+    "e2b857b68ca188e21864a37805e9d58a30afbca8a97691e20d74eba2d412dd1a": {
+      "address": "0x7f9530C06dA4A65902735CC747647D36Aaddc8B0",
+      "txHash": "0x127280312aeec5679116e6e847e2f2c94f828caa3987109167dd4a9617a3bcf4",
       "layout": {
         "solcVersion": "0.8.16",
         "storage": [
@@ -2772,7 +2772,7 @@
             "label": "_cashOuts",
             "offset": 0,
             "slot": "553",
-            "type": "t_mapping(t_bytes32,t_struct(CashOut)12583_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(CashOut)6008_storage)",
             "contract": "PixCashierStorageV1",
             "src": "contracts\\PixCashierStorage.sol:19"
           },
@@ -2796,7 +2796,7 @@
             "label": "_cashIns",
             "offset": 0,
             "slot": "557",
-            "type": "t_mapping(t_bytes32,t_struct(CashInOperation)12571_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperation)5996_storage)",
             "contract": "PixCashierStorageV2",
             "src": "contracts\\PixCashierStorage.sol:33"
           },
@@ -2804,7 +2804,7 @@
             "label": "_cashInBatches",
             "offset": 0,
             "slot": "558",
-            "type": "t_mapping(t_bytes32,t_struct(CashInBatchOperation)12575_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(CashInBatchOperation)6000_storage)",
             "contract": "PixCashierStorageV3",
             "src": "contracts\\PixCashierStorage.sol:41"
           }
@@ -2838,7 +2838,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_enum(CashInBatchStatus)12552": {
+          "t_enum(CashInBatchStatus)5977": {
             "label": "enum IPixCashierTypes.CashInBatchStatus",
             "members": [
               "Nonexistent",
@@ -2846,15 +2846,16 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(CashInStatus)12549": {
+          "t_enum(CashInStatus)5974": {
             "label": "enum IPixCashierTypes.CashInStatus",
             "members": [
               "Nonexistent",
-              "Executed"
+              "Executed",
+              "PremintExecuted"
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(CashOutStatus)12563": {
+          "t_enum(CashOutStatus)5988": {
             "label": "enum IPixCashierTypes.CashOutStatus",
             "members": [
               "Nonexistent",
@@ -2872,15 +2873,15 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(CashInBatchOperation)12575_storage)": {
+          "t_mapping(t_bytes32,t_struct(CashInBatchOperation)6000_storage)": {
             "label": "mapping(bytes32 => struct IPixCashierTypes.CashInBatchOperation)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(CashInOperation)12571_storage)": {
+          "t_mapping(t_bytes32,t_struct(CashInOperation)5996_storage)": {
             "label": "mapping(bytes32 => struct IPixCashierTypes.CashInOperation)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(CashOut)12583_storage)": {
+          "t_mapping(t_bytes32,t_struct(CashOut)6008_storage)": {
             "label": "mapping(bytes32 => struct IPixCashierTypes.CashOut)",
             "numberOfBytes": "32"
           },
@@ -2904,24 +2905,24 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(CashInBatchOperation)12575_storage": {
+          "t_struct(CashInBatchOperation)6000_storage": {
             "label": "struct IPixCashierTypes.CashInBatchOperation",
             "members": [
               {
                 "label": "status",
-                "type": "t_enum(CashInBatchStatus)12552",
+                "type": "t_enum(CashInBatchStatus)5977",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CashInOperation)12571_storage": {
+          "t_struct(CashInOperation)5996_storage": {
             "label": "struct IPixCashierTypes.CashInOperation",
             "members": [
               {
                 "label": "status",
-                "type": "t_enum(CashInStatus)12549",
+                "type": "t_enum(CashInStatus)5974",
                 "offset": 0,
                 "slot": "0"
               },
@@ -2940,7 +2941,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(CashOut)12583_storage": {
+          "t_struct(CashOut)6008_storage": {
             "label": "struct IPixCashierTypes.CashOut",
             "members": [
               {
@@ -2957,7 +2958,7 @@
               },
               {
                 "label": "status",
-                "type": "t_enum(CashOutStatus)12563",
+                "type": "t_enum(CashOutStatus)5988",
                 "offset": 0,
                 "slot": "2"
               }

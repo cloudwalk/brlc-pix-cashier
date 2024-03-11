@@ -67,6 +67,9 @@ contract PixCashier is
     /// @dev The length of the one of the batch arrays is different to the others.
     error InvalidBatchArrays();
 
+    /// @dev The premint restrictions do not fit to the operation
+    error PremintRestrictionFailure();
+
     /**
      * @dev The cash-in operation with the provided off-chain transaction is already executed.
      * @param txId The off-chain transaction identifiers of the operation.
@@ -259,7 +262,14 @@ contract PixCashier is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashIn(account, amount, txId, 0, CashInExecutionPolicy.Revert);
+        _cashIn(
+            account,
+            amount,
+            txId,
+            0,
+            CashInExecutionPolicy.Revert,
+            IERC20Mintable.PremintRestriction.Update
+        );
     }
 
     /**
@@ -281,7 +291,72 @@ contract PixCashier is
         if (releaseTime == 0) {
             revert InappropriatePremintReleaseTime();
         }
-        _cashIn(account, amount, txId, releaseTime, CashInExecutionPolicy.Revert);
+        _cashIn(
+            account,
+            amount,
+            txId,
+            releaseTime,
+            CashInExecutionPolicy.Revert,
+            IERC20Mintable.PremintRestriction.Update
+        );
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremintRevoke}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `txId` and `releaseTime` values must not be zero.
+     */
+    function cashInPremintRevoke(
+        address account,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+        _cashIn(
+            account,
+            0,
+            txId,
+            releaseTime,
+            CashInExecutionPolicy.Revert,
+            IERC20Mintable.PremintRestriction.Create
+        );
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremint}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `amount`, `txId` and `releaseTime` values must not be zero.
+     */
+    function cashInPremintUpdate(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+        if (amount == 0) {
+            revert ZeroAmount();
+        }
+        _cashIn(
+            account,
+            amount,
+            txId,
+            releaseTime,
+            CashInExecutionPolicy.Revert,
+            IERC20Mintable.PremintRestriction.Create
+        );
     }
 
     /**
@@ -326,7 +401,8 @@ contract PixCashier is
                 amounts[i],
                 txIds[i],
                 0,
-                CashInExecutionPolicy.Skip
+                CashInExecutionPolicy.Skip,
+                IERC20Mintable.PremintRestriction.None
             );
         }
 
@@ -461,6 +537,7 @@ contract PixCashier is
      * @param txId The off-chain transaction identifier of the operation.
      * @param releaseTime The timestamp when the tokens will be released.
      * @param policy The execution policy of the operation.
+     * @param restriction The premint operation status.
      * @return The result of the operation according to the appropriate enum.
      */
     function _cashIn(
@@ -468,12 +545,13 @@ contract PixCashier is
         uint256 amount,
         bytes32 txId,
         uint256 releaseTime,
-        CashInExecutionPolicy policy
+        CashInExecutionPolicy policy,
+        IERC20Mintable.PremintRestriction restriction
     ) internal returns (CashInExecutionResult) {
         if (account == address(0)) {
             revert ZeroAccount();
         }
-        if (amount == 0) {
+        if ((amount == 0) && restriction != IERC20Mintable.PremintRestriction.Create) {
             revert ZeroAmount();
         }
         if (txId == 0) {
@@ -483,7 +561,15 @@ contract PixCashier is
             revert BlocklistedAccount(account);
         }
 
-        if (_cashIns[txId].status != CashInStatus.Nonexistent) {
+        if ((_cashIns[txId].status == CashInStatus.PremintExecuted) &&
+            (restriction == IERC20Mintable.PremintRestriction.Create))
+        {
+            revert PremintRestrictionFailure();
+        }
+
+        if ((_cashIns[txId].status != CashInStatus.Nonexistent) &&
+            (restriction != IERC20Mintable.PremintRestriction.Update))
+        {
             if (policy == CashInExecutionPolicy.Skip) {
                 return CashInExecutionResult.AlreadyExecuted;
             } else {
@@ -508,7 +594,7 @@ contract PixCashier is
                 amount: amount
             });
             emit CashInPremint(account, amount, txId, releaseTime);
-            IERC20Mintable(_token).premint(account, amount, releaseTime);
+            IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintRestriction.None);
         }
 
         return CashInExecutionResult.Success;

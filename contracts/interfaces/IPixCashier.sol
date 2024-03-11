@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.16;
 
+import { IERC20Mintable } from "./IERC20Mintable.sol";
+
 /**
  * @title PixCashier types interface
  */
@@ -249,6 +251,44 @@ interface IPixCashier is IPixCashierTypes {
      * @param releaseTime The timestamp when the minted tokens will become available for usage.
      */
     function cashInPremint(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external;
+
+    /**
+     * @dev Revokes the existing premint that has not yet been released.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInPremint} event.
+     *
+     * @param account The account for which the premint was issued.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     */
+    function cashInPremintRevoke(
+        address account,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external;
+
+    /**
+     * @dev Updates a premint operation with the selected release time.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInPremint} event.
+     *
+     * @param account The account for which the premint was issued.
+     * @param amount The new amount of tokens to be available after release time.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the tokens will become available for usage.
+     */
+    function cashInPremintUpdate(
         address account,
         uint256 amount,
         bytes32 txId,

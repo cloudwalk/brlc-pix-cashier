@@ -12,6 +12,12 @@ enum CashInStatus {
   PremintExecuted = 2
 }
 
+enum PremintRestriction {
+  None = 0,
+  Create = 1,
+  Update = 2
+}
+
 enum CashInBatchStatus {
   Nonexistent = 0,
   Executed = 1
@@ -164,6 +170,7 @@ describe("Contract 'PixCashier'", async () => {
   const REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED = "CashInBatchAlreadyExecuted";
   const REVERT_ERROR_IF_BATCH_ID_IS_ZERO = "ZeroBatchId";
   const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "InappropriatePremintReleaseTime";
+  const REVERT_ERROR_IF_INVALID_PREMINT_RESTRICTION = "PremintRestrictionFailure";
 
   let PixCashier: ContractFactory;
   let pixCashier: Contract;
@@ -454,6 +461,15 @@ describe("Contract 'PixCashier'", async () => {
         .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED)
         .withArgs(txId);
     });
+
+    it("Is reverted if the cash-in with the provided txId is a premint", async () => {
+      const txId = TRANSACTION_ID1;
+      const releaseTime = 123456;
+      await proveTx(pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, txId, releaseTime));
+      expect(pixCashier.connect(cashier).cashIn(deployer.address, tokenAmount + 1, txId))
+        .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_PREMINT_RESTRICTION)
+        .withArgs(txId);
+    });
   });
 
   describe("Function 'cashInPremint()'", async () => {
@@ -519,6 +535,124 @@ describe("Contract 'PixCashier'", async () => {
     });
 
     // All other revert conditions are tested in the tests of the 'cashIn()' function
+  });
+
+  describe("Function 'cashInPremintRevoke'", async () => {
+    const releaseTimestamp: number = 123456;
+
+    beforeEach(async () => {
+      await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
+    });
+
+    it("Executes as expected", async () => {
+      const revokeCashIn: TestCashIn = {
+        status: CashInStatus.Nonexistent,
+        account: user,
+        amount: 0,
+        txId: TRANSACTION_ID1,
+        releaseTimestamp
+      };
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevoke(
+          revokeCashIn.account.address,
+          revokeCashIn.txId,
+          revokeCashIn.releaseTimestamp
+        )
+      ).to.emit(
+        pixCashier,
+        "CashInPremint"
+      ).withArgs(
+        revokeCashIn.account.address,
+        0,
+        revokeCashIn.txId,
+        revokeCashIn.releaseTimestamp
+      );
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      await proveTx(pixCashier.grantRole(pauserRole, deployer.address));
+      await proveTx(pixCashier.pause());
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevoke(user.address, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      await expect(
+        pixCashier.connect(deployer).cashInPremintRevoke(user.address, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+
+    it("Is reverted if the premint release time is zero", async () => {
+      const zeroReleaseTimestamp = 0;
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevoke(user.address, TRANSACTION_ID1, zeroReleaseTimestamp)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+    });
+  });
+
+  describe("Function 'cashInPremintUpdate'", async () => {
+    const tokenAmount: number = 100;
+    const releaseTimestamp: number = 123456;
+
+    beforeEach(async () => {
+      await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
+    });
+
+    it("Executes as expected", async () => {
+      const updateCashIn: TestCashIn = {
+        status: CashInStatus.Nonexistent,
+        account: user,
+        amount: tokenAmount,
+        txId: TRANSACTION_ID1,
+        releaseTimestamp
+      };
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintUpdate(
+          updateCashIn.account.address,
+          updateCashIn.amount,
+          updateCashIn.txId,
+          updateCashIn.releaseTimestamp
+        )
+      ).to.emit(
+        pixCashier,
+        "CashInPremint"
+      ).withArgs(
+        updateCashIn.account.address,
+        updateCashIn.amount,
+        updateCashIn.txId,
+        updateCashIn.releaseTimestamp
+      );
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      await proveTx(pixCashier.grantRole(pauserRole, deployer.address));
+      await proveTx(pixCashier.pause());
+      await expect(
+        pixCashier.connect(cashier).cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      await expect(
+        pixCashier.connect(deployer).cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+
+    it("Is reverted if the premint amount is zero", async () => {
+      await expect(
+        pixCashier.connect(cashier).cashInPremintUpdate(user.address, 0, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the premint release time is zero", async () => {
+      const zeroReleaseTimestamp = 0;
+      await expect(
+        pixCashier.connect(cashier).cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, zeroReleaseTimestamp)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+    });
   });
 
   describe("Function 'cashInBatch()'", async () => {

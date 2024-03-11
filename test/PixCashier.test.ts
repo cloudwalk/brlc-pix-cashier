@@ -528,10 +528,19 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
     });
 
+    it("Is reverted if the premint with the same txId is already executed", async () => {
+      await proveTx(
+        pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      );
+      await expect(
+        pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_PREMINT_RESTRICTION);
+    });
+
     // All other revert conditions are tested in the tests of the 'cashIn()' function
   });
 
-  describe("Function 'cashInPremintRevoke'", async () => {
+  describe("Function 'cashInPremintRevoke()'", async () => {
     const releaseTimestamp: number = 123456;
 
     beforeEach(async () => {
@@ -586,7 +595,7 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
-  describe("Function 'cashInPremintUpdate'", async () => {
+  describe("Function 'cashInPremintUpdate()'", async () => {
     const tokenAmount: number = 100;
     const releaseTimestamp: number = 123456;
 

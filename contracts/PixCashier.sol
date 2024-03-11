@@ -268,7 +268,7 @@ contract PixCashier is
             txId,
             0,
             CashInExecutionPolicy.Revert,
-            IERC20Mintable.PremintRestriction.Update
+            IERC20Mintable.PremintRestriction.None
         );
     }
 
@@ -562,7 +562,7 @@ contract PixCashier is
         }
 
         if ((_cashIns[txId].status == CashInStatus.PremintExecuted) &&
-            (restriction == IERC20Mintable.PremintRestriction.Create))
+            (restriction == IERC20Mintable.PremintRestriction.Update))
         {
             revert PremintRestrictionFailure();
         }

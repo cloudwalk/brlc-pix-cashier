@@ -12,12 +12,6 @@ enum CashInStatus {
   PremintExecuted = 2
 }
 
-enum PremintRestriction {
-  None = 0,
-  Create = 1,
-  Update = 2
-}
-
 enum CashInBatchStatus {
   Nonexistent = 0,
   Executed = 1
@@ -650,7 +644,8 @@ describe("Contract 'PixCashier'", async () => {
     it("Is reverted if the premint release time is zero", async () => {
       const zeroReleaseTimestamp = 0;
       await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, zeroReleaseTimestamp)
+        pixCashier.connect(cashier)
+          .cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, zeroReleaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
     });
   });

@@ -578,9 +578,7 @@ contract PixCashier is
     }
 
     /**
-     * @dev Executes a cash-in operation internally depending on the release time and execution policy.
-     *
-     * If the release time is zero then the operation is executed as a common mint otherwise as a premint.
+     * @dev Executes a cash-in premint operation internally depending on the release time and restriction policy.
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.

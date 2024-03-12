@@ -559,7 +559,12 @@ describe("Contract 'PixCashier'", async () => {
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
       await expect(
-        pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, ethers.constants.HashZero,releaseTimestamp)
+        pixCashier.connect(cashier).cashInPremint(
+          user.address,
+          tokenAmount,
+          ethers.constants.HashZero,
+          releaseTimestamp
+        )
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
     });
 

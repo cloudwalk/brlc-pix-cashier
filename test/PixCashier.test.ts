@@ -455,15 +455,6 @@ describe("Contract 'PixCashier'", async () => {
         .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED)
         .withArgs(txId);
     });
-
-    it("Is reverted if the cash-in with the provided txId is a premint", async () => {
-      const txId = TRANSACTION_ID1;
-      const releaseTime = 123456;
-      await proveTx(pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, txId, releaseTime));
-      expect(pixCashier.connect(cashier).cashIn(deployer.address, tokenAmount + 1, txId))
-        .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED)
-        .withArgs(txId);
-    });
   });
 
   describe("Function 'cashInPremint()'", async () => {
@@ -528,7 +519,7 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
     });
 
-    it("Is reverted if the premint with the same txId is already executed", async () => {
+    it("Is reverted if the cash-in with the provided txId is already executed", async () => {
       await proveTx(
         pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
       );
@@ -609,9 +600,10 @@ describe("Contract 'PixCashier'", async () => {
         )
       ).to.emit(
         pixCashier,
-        "CashInPremint"
+        "CashInPremintUpdate"
       ).withArgs(
         revokeCashIn.account.address,
+        tokenAmount,
         0,
         revokeCashIn.txId,
         revokeCashIn.releaseTimestamp
@@ -638,6 +630,12 @@ describe("Contract 'PixCashier'", async () => {
         pixCashier.connect(cashier).cashInPremintRevoke(user.address, TRANSACTION_ID1, zeroReleaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
     });
+
+    it("Is reverted if the cash-in with the provided txId does not exist", async () => {
+      await expect(pixCashier.connect(cashier).cashInPremintRevoke(user.address, TRANSACTION_ID1, releaseTimestamp))
+        .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS)
+        .withArgs(TRANSACTION_ID1, CashInStatus.Nonexistent);
+    });
   });
 
   describe("Function 'cashInPremintUpdate()'", async () => {
@@ -649,7 +647,7 @@ describe("Contract 'PixCashier'", async () => {
     });
 
     it("Executes as expected", async () => {
-      const updateCashIn: TestCashIn = {
+      const cashIn: TestCashIn = {
         status: CashInStatus.Nonexistent,
         account: user,
         amount: tokenAmount,
@@ -659,28 +657,47 @@ describe("Contract 'PixCashier'", async () => {
 
       await proveTx(
         pixCashier.connect(cashier).cashInPremint(
-          updateCashIn.account.address,
-          updateCashIn.amount,
-          updateCashIn.txId,
-          updateCashIn.releaseTimestamp
+          cashIn.account.address,
+          cashIn.amount,
+          cashIn.txId,
+          cashIn.releaseTimestamp
         )
       );
 
       await expect(
         pixCashier.connect(cashier).cashInPremintUpdate(
-          updateCashIn.account.address,
-          updateCashIn.amount + 1,
-          updateCashIn.txId,
-          updateCashIn.releaseTimestamp
+          cashIn.account.address,
+          cashIn.amount + 1,
+          cashIn.txId,
+          cashIn.releaseTimestamp
         )
       ).to.emit(
         pixCashier,
-        "CashInPremint"
+        "CashInPremintUpdate"
       ).withArgs(
-        updateCashIn.account.address,
-        updateCashIn.amount + 1,
-        updateCashIn.txId,
-        updateCashIn.releaseTimestamp
+        cashIn.account.address,
+        cashIn.amount,
+        cashIn.amount + 1,
+        cashIn.txId,
+        cashIn.releaseTimestamp
+      );
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintUpdate(
+          cashIn.account.address,
+          cashIn.amount - 1,
+          cashIn.txId,
+          cashIn.releaseTimestamp
+        )
+      ).to.emit(
+        pixCashier,
+        "CashInPremintUpdate"
+      ).withArgs(
+        cashIn.account.address,
+        cashIn.amount + 1,
+        cashIn.amount - 1,
+        cashIn.txId,
+        cashIn.releaseTimestamp
       );
     });
 
@@ -712,11 +729,23 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
     });
 
-    it("Is reverted if the premint with selected txId does not exist", async () => {
+    it("Is reverted if the cash-in with the provided txId does not exist", async () => {
       await expect(
-        pixCashier.connect(cashier)
-          .cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS);
+        pixCashier.connect(cashier).cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS
+      ).withArgs(TRANSACTION_ID1, CashInStatus.Nonexistent);
+    });
+
+    it("Is reverted if the cash-in with the provided txId is not a premint", async () => {
+      await proveTx(pixCashier.connect(cashier).cashIn(user.address, tokenAmount, TRANSACTION_ID1));
+      await expect(
+        pixCashier.connect(cashier).cashInPremintUpdate(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED
+      ).withArgs(TRANSACTION_ID1);
     });
   });
 

@@ -15,11 +15,13 @@ interface IPixCashierTypes {
      * - Nonexistent ----- The operation does not exist (the default value).
      * - Executed -------- The operation was executed as a common mint.
      * - PremintExecuted - The operation was executed as a premint with some predetermined release time.
+     * - PremintExecuted - The premint operation was revoked.
      */
     enum CashInStatus {
-        Nonexistent,    // 0
-        Executed,       // 1
-        PremintExecuted // 2
+        Nonexistent,     // 0
+        Executed,        // 1
+        PremintExecuted, // 2
+        PremintRevoked   // 3
     }
 
     /**
@@ -110,6 +112,15 @@ interface IPixCashier is IPixCashierTypes {
     event CashInPremint(
         address indexed account, // The account that receives tokens.
         uint256 amount,          // The amount of tokens to receive.
+        bytes32 indexed txId,    // The off-chain transaction identifier.
+        uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
+    );
+
+    /// @dev Emitted when a cash-in premint operation is updated with new amount.
+    event CashInPremintUpdate(
+        address indexed account, // The account that received tokens from the premint.
+        uint256 oldAmount,       // The old amount of preminted tokens.
+        uint256 newAmount,       // The new amount of preminted tokens.
         bytes32 indexed txId,    // The off-chain transaction identifier.
         uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
     );

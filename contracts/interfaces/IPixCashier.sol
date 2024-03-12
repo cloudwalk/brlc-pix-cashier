@@ -267,7 +267,7 @@ interface IPixCashier is IPixCashierTypes {
      *
      * @param account The account for which the premint was issued.
      * @param txId The off-chain transaction identifier of the operation.
-     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     * @param releaseTime The timestamp of the premint that will be revoked.
      */
     function cashInPremintRevoke(
         address account,

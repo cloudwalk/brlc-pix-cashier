@@ -608,6 +608,7 @@ describe("Contract 'PixCashier'", async () => {
 
       expectedCashIn.oldAmount = expectedCashIn.amount;
       expectedCashIn.amount = 0;
+      expectedCashIn.status = CashInStatus.Nonexistent;
       const tx = pixCashier.connect(cashier).cashInPremintRevoke(
         expectedCashIn.account.address,
         expectedCashIn.txId,

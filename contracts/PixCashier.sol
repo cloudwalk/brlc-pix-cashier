@@ -636,13 +636,13 @@ contract PixCashier is
             revert InappropriateCashInStatus(txId, _cashIns[txId].status);
         }
 
-        uint256 oldAmount = _cashIns[txId].amount;
-
-        _cashIns[txId] = CashInOperation({
-            status: CashInStatus.PremintExecuted,
-            account: account,
-            amount: amount
-        });
+        CashInOperation storage cashIn_ = _cashIns[txId];
+        uint256 oldAmount = cashIn_.amount;
+        cashIn_.amount = amount;
+        if (cashIn_.amount == 0) {
+            cashIn_.status = CashInStatus.Nonexistent;
+            cashIn_.account = address(0);
+        }
 
         emit CashInPremint(account, amount, oldAmount, txId, releaseTime);
 

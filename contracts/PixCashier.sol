@@ -557,7 +557,7 @@ contract PixCashier is
     }
 
     /**
-     * @dev Executes a premint cash-in operation internally depending on the release time.
+     * @dev Executes a premint cash-in operation internally.
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.

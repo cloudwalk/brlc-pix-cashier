@@ -583,7 +583,7 @@ contract PixCashier is
             revert InappropriatePremintReleaseTime();
         }
         if (_cashIns[txId].status != CashInStatus.Nonexistent) {
-            revert InappropriateCashInStatus(txId, _cashIns[txId].status);
+            revert CashInAlreadyExecuted(txId);
         }
         if (isBlocklisted(account)) {
             revert BlocklistedAccount(account);

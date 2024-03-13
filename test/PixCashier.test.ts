@@ -573,8 +573,8 @@ describe("Contract 'PixCashier'", async () => {
         pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp)
       ).to.be.revertedWithCustomError(
         pixCashier,
-        REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS
-      ).withArgs(TRANSACTION_ID1, CashInStatus.Executed);
+        REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED
+      ).withArgs(TRANSACTION_ID1);
     });
   });
 

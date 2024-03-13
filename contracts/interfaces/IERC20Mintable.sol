@@ -7,6 +7,13 @@ pragma solidity 0.8.16;
  * @dev The interface of a token that supports mint, premint, burn operations.
  */
 interface IERC20Mintable {
+    /// @dev The enum describing restrictions for actions with premints
+    enum PremintRestriction {
+        None,   // No restriction
+        Create,
+        Update
+    }
+
     /**
      * @dev Mints tokens.
      *
@@ -22,8 +29,14 @@ interface IERC20Mintable {
      * @param account The address of a tokens recipient.
      * @param amount The amount of tokens to premint.
      * @param releaseTime The timestamp when the tokens will be released.
+     * @param restriction The indicator of premint restriction policy.
      */
-    function premint(address account, uint256 amount, uint256 releaseTime) external;
+    function premint(
+        address account,
+        uint256 amount,
+        uint256 releaseTime,
+        PremintRestriction restriction
+    ) external;
 
     /**
      * @dev Burns tokens.

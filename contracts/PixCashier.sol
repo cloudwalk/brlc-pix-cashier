@@ -87,6 +87,13 @@ contract PixCashier is
     error InappropriateCashOutStatus(bytes32 txId, CashOutStatus status);
 
     /**
+     * @dev The cash-in operation with the provided off-chain transaction identifier has an inappropriate status.
+     * @param txId The off-chain transaction identifiers of the operation.
+     * @param status The current status of the operation.
+     */
+    error InappropriateCashInStatus(bytes32 txId, CashInStatus status);
+
+    /**
      * @dev The cash-out operation with the provided txId cannot executed for the given account.
      * @param txId The off-chain transaction identifiers of the operation.
      * @param account The account that must be used for the operation.
@@ -282,6 +289,50 @@ contract PixCashier is
             revert InappropriatePremintReleaseTime();
         }
         _cashIn(account, amount, txId, releaseTime, CashInExecutionPolicy.Revert);
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremintRevoke}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `txId` and `releaseTime` values must not be zero.
+     */
+    function cashInPremintRevoke(
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        _cashInPremintUpdate(
+            0,
+            txId,
+            releaseTime
+        );
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremint}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `amount`, `txId` and `releaseTime` values must not be zero.
+     */
+    function cashInPremintUpdate(
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (amount == 0) {
+            revert ZeroAmount();
+        }
+        _cashInPremintUpdate(
+            amount,
+            txId,
+            releaseTime
+        );
     }
 
     /**
@@ -508,10 +559,47 @@ contract PixCashier is
                 amount: amount
             });
             emit CashInPremint(account, amount, txId, releaseTime);
-            IERC20Mintable(_token).premint(account, amount, releaseTime);
+            IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintRestriction.Update);
         }
 
         return CashInExecutionResult.Success;
+    }
+
+    /**
+     * @dev Executes a cash-in premint update operation internally.
+     *
+     * @param newAmount The new amount of tokens to be preminted. If zero then revoking the cash-in premint.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the tokens will be released.
+     */
+    function _cashInPremintUpdate(
+        uint256 newAmount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) internal {
+        if (txId == 0) {
+            revert ZeroTxId();
+        }
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+        CashInOperation storage cashIn_ = _cashIns[txId];
+        if (cashIn_.status != CashInStatus.PremintExecuted) {
+            revert InappropriateCashInStatus(txId, cashIn_.status);
+        }
+        address account = cashIn_.account;
+        if (isBlocklisted(account)) {
+            revert BlocklistedAccount(account);
+        }
+        emit CashInPremintUpdate(account, newAmount, cashIn_.amount,  txId, releaseTime);
+
+        cashIn_.amount = newAmount;
+        if (newAmount == 0) {
+            cashIn_.status = CashInStatus.Nonexistent;
+            cashIn_.account = address(0);
+        }
+
+        IERC20Mintable(_token).premint(account, newAmount, releaseTime, IERC20Mintable.PremintRestriction.Create);
     }
 
     /**

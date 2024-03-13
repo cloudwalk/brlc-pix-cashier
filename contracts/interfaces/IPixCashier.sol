@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.16;
 
+import { IERC20Mintable } from "./IERC20Mintable.sol";
+
 /**
  * @title PixCashier types interface
  */
@@ -108,6 +110,15 @@ interface IPixCashier is IPixCashierTypes {
     event CashInPremint(
         address indexed account, // The account that receives tokens.
         uint256 amount,          // The amount of tokens to receive.
+        bytes32 indexed txId,    // The off-chain transaction identifier.
+        uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
+    );
+
+    /// @dev Emitted when a cash-in premint operation is updated with new amount.
+    event CashInPremintUpdate(
+        address indexed account, // The account that received tokens from the premint.
+        uint256 newAmount,       // The new amount of preminted tokens.
+        uint256 oldAmount,       // The old amount of preminted tokens.
         bytes32 indexed txId,    // The off-chain transaction identifier.
         uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
     );
@@ -250,6 +261,40 @@ interface IPixCashier is IPixCashierTypes {
      */
     function cashInPremint(
         address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external;
+
+    /**
+     * @dev Revokes the existing premint that has not yet been released.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInPremint} event.
+     *
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp of the premint that will be revoked.
+     */
+    function cashInPremintRevoke(
+        bytes32 txId,
+        uint256 releaseTime
+    ) external;
+
+    /**
+     * @dev Updates a premint operation with the selected release time.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInPremint} event.
+     *
+     * @param amount The new amount of tokens to be available after release time.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the tokens will become available for usage.
+     */
+    function cashInPremintUpdate(
         uint256 amount,
         bytes32 txId,
         uint256 releaseTime

@@ -308,12 +308,10 @@ contract PixCashier is
      * - The provided `account`, `txId` and `releaseTime` values must not be zero.
      */
     function cashInPremintRevoke(
-        address account,
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _cashInPremintUpdate(
-            account,
             0,
             txId,
             releaseTime
@@ -330,7 +328,6 @@ contract PixCashier is
      * - The provided `account`, `amount`, `txId` and `releaseTime` values must not be zero.
      */
     function cashInPremintUpdate(
-        address account,
         uint256 amount,
         bytes32 txId,
         uint256 releaseTime
@@ -339,7 +336,6 @@ contract PixCashier is
             revert ZeroAmount();
         }
         _cashInPremintUpdate(
-            account,
             amount,
             txId,
             releaseTime
@@ -608,27 +604,26 @@ contract PixCashier is
     /**
      * @dev Updates a cash-in premint operation internally depending on the release time.
      *
-     * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
      * @param releaseTime The timestamp when the tokens will be released.
      * @return The result of the operation according to the appropriate enum.
      */
     function _cashInPremintUpdate(
-        address account,
         uint256 amount,
         bytes32 txId,
         uint256 releaseTime
     ) internal returns (CashInExecutionResult) {
-        if (account == address(0)) {
-            revert ZeroAccount();
-        }
         if (txId == 0) {
             revert ZeroTxId();
         }
         if (releaseTime == 0) {
             revert InappropriatePremintReleaseTime();
         }
+
+        CashInOperation storage cashIn_ = _cashIns[txId];
+        address account = cashIn_.account;
+
         if (isBlocklisted(account)) {
             revert BlocklistedAccount(account);
         }
@@ -636,7 +631,6 @@ contract PixCashier is
             revert InappropriateCashInStatus(txId, _cashIns[txId].status);
         }
 
-        CashInOperation storage cashIn_ = _cashIns[txId];
         uint256 oldAmount = cashIn_.amount;
         cashIn_.amount = amount;
         if (cashIn_.amount == 0) {

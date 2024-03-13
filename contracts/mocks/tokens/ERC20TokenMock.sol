@@ -13,6 +13,14 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
 contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
     bool public mintResult;
 
+    /// @dev A mock premint event with the parameters that were passed to the `premint()` function
+    event MockPremint(
+        address account,
+        uint256 amount,
+        uint256 releaseTime,
+        PremintRestriction restriction
+    );
+
     /**
      * @dev The initialize function of the upgradable contract.
      * @param name_ The name of the token to set for this ERC20-comparable contract.
@@ -40,9 +48,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
      * @param releaseTime The timestamp when the tokens will be released.
      */
     function premint(address account, uint256 amount, uint256 releaseTime, PremintRestriction restriction) external {
-        restriction;
-        releaseTime;
-        _mint(account, amount);
+        emit MockPremint(account, amount, releaseTime, restriction);
     }
 
     /**

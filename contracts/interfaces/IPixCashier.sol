@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.16;
 
-import { IERC20Mintable } from "./IERC20Mintable.sol";
-
 /**
  * @title PixCashier types interface
  */
@@ -15,7 +13,6 @@ interface IPixCashierTypes {
      * - Nonexistent ----- The operation does not exist (the default value).
      * - Executed -------- The operation was executed as a common mint.
      * - PremintExecuted - The operation was executed as a premint with some predetermined release time.
-     * - PremintExecuted - The premint operation was revoked.
      */
     enum CashInStatus {
         Nonexistent,     // 0

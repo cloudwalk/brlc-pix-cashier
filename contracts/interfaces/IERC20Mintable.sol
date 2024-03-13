@@ -7,41 +7,42 @@ pragma solidity 0.8.16;
  * @dev The interface of a token that supports mint, premint, burn operations.
  */
 interface IERC20Mintable {
-    /// @dev The enum describing restrictions for actions with premints
+    /// @notice An enum describing restrictions for premint operation
     enum PremintRestriction {
         None,   // No restriction
-        Create,
-        Update
+        Create, // Creating a new premint is disallowed
+        Update  // Updating an existing premint is disallowed
     }
 
     /**
-     * @dev Mints tokens.
+     * @notice Mints tokens
      *
-     * @param account The address of a tokens recipient.
-     * @param amount The amount of tokens to mint.
-     * @return True if the operation was successful.
+     * Emits a {Mint} event
+     *
+     * @param account The address of a tokens recipient
+     * @param amount The amount of tokens to mint
+     * @return True if the operation was successful
      */
     function mint(address account, uint256 amount) external returns (bool);
 
     /**
-     * @dev Premints tokens.
+     * @notice Premints tokens
      *
-     * @param account The address of a tokens recipient.
-     * @param amount The amount of tokens to premint.
-     * @param releaseTime The timestamp when the tokens will be released.
-     * @param restriction The indicator of premint restriction policy.
+     * Emits a {Premint} event
+     *
+     * @param account The address of a tokens recipient
+     * @param amount The amount of tokens to premint
+     * @param release The timestamp when the tokens will be released
+     * @param restriction The restriction for the premint operation
      */
-    function premint(
-        address account,
-        uint256 amount,
-        uint256 releaseTime,
-        PremintRestriction restriction
-    ) external;
+    function premint(address account, uint256 amount, uint256 release, PremintRestriction restriction) external;
 
     /**
-     * @dev Burns tokens.
+     * @notice Burns tokens
      *
-     * @param amount The amount of tokens to burn.
+     * Emits a {Burn} event
+     *
+     * @param amount The amount of tokens to burn
      */
     function burn(uint256 amount) external;
 }

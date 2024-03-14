@@ -87,6 +87,13 @@ contract PixCashier is
     error InappropriateCashOutStatus(bytes32 txId, CashOutStatus status);
 
     /**
+     * @dev The cash-in operation with the provided off-chain transaction identifier has an inappropriate status.
+     * @param txId The off-chain transaction identifiers of the operation.
+     * @param status The current status of the operation.
+     */
+    error InappropriateCashInStatus(bytes32 txId, CashInStatus status);
+
+    /**
      * @dev The cash-out operation with the provided txId cannot executed for the given account.
      * @param txId The off-chain transaction identifiers of the operation.
      * @param account The account that must be used for the operation.
@@ -259,7 +266,12 @@ contract PixCashier is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashIn(account, amount, txId, 0, CashInExecutionPolicy.Revert);
+        _cashIn(
+            account,
+            amount,
+            txId,
+            CashInExecutionPolicy.Revert
+        );
     }
 
     /**
@@ -278,10 +290,56 @@ contract PixCashier is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (releaseTime == 0) {
-            revert InappropriatePremintReleaseTime();
+        _cashInPremintCreate(
+            account,
+            amount,
+            txId,
+            releaseTime
+        );
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremintRevoke}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `txId` and `releaseTime` values must not be zero.
+     */
+    function cashInPremintRevoke(
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        _cashInPremintUpdate(
+            0,
+            txId,
+            releaseTime
+        );
+    }
+
+    /**
+     * @dev See {IPixCashier-cashInPremint}.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `amount`, `txId` and `releaseTime` values must not be zero.
+     */
+    function cashInPremintUpdate(
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (amount == 0) {
+            revert ZeroAmount();
         }
-        _cashIn(account, amount, txId, releaseTime, CashInExecutionPolicy.Revert);
+        _cashInPremintUpdate(
+            amount,
+            txId,
+            releaseTime
+        );
     }
 
     /**
@@ -325,7 +383,6 @@ contract PixCashier is
                 accounts[i],
                 amounts[i],
                 txIds[i],
-                0,
                 CashInExecutionPolicy.Skip
             );
         }
@@ -452,14 +509,11 @@ contract PixCashier is
     }
 
     /**
-     * @dev Executes a cash-in operation internally depending on the release time and execution policy.
-     *
-     * If the release time is zero then the operation is executed as a common mint otherwise as a premint.
+     * @dev Executes a cash-in operation internally depending on the execution policy.
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
-     * @param releaseTime The timestamp when the tokens will be released.
      * @param policy The execution policy of the operation.
      * @return The result of the operation according to the appropriate enum.
      */
@@ -467,7 +521,6 @@ contract PixCashier is
         address account,
         uint256 amount,
         bytes32 txId,
-        uint256 releaseTime,
         CashInExecutionPolicy policy
     ) internal returns (CashInExecutionResult) {
         if (account == address(0)) {
@@ -491,25 +544,103 @@ contract PixCashier is
             }
         }
 
-        if (releaseTime == 0) {
-            _cashIns[txId] = CashInOperation({
-                status: CashInStatus.Executed,
-                account: account,
-                amount: amount
-            });
-            emit CashIn(account, amount, txId);
-            if (!IERC20Mintable(_token).mint(account, amount)) {
-                revert TokenMintingFailure();
-            }
-        } else {
-            _cashIns[txId] = CashInOperation({
-                status: CashInStatus.PremintExecuted,
-                account: account,
-                amount: amount
-            });
-            emit CashInPremint(account, amount, txId, releaseTime);
-            IERC20Mintable(_token).premint(account, amount, releaseTime);
+        _cashIns[txId] = CashInOperation({
+            status: CashInStatus.Executed,
+            account: account,
+            amount: amount
+        });
+        emit CashIn(account, amount, txId);
+        if (!IERC20Mintable(_token).mint(account, amount)) {
+            revert TokenMintingFailure();
         }
+        return CashInExecutionResult.Success;
+    }
+
+    /**
+     * @dev Executes a premint cash-in operation internally.
+     *
+     * @param account The address of the tokens recipient.
+     * @param amount The amount of tokens to be received.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @return The result of the operation according to the appropriate enum.
+     */
+    function _cashInPremintCreate(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) internal returns (CashInExecutionResult) {
+        if (account == address(0)) {
+            revert ZeroAccount();
+        }
+        if (amount == 0) {
+            revert ZeroAmount();
+        }
+        if (txId == 0) {
+            revert ZeroTxId();
+        }
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+        if (_cashIns[txId].status != CashInStatus.Nonexistent) {
+            revert CashInAlreadyExecuted(txId);
+        }
+        if (isBlocklisted(account)) {
+            revert BlocklistedAccount(account);
+        }
+
+        _cashIns[txId] = CashInOperation({
+            status: CashInStatus.PremintExecuted,
+            account: account,
+            amount: amount
+        });
+
+        emit CashInPremint(account, amount, 0, txId, releaseTime);
+        IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintRestriction.Update);
+
+        return CashInExecutionResult.Success;
+    }
+
+    /**
+     * @dev Updates a cash-in premint operation internally depending on the release time.
+     *
+     * @param amount The amount of tokens to be received.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the tokens will be released.
+     * @return The result of the operation according to the appropriate enum.
+     */
+    function _cashInPremintUpdate(
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) internal returns (CashInExecutionResult) {
+        if (txId == 0) {
+            revert ZeroTxId();
+        }
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+
+        CashInOperation storage cashIn_ = _cashIns[txId];
+        address account = cashIn_.account;
+
+        if (isBlocklisted(account)) {
+            revert BlocklistedAccount(account);
+        }
+        if (_cashIns[txId].status != CashInStatus.PremintExecuted) {
+            revert InappropriateCashInStatus(txId, _cashIns[txId].status);
+        }
+
+        uint256 oldAmount = cashIn_.amount;
+        cashIn_.amount = amount;
+        if (cashIn_.amount == 0) {
+            cashIn_.status = CashInStatus.Nonexistent;
+            cashIn_.account = address(0);
+        }
+
+        emit CashInPremint(account, amount, oldAmount, txId, releaseTime);
+
+        IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintRestriction.Create);
 
         return CashInExecutionResult.Success;
     }

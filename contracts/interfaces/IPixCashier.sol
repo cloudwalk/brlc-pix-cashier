@@ -104,7 +104,7 @@ interface IPixCashier is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
-    /// @dev Emitted when a new cash-in premint operation is executed or updated.
+    /// @dev Emitted when a cash-in premint operation is executed.
     event CashInPremint(
         address indexed account, // The account that received tokens from the premint.
         uint256 newAmount,       // The new amount of preminted tokens.

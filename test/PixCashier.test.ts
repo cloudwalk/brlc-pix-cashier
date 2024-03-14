@@ -30,7 +30,7 @@ enum CashOutStatus {
 }
 
 enum PremintRestriction {
-  // None = 0 -- do not use in this test
+  None = 0,  // Not use in tests
   Create = 1,
   Update = 2
 }

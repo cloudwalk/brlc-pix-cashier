@@ -31,7 +31,7 @@ enum CashOutStatus {
 }
 
 enum PremintRestriction {
-  None = 0,
+// None = 0 -- not used in this test. Commented to overcome a warning from the linter
   Create = 1,
   Update = 2
 }
@@ -39,7 +39,7 @@ enum PremintRestriction {
 interface TestCashIn {
   account: HardhatEthersSigner;
   amount: number;
-  oldAmount: number;
+  oldAmount?: number;
   txId: string;
   status: CashInStatus;
   releaseTimestamp?: number;
@@ -417,7 +417,6 @@ describe("Contract 'PixCashier'", async () => {
         status: CashInStatus.Nonexistent,
         account: user,
         amount: tokenAmount,
-        oldAmount: 0,
         txId: TRANSACTION_ID1
       };
       const tx = (pixCashier.connect(cashier) as Contract).cashIn(
@@ -518,7 +517,6 @@ describe("Contract 'PixCashier'", async () => {
         status: CashInStatus.Nonexistent,
         account: user,
         amount: tokenAmount,
-        oldAmount: 0,
         txId: TRANSACTION_ID1,
         releaseTimestamp
       };
@@ -589,7 +587,7 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
     });
 
-    it("Is reverted if the premint amount is zero", async () => {
+    it("Is reverted if the token amount is zero", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashInPremint(user.address, 0, TRANSACTION_ID1, releaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
@@ -663,7 +661,6 @@ describe("Contract 'PixCashier'", async () => {
         status: CashInStatus.Nonexistent,
         account: user,
         amount: tokenAmount,
-        oldAmount: 0,
         txId: TRANSACTION_ID1,
         releaseTimestamp
       };
@@ -843,7 +840,7 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT);
     });
 
-    it("Is reverted if the premint amount is zero", async () => {
+    it("Is reverted if the token amount is zero", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashInPremintUpdate(0, TRANSACTION_ID1, releaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
@@ -924,7 +921,6 @@ describe("Contract 'PixCashier'", async () => {
         return {
           account: user,
           amount: TOKEN_AMOUNTS[index],
-          oldAmount: 0,
           txId: TX_ID_ARRAY[index],
           status: CashInStatus.Executed
         };

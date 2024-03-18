@@ -31,7 +31,7 @@ enum CashOutStatus {
 }
 
 enum PremintRestriction {
-// None = 0 -- not used in this test. Commented to overcome a warning from the linter
+  // None = 0 -- not used in this test. Commented to overcome a warning from the linter
   Create = 1,
   Update = 2
 }

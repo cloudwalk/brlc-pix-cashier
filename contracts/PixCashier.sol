@@ -246,7 +246,6 @@ contract PixCashier is
         );
     }
 
-
     /**
      * @inheritdoc IPixCashier
      *

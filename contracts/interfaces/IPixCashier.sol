@@ -184,7 +184,7 @@ interface IPixCashier is IPixCashierTypes {
     ) external;
 
     /**
-    * @dev Revokes the existing premint that has not yet been released.
+     * @dev Revokes the existing premint that has not yet been released.
      *
      * This function is expected to be called by a limited number of accounts
      * that are allowed to execute cash-in operations.

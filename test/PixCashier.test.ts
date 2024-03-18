@@ -456,14 +456,6 @@ describe("Contract 'PixCashier'", async () => {
       ).withArgs(deployer.address, cashierRole);
     });
 
-    it("Is reverted if the account is blocklisted", async () => {
-      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
-      await proveTx(pixCashier.blocklist(user.address));
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashIn(user.address, tokenAmount, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
-    });
-
     it("Is reverted if the account address is zero", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashIn(ethers.ZeroAddress, tokenAmount, TRANSACTION_ID1)
@@ -476,24 +468,17 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
     });
 
-    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
-      const amount = BigInt("0x10000000000000000");
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashIn(user.address, amount, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
-    });
-
     it("Is reverted if the off-chain transaction ID is zero", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashIn(user.address, tokenAmount, ethers.ZeroHash)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
     });
 
-    it("Is reverted if minting function returns 'false'", async () => {
-      await proveTx(tokenMock.setMintResult(false));
+    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
+      const amount = BigInt("0x10000000000000000");
       await expect(
-        (pixCashier.connect(cashier) as Contract).cashIn(user.address, tokenAmount, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TOKEN_MINTING_FAILURE);
+        (pixCashier.connect(cashier) as Contract).cashIn(user.address, amount, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
     });
 
     it("Is reverted if the cash-in with the provided txId is already executed", async () => {
@@ -502,6 +487,21 @@ describe("Contract 'PixCashier'", async () => {
       expect((pixCashier.connect(cashier) as Contract).cashIn(deployer.address, tokenAmount + 1, txId))
         .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED)
         .withArgs(txId);
+    });
+
+    it("Is reverted if the account is blocklisted", async () => {
+      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
+      await proveTx(pixCashier.blocklist(user.address));
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashIn(user.address, tokenAmount, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
+    });
+
+    it("Is reverted if minting function returns 'false'", async () => {
+      await proveTx(tokenMock.setMintResult(false));
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashIn(user.address, tokenAmount, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TOKEN_MINTING_FAILURE);
     });
   });
 
@@ -578,16 +578,21 @@ describe("Contract 'PixCashier'", async () => {
       ).withArgs(deployer.address, cashierRole);
     });
 
-    it("Is reverted if the premint release time is zero", async () => {
-      const zeroReleaseTimestamp = 0;
+    it("Is reverted if the account address is zero", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashInPremint(
-          user.address,
+          ethers.ZeroAddress,
           tokenAmount,
           TRANSACTION_ID1,
-          zeroReleaseTimestamp
+          releaseTimestamp
         )
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the premint amount is zero", async () => {
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashInPremint(user.address, 0, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
@@ -606,6 +611,18 @@ describe("Contract 'PixCashier'", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashInPremint(user.address, amount, TRANSACTION_ID1, releaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
+    });
+
+    it("Is reverted if the premint release time is zero", async () => {
+      const zeroReleaseTimestamp = 0;
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashInPremint(
+          user.address,
+          tokenAmount,
+          TRANSACTION_ID1,
+          zeroReleaseTimestamp
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
     });
 
     it("Is reverted if the cash-in with the provided txId is already executed", async () => {
@@ -630,23 +647,6 @@ describe("Contract 'PixCashier'", async () => {
           releaseTimestamp
         )
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
-    });
-
-    it("Is reverted if the account address is zero", async () => {
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashInPremint(
-          ethers.ZeroAddress,
-          tokenAmount,
-          TRANSACTION_ID1,
-          releaseTimestamp
-        )
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
-    });
-
-    it("Is reverted if the premint amount is zero", async () => {
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashInPremint(user.address, 0, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
     });
   });
 
@@ -725,6 +725,15 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT);
     });
 
+    it("Is reverted if the off-chain transaction ID is zero", async () => {
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashInPremintRevoke(
+          ethers.ZeroHash,
+          releaseTimestamp
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
+    });
+
     it("Is reverted if the premint release time is zero", async () => {
       const zeroReleaseTimestamp = 0;
       await expect(
@@ -744,15 +753,6 @@ describe("Contract 'PixCashier'", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashInPremintRevoke(TRANSACTION_ID1, releaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
-    });
-
-    it("Is reverted if the off-chain transaction ID is zero", async () => {
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashInPremintRevoke(
-          ethers.ZeroHash,
-          releaseTimestamp
-        )
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
     });
 
     it("Is reverted if the cash-in with the provided txId does not exist", async () => {
@@ -843,35 +843,10 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT);
     });
 
-    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
-      const amount = BigInt("0x10000000000000000");
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashInPremintUpdate(
-          amount,
-          TRANSACTION_ID1,
-          releaseTimestamp
-        )
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
-    });
-
     it("Is reverted if the premint amount is zero", async () => {
       await expect(
         (pixCashier.connect(cashier) as Contract).cashInPremintUpdate(0, TRANSACTION_ID1, releaseTimestamp)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
-    });
-
-    it("Is reverted if the account is blocklisted", async () => {
-      await (pixCashier.connect(cashier) as Contract).cashInPremint(
-        user.address,
-        tokenAmount,
-        TRANSACTION_ID1,
-        releaseTimestamp
-      );
-      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
-      await proveTx(pixCashier.blocklist(user.address));
-      await expect(
-        (pixCashier.connect(cashier) as Contract).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
@@ -882,6 +857,17 @@ describe("Contract 'PixCashier'", async () => {
           releaseTimestamp
         )
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
+    });
+
+    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
+      const amount = BigInt("0x10000000000000000");
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashInPremintUpdate(
+          amount,
+          TRANSACTION_ID1,
+          releaseTimestamp
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
     });
 
     it("Is reverted if the premint release time is zero", async () => {
@@ -899,6 +885,20 @@ describe("Contract 'PixCashier'", async () => {
         pixCashier,
         REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS
       ).withArgs(TRANSACTION_ID1, CashInStatus.Nonexistent);
+    });
+
+    it("Is reverted if the account is blocklisted", async () => {
+      await (pixCashier.connect(cashier) as Contract).cashInPremint(
+        user.address,
+        tokenAmount,
+        TRANSACTION_ID1,
+        releaseTimestamp
+      );
+      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
+      await proveTx(pixCashier.blocklist(user.address));
+      await expect(
+        (pixCashier.connect(cashier) as Contract).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
     });
 
     it("Is reverted if the cash-in with the provided txId is not a premint", async () => {

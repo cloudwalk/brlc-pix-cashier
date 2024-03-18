@@ -194,7 +194,12 @@ contract PixCashier is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashInPremintCreate(account, amount, txId, releaseTime);
+        _cashInPremintCreate(
+            account,
+            amount,
+            txId,
+            releaseTime
+        );
     }
 
     /**
@@ -513,7 +518,7 @@ contract PixCashier is
     // -------------------- Internal functions ---------------------------
 
     /**
-     * @dev Executes a cash-in operation internally depending on the release time and execution policy.
+     * @dev Executes a cash-in operation internally depending on execution policy.
      *
      * If the release time is zero then the operation is executed as a common mint otherwise as a premint.
      *
@@ -571,6 +576,7 @@ contract PixCashier is
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime The timestamp when the tokens will be released.
      * @return The result of the operation according to the appropriate enum.
      */
     function _cashInPremintCreate(
@@ -614,7 +620,7 @@ contract PixCashier is
     }
 
     /**
-     * @dev Updates a cash-in premint operation internally depending on the release time.
+     * @dev Updates a cash-in premint operation internally.
      *
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.

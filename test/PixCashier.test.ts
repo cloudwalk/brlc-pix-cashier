@@ -29,9 +29,9 @@ enum CashOutStatus {
   Confirmed = 3
 }
 
-enum PremintRestriction {
-  None = 0,  // Not use in tests
-  Create = 1,
+enum PremintScenario {
+  Augment = 0,
+  // Create = 1 -- is not used in tests
   Update = 2
 }
 
@@ -503,7 +503,7 @@ describe("Contract 'PixCashier'", async () => {
         expectedCashIn.account.address,
         expectedCashIn.amount,
         expectedCashIn.releaseTimestamp,
-        PremintRestriction.Update
+        PremintScenario.Augment
       );
       expectedCashIn.status = CashInStatus.PremintExecuted;
 
@@ -631,7 +631,7 @@ describe("Contract 'PixCashier'", async () => {
         expectedCashIn.account.address,
         expectedCashIn.amount,
         expectedCashIn.releaseTimestamp,
-        PremintRestriction.Create
+        PremintScenario.Update
       );
       await checkCashInStructuresOnBlockchain([expectedCashIn]);
     });
@@ -714,7 +714,7 @@ describe("Contract 'PixCashier'", async () => {
         expectedCashIn.account.address,
         expectedCashIn.amount,
         expectedCashIn.releaseTimestamp,
-        PremintRestriction.Create
+        PremintScenario.Update
       );
       await checkCashInStructuresOnBlockchain([expectedCashIn]);
     }

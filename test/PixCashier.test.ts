@@ -30,9 +30,10 @@ enum CashOutStatus {
 }
 
 enum PremintScenario {
-  Augment = 0,
+  Increase = 0,
   // Create = 1 -- is not used in tests
   Update = 2
+  // Decrease = 3 -- is not used in tests
 }
 
 interface TestCashIn {
@@ -503,7 +504,7 @@ describe("Contract 'PixCashier'", async () => {
         expectedCashIn.account.address,
         expectedCashIn.amount,
         expectedCashIn.releaseTimestamp,
-        PremintScenario.Augment
+        PremintScenario.Increase
       );
       expectedCashIn.status = CashInStatus.PremintExecuted;
 

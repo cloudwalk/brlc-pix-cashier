@@ -290,7 +290,7 @@ contract PixCashier is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashInPremintCreate(
+        _cashInPremint(
             account,
             amount,
             txId,
@@ -311,32 +311,7 @@ contract PixCashier is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashInPremintUpdate(
-            0,
-            txId,
-            releaseTime
-        );
-    }
-
-    /**
-     * @dev See {IPixCashier-cashInPremint}.
-     *
-     * Requirements:
-     *
-     * - The contract must not be paused.
-     * - The caller must have the {CASHIER_ROLE} role.
-     * - The provided `account`, `amount`, `txId` and `releaseTime` values must not be zero.
-     */
-    function cashInPremintUpdate(
-        uint256 amount,
-        bytes32 txId,
-        uint256 releaseTime
-    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (amount == 0) {
-            revert ZeroAmount();
-        }
-        _cashInPremintUpdate(
-            amount,
+        _cashInPremintRevoke(
             txId,
             releaseTime
         );
@@ -564,7 +539,7 @@ contract PixCashier is
      * @param txId The off-chain transaction identifier of the operation.
      * @return The result of the operation according to the appropriate enum.
      */
-    function _cashInPremintCreate(
+    function _cashInPremint(
         address account,
         uint256 amount,
         bytes32 txId,
@@ -602,15 +577,13 @@ contract PixCashier is
     }
 
     /**
-     * @dev Updates a cash-in premint operation internally depending on the release time.
+     * @dev Revokes a cash-in premint operation internally.
      *
-     * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
      * @param releaseTime The timestamp when the tokens will be released.
      * @return The result of the operation according to the appropriate enum.
      */
-    function _cashInPremintUpdate(
-        uint256 amount,
+    function _cashInPremintRevoke(
         bytes32 txId,
         uint256 releaseTime
     ) internal returns (CashInExecutionResult) {
@@ -632,15 +605,14 @@ contract PixCashier is
         }
 
         uint256 oldAmount = cashIn_.amount;
-        cashIn_.amount = amount;
-        if (cashIn_.amount == 0) {
-            cashIn_.status = CashInStatus.Nonexistent;
-            cashIn_.account = address(0);
-        }
+        // Clearing by fields is used instead of `delete _cashIns[txId]` due to less gas consumption and bytecode size
+        cashIn_.amount = 0;
+        cashIn_.status = CashInStatus.Nonexistent;
+        cashIn_.account = address(0);
 
-        emit CashInPremint(account, amount, oldAmount, txId, releaseTime);
+        emit CashInPremint(account, 0, oldAmount, txId, releaseTime);
 
-        IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintScenario.Update);
+        IERC20Mintable(_token).premint(account, oldAmount, releaseTime, IERC20Mintable.PremintScenario.Decrease);
 
         return CashInExecutionResult.Success;
     }

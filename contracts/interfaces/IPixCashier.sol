@@ -104,7 +104,7 @@ interface IPixCashier is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
-    /// @dev Emitted when a cash-in premint operation is executed.
+    /// @dev Emitted when a cash-in premint operation is executed or changed.
     event CashInPremint(
         address indexed account, // The account that received tokens from the premint.
         uint256 newAmount,       // The new amount of preminted tokens.
@@ -268,24 +268,6 @@ interface IPixCashier is IPixCashierTypes {
      * @param releaseTime The timestamp of the premint that will be revoked.
      */
     function cashInPremintRevoke(
-        bytes32 txId,
-        uint256 releaseTime
-    ) external;
-
-    /**
-     * @dev Updates a premint operation with the selected release time.
-     *
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to execute cash-in operations.
-     *
-     * Emits a {CashInPremint} event.
-     *
-     * @param amount The new amount of tokens to be available after release time.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @param releaseTime The timestamp when the tokens will become available for usage.
-     */
-    function cashInPremintUpdate(
-        uint256 amount,
         bytes32 txId,
         uint256 releaseTime
     ) external;

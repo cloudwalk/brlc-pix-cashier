@@ -571,7 +571,7 @@ contract PixCashier is
         });
 
         emit CashInPremint(account, amount, 0, txId, releaseTime);
-        IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintScenario.Increase);
+        IERC20Mintable(_token).premintIncrease(account, amount, releaseTime);
 
         return CashInExecutionResult.Success;
     }
@@ -612,7 +612,7 @@ contract PixCashier is
 
         emit CashInPremint(account, 0, oldAmount, txId, releaseTime);
 
-        IERC20Mintable(_token).premint(account, oldAmount, releaseTime, IERC20Mintable.PremintScenario.Decrease);
+        IERC20Mintable(_token).premintDecrease(account, oldAmount, releaseTime);
 
         return CashInExecutionResult.Success;
     }

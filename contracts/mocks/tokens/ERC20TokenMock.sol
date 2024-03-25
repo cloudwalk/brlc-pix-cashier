@@ -13,12 +13,18 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
 contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
     bool public mintResult;
 
-    /// @dev A mock premint event with the parameters that were passed to the `premint()` function.
-    event MockPremint(
+    /// @dev A mock premint event with the parameters that were passed to the `premintIncrease()` function.
+    event MockPremintIncreasing(
         address account,
         uint256 amount,
-        uint256 releaseTime,
-        PremintScenario scenario
+        uint256 releaseTime
+    );
+
+    /// @dev A mock premint event with the parameters that were passed to the `premintDecrease()` function.
+    event MockPremintDecreasing(
+        address account,
+        uint256 amount,
+        uint256 releaseTime
     );
 
     /**
@@ -42,19 +48,31 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
     }
 
     /**
-     * @dev Simulates the premint function by emitting the appropriate mock event.
+     * @dev Simulates the premintIncrease function by emitting the appropriate mock event.
      * @param account The address of a tokens recipient.
      * @param amount The amount of tokens to premint.
      * @param release The timestamp when the tokens will be released.
-     * @param scenario The scenario for the premint operation.
      */
-    function premint(
+    function premintIncrease(
         address account,
         uint256 amount,
-        uint256 release,
-        PremintScenario scenario
+        uint256 release
     ) external {
-        emit MockPremint(account, amount, release, scenario);
+        emit MockPremintIncreasing(account, amount, release);
+    }
+
+    /**
+     * @dev Simulates the premintDecrease function by emitting the appropriate mock event.
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to premint.
+     * @param release The timestamp when the tokens will be released.
+     */
+    function premintDecrease(
+        address account,
+        uint256 amount,
+        uint256 release
+    ) external {
+        emit MockPremintDecreasing(account, amount, release);
     }
 
     /**

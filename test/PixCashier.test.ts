@@ -29,13 +29,6 @@ enum CashOutStatus {
   Confirmed = 3
 }
 
-enum PremintScenario {
-  // Create = 0 -- is not used in tests
-  Increase = 1,
-  Decrease = 2
-  // Update = 3  -- is not used in tests
-}
-
 interface TestCashIn {
   account: SignerWithAddress;
   amount: number;
@@ -499,12 +492,11 @@ describe("Contract 'PixCashier'", async () => {
       );
       await expect(tx).to.emit(
         tokenMock,
-        "MockPremint"
+        "MockPremintIncreasing"
       ).withArgs(
         expectedCashIn.account.address,
         expectedCashIn.amount,
-        expectedCashIn.releaseTimestamp,
-        PremintScenario.Increase
+        expectedCashIn.releaseTimestamp
       );
       expectedCashIn.status = CashInStatus.PremintExecuted;
 
@@ -627,12 +619,11 @@ describe("Contract 'PixCashier'", async () => {
       );
       await expect(tx).to.emit(
         tokenMock,
-        "MockPremint"
+        "MockPremintDecreasing"
       ).withArgs(
         expectedCashIn.account.address,
         expectedCashIn.oldAmount,
-        expectedCashIn.releaseTimestamp,
-        PremintScenario.Decrease
+        expectedCashIn.releaseTimestamp
       );
       await checkCashInStructuresOnBlockchain([expectedCashIn]);
     });

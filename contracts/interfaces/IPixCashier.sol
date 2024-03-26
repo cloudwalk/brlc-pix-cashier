@@ -38,12 +38,14 @@ interface IPixCashierTypes {
      * @dev Possible result statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Success --------- The operation was executed successfully.
-     * - AlreadyExecuted - The operation was already executed.
+     * - Success ------------- The operation was executed successfully.
+     * - AlreadyExecuted ----- The operation was already executed.
+     * - InappropriateStatus - The operation has inappropriate status and cannot be modified.
      */
     enum CashInExecutionResult {
-        Success,        // 0
-        AlreadyExecuted // 1
+        Success,            // 0
+        AlreadyExecuted,    // 1
+        InappropriateStatus // 2
     }
 
     /**
@@ -313,6 +315,25 @@ interface IPixCashier is IPixCashierTypes {
     function cashInPremintBatch(
         address[] memory accounts,
         uint256[] memory amounts,
+        bytes32[] memory txIds,
+        uint256 releaseTime,
+        bytes32 batchId
+    ) external;
+
+    /**
+     * @dev Executes a batch revocation of the existing cash-in premints that have not yet been released.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInBatch} event.
+     * Emits a {CashInPremint} events.
+     *
+     * @param txIds The array of the off-chain transaction identifiers of the operation.
+     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     * @param batchId The off-chain batch identifier.
+     */
+    function cashInPremintRevokeBatch(
         bytes32[] memory txIds,
         uint256 releaseTime,
         bytes32 batchId

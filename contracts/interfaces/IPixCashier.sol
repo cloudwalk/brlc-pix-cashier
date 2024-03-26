@@ -106,11 +106,11 @@ interface IPixCashier is IPixCashierTypes {
 
     /// @dev Emitted when a cash-in premint operation is executed or changed.
     event CashInPremint(
-        address indexed account, // The account that received tokens from the premint.
+        address indexed account, // The account that will receive the preminted tokens.
         uint256 newAmount,       // The new amount of preminted tokens.
         uint256 oldAmount,       // The old amount of preminted tokens.
-        bytes32 indexed txId,    // The off-chain transaction identifier.
-        uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
+        bytes32 indexed txId,    // The off-chain transaction identifier for the operation.
+        uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
     );
 
     /// @dev Emitted when a new batch of cash-in operations is executed.

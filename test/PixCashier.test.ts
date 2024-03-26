@@ -14,12 +14,14 @@ enum CashInStatus {
 
 enum CashInBatchStatus {
   Nonexistent = 0,
-  Executed = 1
+  Executed = 1,
+  PremintExecuted = 2
 }
 
 enum CashInExecutionStatus {
   Success = 0,
-  AlreadyExecuted = 1
+  AlreadyExecuted = 1,
+  InappropriateStatus = 2
 }
 
 enum CashOutStatus {
@@ -27,12 +29,6 @@ enum CashOutStatus {
   Pending = 1,
   Reversed = 2,
   Confirmed = 3
-}
-
-enum PremintRestriction {
-  None = 0,  // Not use in tests
-  Create = 1,
-  Update = 2
 }
 
 interface TestCashIn {
@@ -498,12 +494,11 @@ describe("Contract 'PixCashier'", async () => {
       );
       await expect(tx).to.emit(
         tokenMock,
-        "MockPremint"
+        "MockPremintIncreasing"
       ).withArgs(
         expectedCashIn.account.address,
         expectedCashIn.amount,
-        expectedCashIn.releaseTimestamp,
-        PremintRestriction.Update
+        expectedCashIn.releaseTimestamp
       );
       expectedCashIn.status = CashInStatus.PremintExecuted;
 
@@ -626,12 +621,11 @@ describe("Contract 'PixCashier'", async () => {
       );
       await expect(tx).to.emit(
         tokenMock,
-        "MockPremint"
+        "MockPremintDecreasing"
       ).withArgs(
         expectedCashIn.account.address,
-        expectedCashIn.amount,
-        expectedCashIn.releaseTimestamp,
-        PremintRestriction.Create
+        expectedCashIn.oldAmount,
+        expectedCashIn.releaseTimestamp
       );
       await checkCashInStructuresOnBlockchain([expectedCashIn]);
     });
@@ -682,139 +676,6 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
-  describe("Function 'cashInPremintUpdate()'", async () => {
-    const tokenAmount: number = 100;
-    const releaseTimestamp: number = 123456;
-
-    beforeEach(async () => {
-      await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
-    });
-
-    async function executeAndCheckCashInPremintUpdate(expectedCashIn: TestCashIn) {
-      const tx = pixCashier.connect(cashier).cashInPremintUpdate(
-        expectedCashIn.amount,
-        expectedCashIn.txId,
-        expectedCashIn.releaseTimestamp
-      );
-
-      await expect(tx).to.emit(
-        pixCashier,
-        "CashInPremint"
-      ).withArgs(
-        expectedCashIn.account.address,
-        expectedCashIn.amount,
-        expectedCashIn.oldAmount ?? 0,
-        expectedCashIn.txId,
-        expectedCashIn.releaseTimestamp
-      );
-      await expect(tx).to.emit(
-        tokenMock,
-        "MockPremint"
-      ).withArgs(
-        expectedCashIn.account.address,
-        expectedCashIn.amount,
-        expectedCashIn.releaseTimestamp,
-        PremintRestriction.Create
-      );
-      await checkCashInStructuresOnBlockchain([expectedCashIn]);
-    }
-
-    it("Executes as expected", async () => {
-      const expectedCashIn: TestCashIn = {
-        status: CashInStatus.Nonexistent,
-        account: user,
-        amount: tokenAmount,
-        txId: TRANSACTION_ID1,
-        releaseTimestamp
-      };
-
-      await proveTx(
-        pixCashier.connect(cashier).cashInPremint(
-          expectedCashIn.account.address,
-          expectedCashIn.amount,
-          expectedCashIn.txId,
-          expectedCashIn.releaseTimestamp
-        )
-      );
-      expectedCashIn.status = CashInStatus.PremintExecuted;
-      await checkCashInStructuresOnBlockchain([expectedCashIn]);
-
-      expectedCashIn.oldAmount = expectedCashIn.amount;
-      expectedCashIn.amount += 1;
-      await executeAndCheckCashInPremintUpdate(expectedCashIn);
-
-      expectedCashIn.oldAmount = expectedCashIn.amount;
-      expectedCashIn.amount -= 2;
-      await executeAndCheckCashInPremintUpdate(expectedCashIn);
-    });
-
-    it("Is reverted if the contract is paused", async () => {
-      await proveTx(pixCashier.grantRole(pauserRole, deployer.address));
-      await proveTx(pixCashier.pause());
-      await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
-    });
-
-    it("Is reverted if the caller does not have the cashier role", async () => {
-      await expect(
-        pixCashier.connect(deployer).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
-    });
-
-    it("Is reverted if the premint amount is zero", async () => {
-      await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(0, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
-    });
-
-    it("Is reverted if the account is blocklisted", async () => {
-      await pixCashier.connect(cashier).cashInPremint(user.address, tokenAmount, TRANSACTION_ID1, releaseTimestamp);
-      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
-      await proveTx(pixCashier.blocklist(user.address));
-      await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
-    });
-
-    it("Is reverted if the off-chain transaction ID is zero", async () => {
-      await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(
-          tokenAmount,
-          ethers.constants.HashZero,
-          releaseTimestamp
-        )
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
-    });
-
-    it("Is reverted if the premint release time is zero", async () => {
-      const zeroReleaseTimestamp = 0;
-      await expect(
-        pixCashier.connect(cashier)
-          .cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, zeroReleaseTimestamp)
-      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
-    });
-
-    it("Is reverted if the cash-in with the provided txId does not exist", async () => {
-      await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(
-        pixCashier,
-        REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS
-      ).withArgs(TRANSACTION_ID1, CashInStatus.Nonexistent);
-    });
-
-    it("Is reverted if the cash-in with the provided txId is not a premint", async () => {
-      await proveTx(pixCashier.connect(cashier).cashIn(user.address, tokenAmount, TRANSACTION_ID1));
-      await expect(
-        pixCashier.connect(cashier).cashInPremintUpdate(tokenAmount, TRANSACTION_ID1, releaseTimestamp)
-      ).to.be.revertedWithCustomError(
-        pixCashier,
-        REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS
-      ).withArgs(TRANSACTION_ID1, CashInStatus.Executed);
-    });
-  });
-
   describe("Function 'cashInBatch()'", async () => {
     let users: SignerWithAddress[];
     let userAddresses: string[];
@@ -836,7 +697,11 @@ describe("Contract 'PixCashier'", async () => {
     });
 
     it("Executes as expected even if one of the cash-in operations is already executed", async () => {
-      await proveTx(pixCashier.connect(cashier).cashIn(userAddresses[1], TOKEN_AMOUNTS[1], TRANSACTIONS_ARRAY[1]));
+      await proveTx(pixCashier.connect(cashier).cashIn(
+        expectedCashIns[1].account.address,
+        expectedCashIns[1].amount,
+        expectedCashIns[1].txId
+      ));
       const expectedExecutionResults: CashInExecutionStatus[] = [
         CashInExecutionStatus.Success,
         CashInExecutionStatus.AlreadyExecuted,
@@ -966,6 +831,470 @@ describe("Contract 'PixCashier'", async () => {
           userAddresses,
           TOKEN_AMOUNTS,
           TRANSACTIONS_ARRAY,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
+      ).withArgs(BATCH_ID_STUB1);
+    });
+  });
+
+  describe("Function 'cashInPremintBatch()'", async () => {
+    let users: SignerWithAddress[];
+    let userAddresses: string[];
+    const releaseTimestamp: number = 123456;
+    let expectedCashIns: TestCashIn[];
+
+    beforeEach(async () => {
+      users = [user, secondUser, thirdUser];
+      userAddresses = users.map(user => user.address);
+      expectedCashIns = users.map((user: SignerWithAddress, index: number): TestCashIn => {
+        return {
+          account: user,
+          amount: TOKEN_AMOUNTS[index],
+          txId: TRANSACTIONS_ARRAY[index],
+          releaseTimestamp: releaseTimestamp,
+          status: CashInStatus.PremintExecuted
+        };
+      });
+
+      await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
+    });
+
+    it("Executes as expected even if one of the cash-in operations is already executed", async () => {
+      await proveTx(pixCashier.connect(cashier).cashIn(
+        expectedCashIns[1].account.address,
+        expectedCashIns[1].amount,
+        expectedCashIns[1].txId
+      ));
+      expectedCashIns[1].status = CashInStatus.Executed;
+
+      const expectedExecutionResults: CashInExecutionStatus[] = [
+        CashInExecutionStatus.Success,
+        CashInExecutionStatus.AlreadyExecuted,
+        CashInExecutionStatus.Success
+      ];
+
+      const tx: TransactionResponse = await pixCashier.connect(cashier).cashInPremintBatch(
+        userAddresses,
+        TOKEN_AMOUNTS,
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB1
+      );
+
+      await expect(tx)
+        .to.emit(tokenMock, "MockPremintIncreasing")
+        .withArgs(
+          expectedCashIns[0].account.address,
+          expectedCashIns[0].amount,
+          expectedCashIns[0].releaseTimestamp ?? 0
+        );
+      await expect(tx)
+        .to.emit(tokenMock, "MockPremintIncreasing")
+        .withArgs(
+          expectedCashIns[2].account.address,
+          expectedCashIns[2].amount,
+          expectedCashIns[2].releaseTimestamp ?? 0
+        );
+
+      await expect(tx)
+        .to.emit(pixCashier, "CashInBatch")
+        .withArgs(BATCH_ID_STUB1, TRANSACTIONS_ARRAY, expectedExecutionResults);
+      await expect(tx)
+        .to.emit(pixCashier, "CashInPremint")
+        .withArgs(
+          expectedCashIns[0].account.address,
+          expectedCashIns[0].amount, // newAmount
+          0, // oldAmount
+          expectedCashIns[0].txId,
+          releaseTimestamp
+        );
+      await expect(tx)
+        .to.emit(pixCashier, "CashInPremint")
+        .withArgs(
+          expectedCashIns[2].account.address,
+          expectedCashIns[2].amount, // newAmount
+          0, // oldAmount
+          expectedCashIns[2].txId,
+          releaseTimestamp
+        );
+
+      const expectedCashInBatches: TestCashInBatch[] = [
+        { batchId: BATCH_ID_STUB1, status: CashInBatchStatus.PremintExecuted },
+        { batchId: BATCH_ID_STUB2, status: CashInBatchStatus.Nonexistent }
+      ];
+
+      await checkCashInStructuresOnBlockchain(expectedCashIns);
+      await checkCashInBatchStructuresOnBlockchain(expectedCashInBatches);
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      await proveTx(pixCashier.grantRole(pauserRole, deployer.address));
+      await proveTx(pixCashier.pause());
+      const users = [user.address, secondUser.address, thirdUser.address];
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          users,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      await expect(
+        pixCashier.connect(deployer).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+
+    it("Is reverted if one of the account addresses is zero", async () => {
+      const zeroAccountArray = [user.address, ethers.constants.AddressZero, user.address];
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          zeroAccountArray,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if one of the accounts is blocklisted", async () => {
+      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
+      await proveTx(pixCashier.blocklist(secondUser.address));
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
+    });
+
+    it("Is reverted if one of the token amounts is zero", async () => {
+      const zeroAmountArray = [100, 200, 0];
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          zeroAmountArray,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if one of the off-chain transaction IDs is zero", async () => {
+      const zeroTransactionIdArray = [TRANSACTION_ID1, ethers.constants.HashZero, TRANSACTION_ID3];
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          zeroTransactionIdArray,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
+    });
+
+    it("Is reverted if the account array is empty", async () => {
+      const noUsers: string[] = [];
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          noUsers,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_BATCH_ARRAYS);
+    });
+
+    it("Is reverted if the length of any passed arrays is different to others", async () => {
+      const moreUsers = [user.address, secondUser.address, thirdUser.address, user.address];
+      const moreAmounts = [100, 200, 300, 400];
+      const moreTransactions = [TRANSACTION_ID1, TRANSACTION_ID2, TRANSACTION_ID3, TRANSACTION_ID1];
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          moreUsers,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_BATCH_ARRAYS);
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          moreAmounts,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_BATCH_ARRAYS);
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          moreTransactions,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_BATCH_ARRAYS);
+    });
+
+    it("Is reverted if the provided release time is zero", async () => {
+      const zeroReleaseTime = 0;
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          zeroReleaseTime,
+          BATCH_ID_ZERO
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+    });
+
+    it("Is reverted if the provided batch ID is zero", async () => {
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_ZERO
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_BATCH_ID_IS_ZERO);
+    });
+
+    it("Is reverted if a cash-in batch with the provided ID is already executed", async () => {
+      await proveTx(
+        pixCashier.connect(cashier).cashInBatch(userAddresses, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
+      );
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
+      ).withArgs(BATCH_ID_STUB1);
+    });
+  });
+
+  describe("Function 'cashInPremintRevokeBatch()'", async () => {
+    let users: SignerWithAddress[];
+    let userAddresses: string[];
+    const releaseTimestamp: number = 123456;
+    let expectedCashIns: TestCashIn[];
+
+    beforeEach(async () => {
+      users = [user, secondUser, thirdUser];
+      userAddresses = users.map(user => user.address);
+      expectedCashIns = users.map((user: SignerWithAddress, index: number): TestCashIn => {
+        return {
+          account: user,
+          amount: TOKEN_AMOUNTS[index],
+          txId: TRANSACTIONS_ARRAY[index],
+          releaseTimestamp: releaseTimestamp,
+          status: CashInStatus.PremintExecuted
+        };
+      });
+
+      await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
+    });
+
+    it("Executes as expected even if one of the cash-in operations has wrong status", async () => {
+      await proveTx(pixCashier.connect(cashier).cashInPremintBatch(
+        userAddresses,
+        TOKEN_AMOUNTS,
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB2
+      ));
+
+      await proveTx(pixCashier.connect(cashier).cashInPremintRevoke(
+        expectedCashIns[1].txId,
+        expectedCashIns[1].releaseTimestamp ?? 0
+      ));
+      expectedCashIns[1].status = CashInStatus.Nonexistent;
+
+      const expectedExecutionResults: CashInExecutionStatus[] = [
+        CashInExecutionStatus.Success,
+        CashInExecutionStatus.InappropriateStatus,
+        CashInExecutionStatus.Success
+      ];
+
+      const tx: TransactionResponse = await pixCashier.connect(cashier).cashInPremintRevokeBatch(
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB1
+      );
+      expectedCashIns.forEach(cashIn => {
+        cashIn.status = CashInStatus.Nonexistent;
+      });
+
+      await expect(tx)
+        .to.emit(tokenMock, "MockPremintDecreasing")
+        .withArgs(
+          expectedCashIns[0].account.address,
+          expectedCashIns[0].amount,
+          expectedCashIns[0].releaseTimestamp ?? 0
+        );
+      await expect(tx)
+        .to.emit(tokenMock, "MockPremintDecreasing")
+        .withArgs(
+          expectedCashIns[2].account.address,
+          expectedCashIns[2].amount,
+          expectedCashIns[2].releaseTimestamp ?? 0
+        );
+
+      await expect(tx)
+        .to.emit(pixCashier, "CashInBatch")
+        .withArgs(BATCH_ID_STUB1, TRANSACTIONS_ARRAY, expectedExecutionResults);
+      await expect(tx)
+        .to.emit(pixCashier, "CashInPremint")
+        .withArgs(
+          expectedCashIns[0].account.address,
+          0, // newAmount
+          expectedCashIns[0].amount, // oldAmount
+          expectedCashIns[0].txId,
+          releaseTimestamp
+        );
+      await expect(tx)
+        .to.emit(pixCashier, "CashInPremint")
+        .withArgs(
+          expectedCashIns[2].account.address,
+          0, // newAmount
+          expectedCashIns[2].amount, // oldAmount
+          expectedCashIns[2].txId,
+          releaseTimestamp
+        );
+
+      const expectedCashInBatches: TestCashInBatch[] = [
+        { batchId: BATCH_ID_STUB2, status: CashInBatchStatus.PremintExecuted },
+        { batchId: BATCH_ID_STUB1, status: CashInBatchStatus.PremintExecuted }
+      ];
+
+      await checkCashInStructuresOnBlockchain(expectedCashIns);
+      await checkCashInBatchStructuresOnBlockchain(expectedCashInBatches);
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      await proveTx(pixCashier.grantRole(pauserRole, deployer.address));
+      await proveTx(pixCashier.pause());
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      await expect(
+        pixCashier.connect(deployer).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+
+    it("Is reverted if one of the accounts is blocklisted", async () => {
+      await proveTx(pixCashier.connect(cashier).cashInPremintBatch(
+        userAddresses,
+        TOKEN_AMOUNTS,
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB2
+      ));
+      await proveTx(pixCashier.grantRole(blocklisterRole, deployer.address));
+      await proveTx(pixCashier.blocklist(secondUser.address));
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
+    });
+
+    it("Is reverted if one of the off-chain transaction IDs is zero", async () => {
+      const zeroTransactionIdArray = [TRANSACTION_ID1, ethers.constants.HashZero, TRANSACTION_ID3];
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          zeroTransactionIdArray,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
+    });
+
+    it("Is reverted if the txId array is empty", async () => {
+      const noTxIds: string[] = [];
+
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          noTxIds,
+          releaseTimestamp,
+          BATCH_ID_STUB1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INVALID_BATCH_ARRAYS);
+    });
+
+    it("Is reverted if the provided release time is zero", async () => {
+      const zeroReleaseTime = 0;
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          zeroReleaseTime,
+          BATCH_ID_ZERO
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+    });
+
+    it("Is reverted if the provided batch ID is zero", async () => {
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_ZERO
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_BATCH_ID_IS_ZERO);
+    });
+
+    it("Is reverted if a cash-in batch with the provided ID is already executed", async () => {
+      await proveTx(
+        pixCashier.connect(cashier).cashInBatch(userAddresses, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
+      );
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
           BATCH_ID_STUB1
         )
       ).to.be.revertedWithCustomError(

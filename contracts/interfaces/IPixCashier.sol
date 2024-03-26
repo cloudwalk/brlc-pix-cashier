@@ -24,12 +24,14 @@ interface IPixCashierTypes {
      * @dev Possible statuses of a cash-in batch operation as an enum.
      *
      * The possible values:
-     * - Nonexistent - The operation does not exist (the default value).
-     * - Executed ---- The operation was executed.
+     * - Nonexistent ----- The operation does not exist (the default value).
+     * - Executed -------- The operation was executed as common mints.
+     * - PremintExecuted - The operation was executed as premints or related to them.
      */
     enum CashInBatchStatus {
-        Nonexistent, // 0
-        Executed     // 1
+        Nonexistent,    // 0
+        Executed,       // 1
+        PremintExecuted // 2
     }
 
     /**
@@ -290,6 +292,29 @@ interface IPixCashier is IPixCashierTypes {
         address[] memory accounts,
         uint256[] memory amounts,
         bytes32[] memory txIds,
+        bytes32 batchId
+    ) external;
+
+    /**
+     * @dev Executes a batch of cash-in operations as premints with some predetermined release time.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInBatch} event.
+     * Emits a {CashInPremint} events.
+     *
+     * @param accounts The array of the addresses of the tokens recipient.
+     * @param amounts The array of the token amounts to be received.
+     * @param txIds The array of the off-chain transaction identifiers of the operation.
+     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     * @param batchId The off-chain batch identifier.
+     */
+    function cashInPremintBatch(
+        address[] memory accounts,
+        uint256[] memory amounts,
+        bytes32[] memory txIds,
+        uint256 releaseTime,
         bytes32 batchId
     ) external;
 

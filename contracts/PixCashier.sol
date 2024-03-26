@@ -270,6 +270,7 @@ contract PixCashier is
             account,
             amount,
             txId,
+            0, // releaseTime
             CashInExecutionPolicy.Revert
         );
     }
@@ -290,11 +291,15 @@ contract PixCashier is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _cashInPremint(
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
+        }
+        _cashIn(
             account,
             amount,
             txId,
-            releaseTime
+            releaseTime,
+            CashInExecutionPolicy.Revert
         );
     }
 
@@ -322,14 +327,12 @@ contract PixCashier is
      *
      * Requirements
      *
-     * - The length of each passed array must be equal.
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
      * - The provided `account`, `amount`, and `txId` values must not be zero.
      * - The provided `accounts`, `amounts`, `txIds` arrays must not be empty and must have the same length.
-     * - The provided `batchId` must not be zero
+     * - The provided `batchId` must not be zero.
      * - The cash-in batch operation with the provided `batchId` must not be already executed.
-     * - Each cash-in operation with the provided identifier from the `txIds` array must not be already executed.
      */
     function cashInBatch(
         address[] memory accounts,
@@ -337,34 +340,44 @@ contract PixCashier is
         bytes32[] memory txIds,
         bytes32 batchId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (
-            accounts.length == 0 ||
-            accounts.length != amounts.length ||
-            accounts.length != txIds.length
-        ) {
-            revert InvalidBatchArrays();
-        }
-        if (_cashInBatches[batchId].status == CashInBatchStatus.Executed) {
-            revert CashInBatchAlreadyExecuted(batchId);
-        }
-        if (batchId == 0) {
-            revert ZeroBatchId();
-        }
+        _cashInBatch(
+            accounts,
+            amounts,
+            txIds,
+            0, // releaseTime
+            batchId
+        );
+    }
 
-        CashInExecutionResult[] memory executionResults = new CashInExecutionResult[](txIds.length);
-
-        for (uint256 i = 0; i < accounts.length; i++) {
-            executionResults[i] = _cashIn(
-                accounts[i],
-                amounts[i],
-                txIds[i],
-                CashInExecutionPolicy.Skip
-            );
+    /**
+     * @dev See {IPixCashier-cashInBatch}.
+     *
+     * Requirements
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The provided `account`, `amount`, and `txId` values must not be zero.
+     * - The provided `accounts`, `amounts`, `txIds` arrays must not be empty and must have the same length.
+     * - The provided `batchId` and `releaseTime` must not be zero.
+     * - The cash-in batch operation with the provided `batchId` must not be already executed.
+     */
+    function cashInPremintBatch(
+        address[] memory accounts,
+        uint256[] memory amounts,
+        bytes32[] memory txIds,
+        uint256 releaseTime,
+        bytes32 batchId
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (releaseTime == 0) {
+            revert InappropriatePremintReleaseTime();
         }
-
-        _cashInBatches[batchId].status = CashInBatchStatus.Executed;
-
-        emit CashInBatch(batchId, txIds, executionResults);
+        _cashInBatch(
+            accounts,
+            amounts,
+            txIds,
+            releaseTime,
+            batchId
+        );
     }
 
     /**
@@ -484,11 +497,12 @@ contract PixCashier is
     }
 
     /**
-     * @dev Executes a cash-in operation internally depending on the execution policy.
+     * @dev Executes a cash-in operation internally depending on the execution policy and release time.
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
+     * @param releaseTime Zero if the cash-in is common otherwise the release time of the preminted tokens.
      * @param policy The execution policy of the operation.
      * @return The result of the operation according to the appropriate enum.
      */
@@ -496,6 +510,7 @@ contract PixCashier is
         address account,
         uint256 amount,
         bytes32 txId,
+        uint256 releaseTime,
         CashInExecutionPolicy policy
     ) internal returns (CashInExecutionResult) {
         if (account == address(0)) {
@@ -519,61 +534,78 @@ contract PixCashier is
             }
         }
 
-        _cashIns[txId] = CashInOperation({
-            status: CashInStatus.Executed,
-            account: account,
-            amount: amount
-        });
-        emit CashIn(account, amount, txId);
-        if (!IERC20Mintable(_token).mint(account, amount)) {
-            revert TokenMintingFailure();
+        if (releaseTime == 0) {
+            _cashIns[txId] = CashInOperation({
+                status: CashInStatus.Executed,
+                account: account,
+                amount: amount
+            });
+            emit CashIn(account, amount, txId);
+            if (!IERC20Mintable(_token).mint(account, amount)) {
+                revert TokenMintingFailure();
+            }
+        } else {
+            _cashIns[txId] = CashInOperation({
+                status: CashInStatus.PremintExecuted,
+                account: account,
+                amount: amount
+            });
+
+            emit CashInPremint(account, amount, 0, txId, releaseTime);
+            IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintScenario.Increase);
         }
         return CashInExecutionResult.Success;
     }
 
     /**
-     * @dev Executes a premint cash-in operation internally.
+     * @dev Executes a cash-in batch operation internally depending on the release time.
+     * @param accounts The array of the addresses of the tokens recipient.
+     * @param amounts The array of the token amounts to be received.
+     * @param txIds The array of the off-chain transaction identifiers of the operation.
+     * @param releaseTime Zero if the cash-ins are common otherwise the release time of the preminted tokens.
+     * @param batchId The off-chain batch identifier.
      *
-     * @param account The address of the tokens recipient.
-     * @param amount The amount of tokens to be received.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @return The result of the operation according to the appropriate enum.
      */
-    function _cashInPremint(
-        address account,
-        uint256 amount,
-        bytes32 txId,
-        uint256 releaseTime
-    ) internal returns (CashInExecutionResult) {
-        if (account == address(0)) {
-            revert ZeroAccount();
+    function _cashInBatch(
+        address[] memory accounts,
+        uint256[] memory amounts,
+        bytes32[] memory txIds,
+        uint256 releaseTime,
+        bytes32 batchId
+    ) internal {
+        if (
+            accounts.length == 0 ||
+            accounts.length != amounts.length ||
+            accounts.length != txIds.length
+        ) {
+            revert InvalidBatchArrays();
         }
-        if (amount == 0) {
-            revert ZeroAmount();
+        if (_cashInBatches[batchId].status == CashInBatchStatus.Executed) {
+            revert CashInBatchAlreadyExecuted(batchId);
         }
-        if (txId == 0) {
-            revert ZeroTxId();
+        if (batchId == 0) {
+            revert ZeroBatchId();
         }
+
+        CashInExecutionResult[] memory executionResults = new CashInExecutionResult[](txIds.length);
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            executionResults[i] = _cashIn(
+                accounts[i],
+                amounts[i],
+                txIds[i],
+                releaseTime,
+                CashInExecutionPolicy.Skip
+            );
+        }
+
         if (releaseTime == 0) {
-            revert InappropriatePremintReleaseTime();
-        }
-        if (_cashIns[txId].status != CashInStatus.Nonexistent) {
-            revert CashInAlreadyExecuted(txId);
-        }
-        if (isBlocklisted(account)) {
-            revert BlocklistedAccount(account);
+            _cashInBatches[batchId].status = CashInBatchStatus.Executed;
+        } else {
+            _cashInBatches[batchId].status = CashInBatchStatus.PremintExecuted;
         }
 
-        _cashIns[txId] = CashInOperation({
-            status: CashInStatus.PremintExecuted,
-            account: account,
-            amount: amount
-        });
-
-        emit CashInPremint(account, amount, 0, txId, releaseTime);
-        IERC20Mintable(_token).premint(account, amount, releaseTime, IERC20Mintable.PremintScenario.Increase);
-
-        return CashInExecutionResult.Success;
+        emit CashInBatch(batchId, txIds, executionResults);
     }
 
     /**
@@ -581,12 +613,11 @@ contract PixCashier is
      *
      * @param txId The off-chain transaction identifier of the operation.
      * @param releaseTime The timestamp when the tokens will be released.
-     * @return The result of the operation according to the appropriate enum.
      */
     function _cashInPremintRevoke(
         bytes32 txId,
         uint256 releaseTime
-    ) internal returns (CashInExecutionResult) {
+    ) internal {
         if (txId == 0) {
             revert ZeroTxId();
         }
@@ -600,8 +631,8 @@ contract PixCashier is
         if (isBlocklisted(account)) {
             revert BlocklistedAccount(account);
         }
-        if (_cashIns[txId].status != CashInStatus.PremintExecuted) {
-            revert InappropriateCashInStatus(txId, _cashIns[txId].status);
+        if (cashIn_.status != CashInStatus.PremintExecuted) {
+            revert InappropriateCashInStatus(txId, cashIn_.status);
         }
 
         uint256 oldAmount = cashIn_.amount;
@@ -613,8 +644,6 @@ contract PixCashier is
         emit CashInPremint(account, 0, oldAmount, txId, releaseTime);
 
         IERC20Mintable(_token).premint(account, oldAmount, releaseTime, IERC20Mintable.PremintScenario.Decrease);
-
-        return CashInExecutionResult.Success;
     }
 
     /**

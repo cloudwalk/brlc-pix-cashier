@@ -650,7 +650,7 @@ contract PixCashier is
         ) {
             revert InvalidBatchArrays();
         }
-        if (_cashInBatches[batchId].status == CashInBatchStatus.Executed) {
+        if (_cashInBatches[batchId].status != CashInBatchStatus.Nonexistent) {
             revert CashInBatchAlreadyExecuted(batchId);
         }
         if (batchId == 0) {
@@ -698,7 +698,7 @@ contract PixCashier is
         if (batchId == 0) {
             revert ZeroBatchId();
         }
-        if (_cashInBatches[batchId].status == CashInBatchStatus.Executed) {
+        if (_cashInBatches[batchId].status != CashInBatchStatus.Nonexistent) {
             revert CashInBatchAlreadyExecuted(batchId);
         }
 

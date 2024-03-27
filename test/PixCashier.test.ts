@@ -826,6 +826,14 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(
         pixCashier.connect(cashier).cashInBatch(userAddresses, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
       );
+      const releaseTimestamp: number = 123456;
+      await proveTx(pixCashier.connect(cashier).cashInPremintBatch(
+        userAddresses,
+        TOKEN_AMOUNTS,
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB2
+      ));
       await expect(
         pixCashier.connect(cashier).cashInBatch(
           userAddresses,
@@ -837,6 +845,17 @@ describe("Contract 'PixCashier'", async () => {
         pixCashier,
         REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
       ).withArgs(BATCH_ID_STUB1);
+      await expect(
+        pixCashier.connect(cashier).cashInBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          BATCH_ID_STUB2
+        )
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
+      ).withArgs(BATCH_ID_STUB2);
     });
   });
 
@@ -1089,6 +1108,13 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(
         pixCashier.connect(cashier).cashInBatch(userAddresses, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
       );
+      await proveTx(pixCashier.connect(cashier).cashInPremintBatch(
+        userAddresses,
+        TOKEN_AMOUNTS,
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB2
+      ));
       await expect(
         pixCashier.connect(cashier).cashInPremintBatch(
           userAddresses,
@@ -1101,6 +1127,18 @@ describe("Contract 'PixCashier'", async () => {
         pixCashier,
         REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
       ).withArgs(BATCH_ID_STUB1);
+      await expect(
+        pixCashier.connect(cashier).cashInPremintBatch(
+          userAddresses,
+          TOKEN_AMOUNTS,
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB2
+        )
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
+      ).withArgs(BATCH_ID_STUB2);
     });
   });
 
@@ -1291,6 +1329,13 @@ describe("Contract 'PixCashier'", async () => {
       await proveTx(
         pixCashier.connect(cashier).cashInBatch(userAddresses, TOKEN_AMOUNTS, TRANSACTIONS_ARRAY, BATCH_ID_STUB1)
       );
+      await proveTx(pixCashier.connect(cashier).cashInPremintBatch(
+        userAddresses,
+        TOKEN_AMOUNTS,
+        TRANSACTIONS_ARRAY,
+        releaseTimestamp,
+        BATCH_ID_STUB2
+      ));
       await expect(
         pixCashier.connect(cashier).cashInPremintRevokeBatch(
           TRANSACTIONS_ARRAY,
@@ -1301,6 +1346,16 @@ describe("Contract 'PixCashier'", async () => {
         pixCashier,
         REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
       ).withArgs(BATCH_ID_STUB1);
+      await expect(
+        pixCashier.connect(cashier).cashInPremintRevokeBatch(
+          TRANSACTIONS_ARRAY,
+          releaseTimestamp,
+          BATCH_ID_STUB2
+        )
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_CASH_IN_BATCH_ALREADY_EXECUTED
+      ).withArgs(BATCH_ID_STUB2);
     });
   });
 

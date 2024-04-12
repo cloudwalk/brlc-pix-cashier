@@ -406,6 +406,24 @@ contract PixCashier is
     }
 
     /**
+     * @dev See {IPixCashier-reschedulePremints}.
+     *
+     * Requirements
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The original and target release timestamps must meet the requirements of the appropriate function of the
+     *   underlying token contract
+     */
+    function cashInReschedulePremints(
+        uint256 originalRelease,
+        uint256 targetRelease
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        IERC20Mintable(_token).reschedulePremints(originalRelease, targetRelease);
+        emit CashInPremintsRescheduled(originalRelease, targetRelease);
+    }
+
+    /**
      * @dev See {IPixCashier-requestCashOutFrom}.
      *
      * Requirements:

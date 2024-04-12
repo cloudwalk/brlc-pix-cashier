@@ -117,6 +117,12 @@ interface IPixCashier is IPixCashierTypes {
         uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
     );
 
+    /// @dev Emitted when one release for all existing or future premints has been rescheduled to another release
+    event CashInPremintsRescheduled(
+        uint256 indexed originalRelease,
+        uint256 indexed targetRelease
+    );
+
     /// @dev Emitted when a new batch of cash-in operations is executed.
     event CashInBatch(
         bytes32 indexed batchId,                 // The off-chain batch identifier.
@@ -338,6 +344,16 @@ interface IPixCashier is IPixCashierTypes {
         uint256 releaseTime,
         bytes32 batchId
     ) external;
+
+    /**
+     * @notice Reschedules one release for all existing or future cash-in premints with another release
+     *
+     * Emits a {CashInPremintsRescheduled} event
+     *
+     * @param originalRelease The premint release timestamp to be rescheduled
+     * @param targetRelease The target premint release timestamp to be set during the rescheduling
+     */
+    function cashInReschedulePremints(uint256 originalRelease, uint256 targetRelease) external;
 
     /**
      * @dev Initiates a cash-out operation from some other account.

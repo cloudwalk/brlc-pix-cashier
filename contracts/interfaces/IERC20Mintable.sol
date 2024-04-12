@@ -39,6 +39,16 @@ interface IERC20Mintable {
     function premintDecrease(address account, uint256 amount, uint256 release) external;
 
     /**
+     * @notice Reschedules one release timestamp for all existing or future premints with another release timestamp
+     *
+     * Emits a {PremintsRescheduled} event
+     *
+     * @param originalRelease The premint release timestamp to be rescheduled
+     * @param targetRelease The target premint release timestamp to be set during the rescheduling
+     */
+    function reschedulePremints(uint256 originalRelease, uint256 targetRelease) external;
+
+    /**
      * @dev Burns tokens.
      *
      * @param amount The amount of tokens to burn.

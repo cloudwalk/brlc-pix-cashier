@@ -27,6 +27,12 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
         uint256 releaseTime
     );
 
+    /// @dev A mock premint event with the parameters that were passed to the `reschedulePremints()` function.
+    event MockPremintsRescheduling(
+        uint256 originalRelease,
+        uint256 targetRelease
+    );
+
     /**
      * @dev The initialize function of the upgradable contract.
      * @param name_ The name of the token to set for this ERC20-comparable contract.
@@ -73,6 +79,18 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
         uint256 release
     ) external {
         emit MockPremintDecreasing(account, amount, release);
+    }
+
+    /**
+     * @notice Simulates the reschedulePremints function by emitting the appropriate mock event.
+     *
+     * Emits a {PremintsRescheduled} event
+     *
+     * @param originalRelease The premint release timestamp to be rescheduled
+     * @param targetRelease The target premint release timestamp to be set during the rescheduling
+     */
+    function reschedulePremints(uint256 originalRelease, uint256 targetRelease) external {
+        emit MockPremintsRescheduling(originalRelease, targetRelease);
     }
 
     /**

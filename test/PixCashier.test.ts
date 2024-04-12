@@ -1359,6 +1359,55 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
+  describe("Function 'cashInReschedulePremints()'", async () => {
+    const originalReleaseTimestamp = 123;
+    const targetReleaseTimestamp = 321;
+
+    beforeEach(async () => {
+      await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
+    });
+
+    it("Executes as expected", async () => {
+      const tx: TransactionResponse = await pixCashier.connect(cashier).cashInReschedulePremints(
+        originalReleaseTimestamp,
+        targetReleaseTimestamp
+      );
+
+      await expect(tx)
+        .to.emit(tokenMock, "MockPremintsRescheduling")
+        .withArgs(
+          originalReleaseTimestamp,
+          targetReleaseTimestamp
+        );
+      await expect(tx)
+        .to.emit(pixCashier, "CashInPremintsRescheduled")
+        .withArgs(
+          originalReleaseTimestamp,
+          targetReleaseTimestamp
+        );
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      await proveTx(pixCashier.grantRole(pauserRole, deployer.address));
+      await proveTx(pixCashier.pause());
+      await expect(
+        pixCashier.connect(cashier).cashInReschedulePremints(
+          originalReleaseTimestamp,
+          targetReleaseTimestamp
+        )
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      await expect(
+        pixCashier.connect(deployer).cashInReschedulePremints(
+          originalReleaseTimestamp,
+          targetReleaseTimestamp
+        )
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+  });
+
   describe("Function 'requestCashOutFrom()'", async () => {
     let cashOut: TestCashOut;
 

@@ -17,36 +17,30 @@ interface IERC20Mintable {
     function mint(address account, uint256 amount) external returns (bool);
 
     /**
-     * @notice Increases the amount of an existing premint or creates a new one if it does not exist
+     * @dev Increases the amount of an existing premint or creates a new one if it does not exist.
      *
-     * Emits a {Premint} event
-     *
-     * @param account The address of a tokens recipient
-     * @param amount The amount of tokens to increase
-     * @param release The timestamp when the tokens will be released
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to increase.
+     * @param release The timestamp when the tokens will be released.
      */
     function premintIncrease(address account, uint256 amount, uint256 release) external;
 
     /**
-     * @notice Decreases the amount of an existing premint or fails if it does not exist
+     * @dev Decreases the amount of an existing premint or fails if it does not exist.
      *
-     * Emits a {Premint} event
-     *
-     * @param account The address of a tokens recipient
-     * @param amount The amount of tokens to decrease
-     * @param release The timestamp when the tokens will be released
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to decrease.
+     * @param release The timestamp when the tokens will be released.
      */
     function premintDecrease(address account, uint256 amount, uint256 release) external;
 
     /**
-     * @notice Reschedules one release timestamp for all existing or future premints with another release timestamp
+     * @dev Reschedules original premint release to a new target release.
      *
-     * Emits a {PremintsRescheduled} event
-     *
-     * @param originalRelease The premint release timestamp to be rescheduled
-     * @param targetRelease The target premint release timestamp to be set during the rescheduling
+     * @param originalRelease The timestamp of the original premint release to be rescheduled.
+     * @param targetRelease The new timestamp of the premint release to set during the rescheduling.
      */
-    function reschedulePremints(uint256 originalRelease, uint256 targetRelease) external;
+    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external;
 
     /**
      * @dev Burns tokens.

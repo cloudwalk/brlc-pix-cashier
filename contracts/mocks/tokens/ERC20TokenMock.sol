@@ -27,8 +27,8 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
         uint256 releaseTime
     );
 
-    /// @dev A mock premint event with the parameters that were passed to the `reschedulePremints()` function.
-    event MockPremintsRescheduling(
+    /// @dev A mock premint event with the parameters that were passed to the `reschedulePremintRelease()` function.
+    event MockPremintReleaseRescheduling(
         uint256 originalRelease,
         uint256 targetRelease
     );
@@ -55,9 +55,9 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
 
     /**
      * @dev Simulates the premintIncrease function by emitting the appropriate mock event.
-     * @param account The address of a tokens recipient
-     * @param amount The amount of tokens to increase
-     * @param release The timestamp when the tokens will be released
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to increase.
+     * @param release The timestamp when the tokens will be released.
      */
     function premintIncrease(
         address account,
@@ -69,9 +69,9 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
 
     /**
      * @dev Simulates the premintDecrease function by emitting the appropriate mock event.
-     * @param account The address of a tokens recipient
-     * @param amount The amount of tokens to decrease
-     * @param release The timestamp when the tokens will be released
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to decrease.
+     * @param release The timestamp when the tokens will be released.
      */
     function premintDecrease(
         address account,
@@ -82,15 +82,12 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
     }
 
     /**
-     * @notice Simulates the reschedulePremints function by emitting the appropriate mock event.
-     *
-     * Emits a {PremintsRescheduled} event
-     *
-     * @param originalRelease The premint release timestamp to be rescheduled
-     * @param targetRelease The target premint release timestamp to be set during the rescheduling
+     * @dev Simulates the reschedulePremintRelease function by emitting the appropriate mock event.
+     * @param originalRelease The premint release timestamp to be rescheduled.
+     * @param targetRelease The target premint release timestamp to be set during the rescheduling.
      */
-    function reschedulePremints(uint256 originalRelease, uint256 targetRelease) external {
-        emit MockPremintsRescheduling(originalRelease, targetRelease);
+    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external {
+        emit MockPremintReleaseRescheduling(originalRelease, targetRelease);
     }
 
     /**
@@ -101,7 +98,11 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable {
         _burn(msg.sender, amount);
     }
 
-    function setMintResult(bool _newMintResult) external {
-        mintResult = _newMintResult;
+    /**
+     * @dev Sets the mint result to the new value.
+     * @param newMintResult The new value to set for the mint result.
+     */
+    function setMintResult(bool newMintResult) external {
+        mintResult = newMintResult;
     }
 }

@@ -340,6 +340,14 @@ interface IPixCashier is IPixCashierTypes {
     ) external;
 
     /**
+     * @dev Reschedules original cash-in premint release to a new target release.
+     *
+     * @param originalRelease The timestamp of the original premint release to be rescheduled.
+     * @param targetRelease The new timestamp of the premint release to set during the rescheduling.
+     */
+    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external;
+
+    /**
      * @dev Initiates a cash-out operation from some other account.
      *
      * Transfers tokens from the account to the contract.

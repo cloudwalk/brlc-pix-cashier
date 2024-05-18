@@ -7,13 +7,6 @@ pragma solidity ^0.8.0;
  * @dev The interface of a token that supports mint, premint, burn operations.
  */
 interface IERC20Mintable {
-    /// @dev An enum describing restrictions for premint operation.
-    enum PremintRestriction {
-        None,   // No restriction.
-        Create, // Creating a new premint is disallowed.
-        Update  // Updating an existing premint is disallowed.
-    }
-
     /**
      * @dev Mints tokens.
      *
@@ -24,14 +17,30 @@ interface IERC20Mintable {
     function mint(address account, uint256 amount) external returns (bool);
 
     /**
-     * @dev Premints tokens.
+     * @dev Increases the amount of an existing premint or creates a new one if it does not exist.
      *
      * @param account The address of a tokens recipient.
-     * @param amount The amount of tokens to premint.
-     * @param releaseTime The timestamp when the tokens will be released.
-     * @param restriction The restriction for the premint operation.
+     * @param amount The amount of tokens to increase.
+     * @param release The timestamp when the tokens will be released.
      */
-    function premint(address account, uint256 amount, uint256 releaseTime, PremintRestriction restriction) external;
+    function premintIncrease(address account, uint256 amount, uint256 release) external;
+
+    /**
+     * @dev Decreases the amount of an existing premint or fails if it does not exist.
+     *
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to decrease.
+     * @param release The timestamp when the tokens will be released.
+     */
+    function premintDecrease(address account, uint256 amount, uint256 release) external;
+
+    /**
+     * @dev Reschedules original premint release to a new target release.
+     *
+     * @param originalRelease The timestamp of the original premint release to be rescheduled.
+     * @param targetRelease The new timestamp of the premint release to set during the rescheduling.
+     */
+    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external;
 
     /**
      * @dev Burns tokens.

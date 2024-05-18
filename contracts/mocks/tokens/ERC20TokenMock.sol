@@ -12,15 +12,27 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
  * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes
  */
 contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
-    /// @dev A mock premint event with the parameters that were passed to the `premint()` function.
-    event MockPremint(
+    bool public _mintResult;
+
+    /// @dev A mock premint event with the parameters that were passed to the `premintIncrease()` function.
+    event MockPremintIncreasing(
         address account,
         uint256 amount,
-        uint256 releaseTime,
-        PremintRestriction restriction
+        uint256 releaseTime
     );
 
-    bool public mintResult;
+    /// @dev A mock premint event with the parameters that were passed to the `premintDecrease()` function.
+    event MockPremintDecreasing(
+        address account,
+        uint256 amount,
+        uint256 releaseTime
+    );
+
+    /// @dev A mock premint event with the parameters that were passed to the `reschedulePremintRelease()` function.
+    event MockPremintReleaseRescheduling(
+        uint256 originalRelease,
+        uint256 targetRelease
+    );
 
     // -------------------- Initializers -----------------------------
 
@@ -31,7 +43,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
      */
     function initialize(string memory name_, string memory symbol_) public initializer {
         __ERC20_init(name_, symbol_);
-        mintResult = true;
+        _mintResult = true;
 
         // Only to provide the 100 % test coverage
         _authorizeUpgrade(address(0));
@@ -46,22 +58,44 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
      */
     function mint(address account, uint256 amount) external returns (bool) {
         _mint(account, amount);
-        return mintResult;
+        return _mintResult;
     }
 
     /**
-     * @dev Executes the mint function ignoring the release time parameter.
+     * @dev Simulates the premintIncrease function by emitting the appropriate mock event.
      * @param account The address of a tokens recipient.
-     * @param amount The amount of tokens to premint.
-     * @param releaseTime The timestamp when the tokens will be released.
+     * @param amount The amount of tokens to increase.
+     * @param release The timestamp when the tokens will be released.
      */
-    function premint(
+    function premintIncrease(
         address account,
         uint256 amount,
-        uint256 releaseTime,
-        IERC20Mintable.PremintRestriction restriction
+        uint256 release
     ) external {
-        emit MockPremint(account, amount, releaseTime, restriction);
+        emit MockPremintIncreasing(account, amount, release);
+    }
+
+    /**
+     * @dev Simulates the premintDecrease function by emitting the appropriate mock event.
+     * @param account The address of a tokens recipient.
+     * @param amount The amount of tokens to decrease.
+     * @param release The timestamp when the tokens will be released.
+     */
+    function premintDecrease(
+        address account,
+        uint256 amount,
+        uint256 release
+    ) external {
+        emit MockPremintDecreasing(account, amount, release);
+    }
+
+    /**
+     * @dev Simulates the reschedulePremintRelease function by emitting the appropriate mock event.
+     * @param originalRelease The premint release timestamp to be rescheduled.
+     * @param targetRelease The target premint release timestamp to be set during the rescheduling.
+     */
+    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external {
+        emit MockPremintReleaseRescheduling(originalRelease, targetRelease);
     }
 
     /**
@@ -72,8 +106,12 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
         _burn(msg.sender, amount);
     }
 
-    function setMintResult(bool _newMintResult) external {
-        mintResult = _newMintResult;
+    /**
+     * @dev Sets the mint result to the new value.
+     * @param newMintResult The new value to set for the mint result.
+     */
+    function setMintResult(bool newMintResult) external {
+        _mintResult = newMintResult;
     }
 
     // -------------------- Internal functions -----------------------

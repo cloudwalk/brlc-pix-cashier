@@ -24,24 +24,28 @@ interface IPixCashierTypes {
      * @dev Possible statuses of a cash-in batch operation as an enum.
      *
      * The possible values:
-     * - Nonexistent - The operation does not exist (the default value).
-     * - Executed ---- The operation was executed.
+     * - Nonexistent ----- The operation does not exist (the default value).
+     * - Executed -------- The operation was executed as common mints.
+     * - PremintExecuted - The operation was executed as premints or related to them.
      */
     enum CashInBatchStatus {
-        Nonexistent, // 0
-        Executed     // 1
+        Nonexistent,    // 0
+        Executed,       // 1
+        PremintExecuted // 2
     }
 
     /**
      * @dev Possible result statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Success --------- The operation was executed successfully.
-     * - AlreadyExecuted - The operation was already executed.
+     * - Success ------------- The operation was executed successfully.
+     * - AlreadyExecuted ----- The operation was already executed.
+     * - InappropriateStatus - The operation has inappropriate status and cannot be modified.
      */
     enum CashInExecutionResult {
-        Success,        // 0
-        AlreadyExecuted // 1
+        Success,            // 0
+        AlreadyExecuted,    // 1
+        InappropriateStatus // 2
     }
 
     /**
@@ -106,13 +110,13 @@ interface IPixCashier is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
-    /// @dev Emitted when a cash-in premint operation is executed.
+    /// @dev Emitted when a cash-in premint operation is executed or changed.
     event CashInPremint(
-        address indexed account, // The account that received tokens from the premint.
+        address indexed account, // The account that will receive the preminted tokens.
         uint256 newAmount,       // The new amount of preminted tokens.
         uint256 oldAmount,       // The old amount of preminted tokens.
-        bytes32 indexed txId,    // The off-chain transaction identifier.
-        uint256 releaseTime      // The timestamp when the minted tokens will become available for usage.
+        bytes32 indexed txId,    // The off-chain transaction identifier for the operation.
+        uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
     );
 
     /// @dev Emitted when a new batch of cash-in operations is executed.
@@ -200,24 +204,6 @@ interface IPixCashier is IPixCashierTypes {
     ) external;
 
     /**
-     * @dev Updates a premint operation with the selected release time.
-     *
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to execute cash-in operations.
-     *
-     * Emits a {CashInPremint} event.
-     *
-     * @param amount The new amount of tokens to be available after release time.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @param releaseTime The timestamp when the tokens will become available for usage.
-     */
-    function cashInPremintUpdate(
-        uint256 amount,
-        bytes32 txId,
-        uint256 releaseTime
-    ) external;
-
-    /**
      * @dev Executes a batch of cash-in operations as common mints.
      *
      * This function is expected to be called by a limited number of accounts
@@ -237,6 +223,56 @@ interface IPixCashier is IPixCashierTypes {
         bytes32[] memory txIds,
         bytes32 batchId
     ) external;
+
+    /**
+     * @dev Executes a batch of cash-in operations as premints with some predetermined release time.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInBatch} event.
+     * Emits a {CashInPremint} events.
+     *
+     * @param accounts The array of the addresses of the tokens recipient.
+     * @param amounts The array of the token amounts to be received.
+     * @param txIds The array of the off-chain transaction identifiers of the operation.
+     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     * @param batchId The off-chain batch identifier.
+     */
+    function cashInPremintBatch(
+        address[] memory accounts,
+        uint256[] memory amounts,
+        bytes32[] memory txIds,
+        uint256 releaseTime,
+        bytes32 batchId
+    ) external;
+
+    /**
+     * @dev Executes a batch revocation of the existing cash-in premints that have not been released yet.
+     *
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to execute cash-in operations.
+     *
+     * Emits a {CashInBatch} event.
+     * Emits a {CashInPremint} events.
+     *
+     * @param txIds The array of the off-chain transaction identifiers of the operation.
+     * @param releaseTime The timestamp when the minted tokens will become available for usage.
+     * @param batchId The off-chain batch identifier.
+     */
+    function cashInPremintRevokeBatch(
+        bytes32[] memory txIds,
+        uint256 releaseTime,
+        bytes32 batchId
+    ) external;
+
+    /**
+     * @dev Reschedules original cash-in premint release to a new target release.
+     *
+     * @param originalRelease The timestamp of the original premint release to be rescheduled.
+     * @param targetRelease The new timestamp of the premint release to set during the rescheduling.
+     */
+    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external;
 
     /**
      * @dev Initiates a cash-out operation from some other account.

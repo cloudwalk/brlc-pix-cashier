@@ -12,7 +12,8 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
  * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes
  */
 contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
-    bool public _mintResult;
+    /// @dev The result of minting function.
+    bool public mintResult;
 
     /// @dev A mock premint event with the parameters that were passed to the `premintIncrease()` function.
     event MockPremintIncreasing(
@@ -43,7 +44,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
      */
     function initialize(string memory name_, string memory symbol_) public initializer {
         __ERC20_init(name_, symbol_);
-        _mintResult = true;
+        mintResult = true;
 
         // Only to provide the 100 % test coverage
         _authorizeUpgrade(address(0));
@@ -58,7 +59,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
      */
     function mint(address account, uint256 amount) external returns (bool) {
         _mint(account, amount);
-        return _mintResult;
+        return mintResult;
     }
 
     /**
@@ -111,7 +112,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
      * @param newMintResult The new value to set for the mint result.
      */
     function setMintResult(bool newMintResult) external {
-        _mintResult = newMintResult;
+        mintResult = newMintResult;
     }
 
     // -------------------- Internal functions -----------------------

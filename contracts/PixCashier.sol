@@ -32,7 +32,7 @@ contract PixCashier is
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // -------------------- Constants --------------------------------
+    // ------------------ Constants ------------------------------- //
 
     /// @dev The role of this contract owner.
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
@@ -40,7 +40,7 @@ contract PixCashier is
     /// @dev The role of cashier that is allowed to execute the cash-in operations.
     bytes32 public constant CASHIER_ROLE = keccak256("CASHIER_ROLE");
 
-    // -------------------- Errors -----------------------------------
+    // ------------------ Errors ---------------------------------- //
 
     /// @dev Throws if the provided token address is zero.
     error ZeroTokenAddress();
@@ -107,7 +107,7 @@ contract PixCashier is
      */
     error InappropriatePremintReleaseTime();
 
-    // -------------------- Initializers -----------------------------
+    // ------------------ Initializers ---------------------------- //
 
     /**
      * @dev Initializer of the upgradable contract.
@@ -156,7 +156,7 @@ contract PixCashier is
         _grantRole(OWNER_ROLE, _msgSender());
     }
 
-    // -------------------- Functions --------------------------------
+    // ------------------ Functions ------------------------------- //
 
     /**
      * @inheritdoc IPixCashier
@@ -445,7 +445,7 @@ contract PixCashier is
         }
     }
 
-    // -------------------- View functions ---------------------------
+    // ------------------ View functions -------------------------- //
 
     /**
      * @inheritdoc IPixCashier
@@ -547,7 +547,7 @@ contract PixCashier is
         return _token;
     }
 
-    // -------------------- Internal functions ---------------------------
+    // ------------------ Internal functions ---------------------- //
 
     /**
      * @dev Executes a cash-in operation internally depending on execution policy.
@@ -829,7 +829,7 @@ contract PixCashier is
         _checkRole(OWNER_ROLE);
     }
 
-    // -------------------- Service functions ------------------------
+    // ------------------ Service functions ----------------------- //
 
     /**
      * @dev The version of the standard upgrade function without the second parameter for backward compatibility.

@@ -101,7 +101,7 @@ interface IPixCashierTypes {
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
 interface IPixCashier is IPixCashierTypes {
-    // -------------------- Events -----------------------------------
+    // ------------------ Events ---------------------------------- //
 
     /// @dev Emitted when a new cash-in operation is executed.
     event CashIn(
@@ -151,7 +151,7 @@ interface IPixCashier is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
-    // -------------------- Functions --------------------------------
+    // ------------------ Functions ------------------------------- //
 
     /**
      * @dev Executes a cash-in operation as a common mint.
@@ -360,7 +360,7 @@ interface IPixCashier is IPixCashierTypes {
      */
     function reverseCashOutBatch(bytes32[] memory txIds) external;
 
-    // -------------------- View functions ---------------------------
+    // ------------------ View functions -------------------------- //
 
     /**
      * @dev Returns the data of a single cash-in operation.

@@ -15,6 +15,8 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
     /// @dev The result of minting function.
     bool public mintResult;
 
+    // ------------------ Events ---------------------------------- //
+
     /// @dev A mock premint event with the parameters that were passed to the `premintIncrease()` function.
     event MockPremintIncreasing(
         address account,
@@ -35,7 +37,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
         uint256 targetRelease
     );
 
-    // -------------------- Initializers -----------------------------
+    // ------------------ Initializers ---------------------------- //
 
     /**
      * @dev The initialize function of the upgradable contract.
@@ -50,7 +52,7 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
         _authorizeUpgrade(address(0));
     }
 
-    // -------------------- Functions --------------------------------
+    // ------------------ Functions ------------------------------- //
 
     /**
      * @dev Calls the appropriate internal function to mint needed amount of tokens for an account.
@@ -115,11 +117,9 @@ contract ERC20TokenMock is ERC20Upgradeable, IERC20Mintable, UUPSUpgradeable {
         mintResult = newMintResult;
     }
 
-    // -------------------- Internal functions -----------------------
+    // ------------------ Internal functions ---------------------- //
 
-    /**
-     * @dev The upgrade authorization function for UUPSProxy.
-     */
+    /// @dev The upgrade authorization function for UUPSProxy.
     function _authorizeUpgrade(address newImplementation) internal pure override {
         newImplementation; // Suppresses a compiler warning about the unused variable
     }

@@ -76,6 +76,11 @@ interface IPixCashierTypes {
         Confirmed    // 3
     }
 
+    enum InteractionFlag {
+        None,
+        Restriction
+    }
+
     /// @dev Structure with data of a single cash-in operation.
     struct CashInOperation {
         CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
@@ -119,6 +124,13 @@ interface IPixCashier is IPixCashierTypes {
         uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
     );
 
+    event CashInRestricted(
+        address indexed account,
+        uint256 amount,
+        bytes32 indexed txId,
+        bytes32 purpose
+    );
+
     /// @dev Emitted when a new batch of cash-in operations is executed.
     event CashInBatch(
         bytes32 indexed batchId,                 // The off-chain batch identifier.
@@ -149,6 +161,13 @@ interface IPixCashier is IPixCashierTypes {
         uint256 amount,          // The amount of tokens to cash-out.
         uint256 balance,         // The new pending cash-out balance of the account.
         bytes32 indexed txId     // The off-chain transaction identifier.
+    );
+
+    event CashOutRestricted(
+        address indexed account,
+        uint256 amount,
+        bytes32 indexed txId,
+        bytes32 purpose
     );
 
     // -------------------- Functions --------------------------------

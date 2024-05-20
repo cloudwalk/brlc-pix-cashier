@@ -14,6 +14,7 @@ import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 import { PixCashierStorage } from "./PixCashierStorage.sol";
 
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
+import { IERC20Restrictable } from "./interfaces/IERC20Restrictable.sol";
 import { IPixCashier } from "./interfaces/IPixCashier.sol";
 
 /**
@@ -94,6 +95,8 @@ contract PixCashier is
      * @param status The current status of the operation.
      */
     error InappropriateCashOutStatus(bytes32 txId, CashOutStatus status);
+
+    error InappropriateTransactionInteractionFlag();
 
     /**
      * @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
@@ -208,6 +211,32 @@ contract PixCashier is
             releaseTime,
             CashInExecutionPolicy.Revert
         );
+    }
+
+    function cashInWithInteraction(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        InteractionFlag flag,
+        bytes32 purpose
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (flag == InteractionFlag.Restriction) {
+            _transactionPurposes[txId] = purpose;
+
+            IERC20Restrictable(_token).restrictionIncrease(account, purpose, amount);
+
+            _cashIn(
+                account,
+                amount,
+                txId,
+                0, // releaseTime
+                CashInExecutionPolicy.Revert
+            );
+
+            emit CashInRestricted(account, amount, txId, purpose);
+        } else {
+            revert InappropriateTransactionInteractionFlag();
+        }
     }
 
     /**
@@ -373,6 +402,25 @@ contract PixCashier is
         }
     }
 
+    function cashOutWithInteraction(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        InteractionFlag flag,
+        bytes32 purpose
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (flag == InteractionFlag.Restriction) {
+            IERC20Restrictable(_token).restrictionDecrease(account, purpose, amount);
+
+            _requestCashOut(_msgSender(), account, amount, txId);
+            _processCashOut(txId, CashOutStatus.Confirmed);
+
+            emit CashOutRestricted(account, amount, txId, purpose);
+        } else {
+         revert InappropriateTransactionInteractionFlag();
+        }
+    }
+
     /**
      * @inheritdoc IPixCashier
      *
@@ -452,6 +500,10 @@ contract PixCashier is
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _cashInOperations[txId];
+    }
+
+    function getTransactionPurpose(bytes32 txId) external view returns (bytes32) {
+        return _transactionPurposes[txId];
     }
 
     /**

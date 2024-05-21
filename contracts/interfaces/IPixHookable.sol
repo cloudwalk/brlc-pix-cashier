@@ -64,10 +64,10 @@ interface IPixHookable is IPixHookableTypes {
     /**
      * @dev Registers cash-in hooks to call TODO
      */
-    function registerCashInHooks(bytes32 txId, address callableContract, uint256 hookFlags) external view;
+    function registerCashInHooks(bytes32 txId, address newCallableContract, uint256 newHookFlags) external;
 
     /**
      * @dev Registers cash-out hooks to call TODO
      */
-    function registerCashOutHooks(bytes32 txId, address callableContract, uint256 hookFlags) external view;
+    function registerCashOutHooks(bytes32 txId, address newCallableContract, uint256 newHookFlags) external;
 }

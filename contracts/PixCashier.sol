@@ -14,6 +14,7 @@ import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.
 
 import { PixCashierStorage } from "./PixCashierStorage.sol";
 import { IPixCashier } from "./interfaces/IPixCashier.sol";
+import { IPixHookable } from "./interfaces/IPixHookable.sol";
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 /**
@@ -30,7 +31,8 @@ contract PixCashier is
     RescuableUpgradeable,
     StoragePlaceholder200,
     PixCashierStorage,
-    IPixCashier
+    IPixCashier,
+    IPixHookable
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
@@ -40,6 +42,17 @@ contract PixCashier is
 
     /// @dev The role of cashier that is allowed to execute the cash-in operations.
     bytes32 public constant CASHIER_ROLE = keccak256("CASHIER_ROLE");
+
+    /// @dev TODO
+    uint256 private ALL_CASH_IN_HOOK_FLAGS =
+        uint256(HookKind.CashInCommonBefore) + uint256(HookKind.CashInCommonAfter) +
+        uint256(HookKind.CashInPremintBefore) + uint256(HookKind.CashInPremintAfter);
+
+    /// @dev TODO
+    uint256 private ALL_CASH_OUT_HOOK_FLAGS =
+        uint256(HookKind.CashOutRequestBefore) + uint256(HookKind.CashOutRequestAfter) +
+        uint256(HookKind.CashOutConfirmationBefore) + uint256(HookKind.CashOutConfirmationAfter) +
+        uint256(HookKind.CashOutReversalBefore) + uint256(HookKind.CashOutReversalBefore);
 
     // -------------------- Errors -----------------------------------
 
@@ -104,6 +117,12 @@ contract PixCashier is
      * @dev The provided release time for the premint operation is inappropriate.
      */
     error InappropriatePremintReleaseTime();
+
+    /// @dev TODO
+    error HookFlagsInvalid();
+
+    /// @dev TODO
+    error HooksAlreadyRegistered();
 
     // -------------------- Functions --------------------------------
 
@@ -538,6 +557,32 @@ contract PixCashier is
         }
     }
 
+    /// @dev TODO
+    function registerCashInHooks(
+        bytes32 txId,
+        address newCallableContract,
+        uint256 newHookFlags
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if ((newHookFlags & ~ALL_CASH_IN_HOOK_FLAGS) != 0) {
+            revert HookFlagsInvalid();
+        }
+        HooksConfig storage hooksConfig = _cashInHookConfigs[txId];
+        _registerHooks(txId, newCallableContract, newHookFlags, hooksConfig);
+    }
+
+    /// @dev TODO
+    function registerCashOutHooks(
+        bytes32 txId,
+        address newCallableContract,
+        uint256 newHookFlags
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
+            revert HookFlagsInvalid();
+        }
+        HooksConfig storage hooksConfig = _cashOutHookConfigs[txId];
+        _registerHooks(txId, newCallableContract, newHookFlags, hooksConfig);
+    }
+
     /**
      * @dev Executes a cash-in operation internally depending on the execution policy and release time.
      *
@@ -808,5 +853,29 @@ contract PixCashier is
             emit ReverseCashOut(account, amount, newCashOutBalance, txId);
             IERC20Upgradeable(_token).safeTransfer(account, amount);
         }
+    }
+
+    /// @dev TODO
+    function _registerHooks(
+        bytes32 txId,
+        address newCallableContract,
+        uint256 newHookFlags,
+        HooksConfig storage hooksConfig
+    ) internal {
+        address oldCallableContract = hooksConfig.callableContract;
+        uint256 oldHookFlags = hooksConfig.hookFlags;
+        if (oldCallableContract == newCallableContract && oldHookFlags == newHookFlags) {
+            revert HooksAlreadyRegistered();
+        }
+        hooksConfig.callableContract = newCallableContract;
+        hooksConfig.hookFlags = newHookFlags;
+
+        emit CashInHooksRegistered(
+            txId,
+            newCallableContract,
+            oldCallableContract,
+            newHookFlags,
+            oldHookFlags
+        );
     }
 }

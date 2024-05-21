@@ -15,6 +15,7 @@ import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.
 import { PixCashierStorage } from "./PixCashierStorage.sol";
 import { IPixCashier } from "./interfaces/IPixCashier.sol";
 import { IPixHookable } from "./interfaces/IPixHookable.sol";
+import { IPixHook } from "./interfaces/IPixHook.sol";
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 /**
@@ -628,9 +629,11 @@ contract PixCashier is
                 amount: amount
             });
             emit CashIn(account, amount, txId);
+            _callCashInHookIfConfigured(txId, HookKind.CashInCommonBefore);
             if (!IERC20Mintable(_token).mint(account, amount)) {
                 revert TokenMintingFailure();
             }
+            _callCashInHookIfConfigured(txId, HookKind.CashInCommonAfter);
         } else {
             _cashIns[txId] = CashInOperation({
                 status: CashInStatus.PremintExecuted,
@@ -639,7 +642,9 @@ contract PixCashier is
             });
 
             emit CashInPremint(account, amount, 0, txId, releaseTime);
+            _callCashInHookIfConfigured(txId, HookKind.CashInPremintBefore);
             IERC20Mintable(_token).premintIncrease(account, amount, releaseTime);
+            _callCashInHookIfConfigured(txId, HookKind.CashInPremintAfter);
         }
         return CashInExecutionResult.Success;
     }
@@ -819,7 +824,9 @@ contract PixCashier is
 
         emit RequestCashOut(account, amount, newCashOutBalance, txId, sender);
 
+        _callCashOutHookIfConfigured(txId, HookKind.CashOutRequestBefore);
         IERC20Upgradeable(_token).safeTransferFrom(account, address(this), amount);
+        _callCashOutHookIfConfigured(txId, HookKind.CashOutRequestAfter);
     }
 
     /**
@@ -848,10 +855,14 @@ contract PixCashier is
 
         if (targetStatus == CashOutStatus.Confirmed) {
             emit ConfirmCashOut(account, amount, newCashOutBalance, txId);
+            _callCashOutHookIfConfigured(txId, HookKind.CashOutConfirmationBefore);
             IERC20Mintable(_token).burn(amount);
+            _callCashOutHookIfConfigured(txId, HookKind.CashOutConfirmationAfter);
         } else {
             emit ReverseCashOut(account, amount, newCashOutBalance, txId);
+            _callCashOutHookIfConfigured(txId, HookKind.CashOutReversalBefore);
             IERC20Upgradeable(_token).safeTransfer(account, amount);
+            _callCashOutHookIfConfigured(txId, HookKind.CashOutReversalAfter);
         }
     }
 
@@ -877,5 +888,29 @@ contract PixCashier is
             newHookFlags,
             oldHookFlags
         );
+    }
+
+    /// @dev TODO
+    function _callCashInHookIfConfigured(bytes32 txId, HookKind hookKind) internal {
+        _callHookIfConfigured(txId, hookKind, _cashInHookConfigs[txId]);
+    }
+
+    /// @dev TODO
+    function _callCashOutHookIfConfigured(bytes32 txId, HookKind hookKind) internal {
+        _callHookIfConfigured(txId, hookKind, _cashOutHookConfigs[txId]);
+    }
+
+    /// @dev TODO
+    function _callHookIfConfigured(bytes32 txId, HookKind hookKind, HooksConfig storage hooksConfig) internal {
+        uint256 hookIndex = uint256(hookKind);
+        if ((hooksConfig.hookFlags & hookIndex) != 0) {
+            IPixHook callableContract = IPixHook(hooksConfig.callableContract);
+            callableContract.onPixHook(hookIndex, txId);
+            emit HookInvoked(
+                txId,
+                hookKind,
+                address(callableContract)
+            );
+        }
     }
 }

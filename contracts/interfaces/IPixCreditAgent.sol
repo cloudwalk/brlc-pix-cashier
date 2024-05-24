@@ -64,7 +64,11 @@ interface IPixCreditAgent is IPixCreditAgentTypes {
     /**
      * @dev TODO
      */
-    event PixCreditChanged(bytes32 indexed pixTxId, uint256 indexed loanId);
+    event PixCreditChanged(
+        bytes32 indexed pixTxId,
+        PixCreditStatus newStatus,
+        PixCreditStatus oldStatus
+    );
 
     /**
      * @dev Throws if the given address is zero.

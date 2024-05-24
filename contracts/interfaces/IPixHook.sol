@@ -23,4 +23,7 @@ interface IPixHook {
      * @param hookFlags The flags indicating the hook types.
      */
     function onPixCashOutHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external;
+
+    /// @notice possible unification of hooks:
+    function onPixHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external;
 }

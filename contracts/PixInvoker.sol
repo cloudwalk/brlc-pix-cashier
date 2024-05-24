@@ -294,6 +294,9 @@ contract PixInvoker is
         emit HookDataSubmitted(txId, data);
     }
 
+    /// @dev temporary only for compatibility
+    function onPixHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external {}
+
     /**
      * @dev Authorizes upgrade to a new implementation contract.
      * @param newImplementation The address of the new implementation contract.

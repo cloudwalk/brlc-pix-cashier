@@ -19,8 +19,5 @@ contract PixCreditAgentStorage is IPixCreditAgentTypes {
     address internal _market;
 
     /// @dev The mapping of cash-in id to registered hook data.
-    mapping(bytes32 txId => HookData) internal _registeredCashInTxId;
-
-    /// @dev The mapping of cash-out id to registered hook data.
-    mapping(bytes32 txId => HookData) internal _registeredCashOutTxId;
+    mapping(bytes32 txId => PixCredit) internal _pixCredits;
 }

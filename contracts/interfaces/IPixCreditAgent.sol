@@ -9,21 +9,24 @@ interface IPixCreditAgentTypes {
     /**
      * @dev Enumeration for the goal of a hook.
      */
-    enum HookGoal {
-        Restrict,   // 0
-        Revoke      // 1
+    enum PixCreditStatus {
+        Nonexistent, // 0
+        Prepared,    // 1
+        Taken,       // 2
+        Reversed     // 3
     }
 
     /**
      * @dev Struct for the data associated with a hook.
      */
-    struct HookData {
-        uint256 amount;     // The amount associated with the pix operation.
-        address account;    // The account address associated with the operation.
-        HookGoal goal;      // The goal of the hook (see HookGoal enum).
-        bool invoked;       // Flag indicating if the hook has been invoked.
-        bytes32 purpose;    // The purpose of the hook, if applicable.
+    struct PixCredit {
+        // Slot 1
         uint256 loanId;     // The ID of the loan associated with the hook, if applicable.
+
+        // Slot 2
+        address account;    // TODO
+        uint64  amount;     // TODO
+        PixCreditStatus status; // TODO
     }
 }
 
@@ -54,27 +57,14 @@ interface IPixCreditAgent is IPixCreditAgentTypes {
     event MarketAddressConfigured(address indexed newMarket, address indexed oldMarket);
 
     /**
-     * @dev Emitted when a Pix cash-in operation is prepared.
-     * @param txId The transaction ID.
-     * @param data The data associated with the transaction.
-     * @param hookFlags The flags for hooks.
+     * @dev TODO
      */
-    event PixCashInPrepared(bytes32 indexed txId, HookData data, uint256 hookFlags);
+    event PixCreditPrepared(bytes32 indexed pixTxId, uint256 indexed loanId);
 
     /**
-     * @dev Emitted when a Pix cash-out operation is prepared.
-     * @param txId The transaction ID.
-     * @param data The data associated with the transaction.
-     * @param hookFlags The flags for hooks.
+     * @dev TODO
      */
-    event PixCashOutPrepared(bytes32 indexed txId, HookData data, uint256 hookFlags);
-
-    /**
-    * @dev Emitted when a PixCreditAgent invokes a call after a hook.
-    * @param txId The transaction ID.
-    * @param goal The goal of other contract invoking.
-    */
-    event HookInvoked(bytes32 txId, HookGoal goal);
+    event PixCreditChanged(bytes32 indexed pixTxId, uint256 indexed loanId);
 
     /**
      * @dev Throws if the given address is zero.
@@ -107,20 +97,22 @@ interface IPixCreditAgent is IPixCreditAgentTypes {
     error AlreadyConfigured();
 
     /**
-     * @dev Prepares for a Pix cash-in operation.
-     * @param txId The transaction ID.
-     * @param data The data associated with the transaction.
-     * @param hookFlags The flags for hooks.
+     * @dev TODO
      */
-    function preparePixCashIn(bytes32 txId, HookData memory data, uint256 hookFlags) external;
+    error PixTxIdZero();
 
     /**
-     * @dev Prepares for a Pix cash-out operation.
-     * @param txId The transaction ID.
-     * @param data The data associated with the transaction.
-     * @param hookFlags The flags for hooks.
+     * @dev TODO
      */
-    function preparePixCashOut(bytes32 txId, HookData memory data, uint256 hookFlags) external;
+    error LoanIdZero();
+
+    /// @dev TODO
+    error PixCreditInAction(PixCreditStatus currentStatus);
+
+    /**
+     * @dev TODO
+     */
+    function preparePixCredit(bytes32 pixTxId, uint256 loanId) external;
 
     /**
      * @dev Configures the address of the Pix contract.

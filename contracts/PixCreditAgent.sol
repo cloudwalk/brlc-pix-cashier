@@ -35,6 +35,13 @@ contract PixCreditAgent is
     /// @dev The role of the Pix contract.
     bytes32 public constant PIX_ROLE = keccak256("PIX_ROLE");
 
+    uint256 private constant CASH_OUT_REQUEST_AFTER_HOOK_FLAG =
+        1 << uint256(IPixHookableTypes.HookKind.CashOutRequestAfter);
+    uint256 private constant CASH_OUT_REVERSE_AFTER_HOOK_FLAG =
+        1 << uint256(IPixHookableTypes.HookKind.CashOutReversalAfter);
+    uint256 private constant ALL_HOOK_FLAGS = CASH_OUT_REQUEST_AFTER_HOOK_FLAG + CASH_OUT_REVERSE_AFTER_HOOK_FLAG;
+
+
     /**
      * @dev Initializer of the upgradable contract.
      */
@@ -63,57 +70,29 @@ contract PixCreditAgent is
     }
 
     /**
-     * @dev Prepares pix cash-in operation hook.
-     * @param txId The transaction ID.
-     * @param data The data associated with the transaction and hooks.
-     * @param hookFlags The flags for hooks.
+     * @inheritdoc IPixCreditAgent
      */
-    function preparePixCashIn(bytes32 txId, HookData memory data, uint256 hookFlags) external onlyRole(ADMIN_ROLE) {
-        if (data.account == address(0)) {
-            revert ZeroAddress();
+    function preparePixCredit(bytes32 pixTxId, uint256 loanId) external onlyRole(ADMIN_ROLE) {
+        if (pixTxId == bytes32(0)) {
+            revert PixTxIdZero();
         }
-        if (data.amount == 0) {
-            revert ZeroAmount();
+        if (loanId == 0) {
+            revert LoanIdZero();
+        }
+        if (uint256(_pixCredits[pixTxId].status) > uint256(PixCreditStatus.Prepared)) {
+            revert PixCreditInAction(_pixCredits[pixTxId].status);
         }
 
-        _registeredCashInTxId[txId] = HookData({
-            amount : data.amount,
-            account : data.account,
-            goal : data.goal,
-            invoked : false,
-            purpose : data.purpose,
-            loanId : data.loanId
+        IPixHookable(_pix).registerCashOutHooks(pixTxId, address(this), ALL_HOOK_FLAGS);
+
+        _pixCredits[pixTxId] = PixCredit({
+            loanId: loanId,
+            account: address(0),
+            amount: 0,
+            status: PixCreditStatus.Prepared
         });
 
-        IPixHookable(_pix).registerCashInHooks(txId, address(this), hookFlags);
-        emit PixCashInPrepared(txId, data, hookFlags);
-    }
-
-    /**
-     * @dev Prepares pix cash-out operation hook.
-     * @param txId The transaction ID.
-     * @param data The data associated with the transaction and hooks.
-     * @param hookFlags The flags for hooks.
-     */
-    function preparePixCashOut(bytes32 txId, HookData memory data, uint256 hookFlags) external onlyRole(ADMIN_ROLE) {
-        if (data.account == address(0)) {
-            revert ZeroAddress();
-        }
-        if (data.amount == 0) {
-            revert ZeroAmount();
-        }
-
-        _registeredCashOutTxId[txId] = HookData({
-            amount : data.amount,
-            account : data.account,
-            goal : data.goal,
-            invoked : false,
-            purpose : data.purpose,
-            loanId : data.loanId
-        });
-
-        IPixHookable(_pix).registerCashInHooks(txId, address(this), hookFlags);
-        emit PixCashOutPrepared(txId, data, hookFlags);
+        emit PixCreditPrepared(pixTxId, loanId);
     }
 
     /**
@@ -122,27 +101,11 @@ contract PixCreditAgent is
      * @param txId The transaction ID.
      * @param hookFlags The flags for hooks.
      */
-    function onPixCashInHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external onlyRole(PIX_ROLE) {
-        HookData storage data = _registeredCashInTxId[txId];
-        if (data.account == address(0)) {
-            revert TransactionIdNotRegistered();
-        }
-        if (data.invoked) {
-            revert TransactionIdAlreadyInvoked();
-        }
-
-        if (data.goal == HookGoal.Restrict) {
-            // TODO consider making purpose constant or global configurable variable
-            IERC20Restrictable(_token).restrictionIncrease(data.account, data.purpose, data.amount);
-        } else if (data.goal == HookGoal.Revoke) {
-            // TODO consider if there are scenarios when it is needed in case of cash-in
-            ILendingMarket(_market).revokeLoan(data.loanId);
-        } else {
-            revert InvalidConfiguredGoal();
-        }
-
-        data.invoked = true;
-        emit HookInvoked(txId, data.goal);
+    function onPixCashInHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external onlyRole(PIX_ROLE) view  {
+        hookIndex;
+        txId;
+        hookFlags;
+        // do nothing
     }
 
     /**
@@ -151,25 +114,13 @@ contract PixCreditAgent is
      * @param txId The transaction ID.
      * @param hookFlags The flags for hooks.
      */
-    function onPixCashOutHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external onlyRole(PIX_ROLE) {
-        HookData storage data = _registeredCashOutTxId[txId];
-        if (data.account == address(0)) {
-            revert TransactionIdNotRegistered();
+    function onPixCashOutHook(uint256 hookIndex, bytes32 txId, uint256 hookFlags) external onlyRole(PIX_ROLE) view {
+        hookFlags;
+        if ((1 << hookIndex) == CASH_OUT_REQUEST_AFTER_HOOK_FLAG) {
+            _processPixRequesting(txId);
+        } else if ((1 << hookIndex) == CASH_OUT_REVERSE_AFTER_HOOK_FLAG) {
+            _processPixReversing(txId);
         }
-        if (data.invoked) {
-            revert TransactionIdAlreadyInvoked();
-        }
-
-        if (data.goal == HookGoal.Restrict) {
-            IERC20Restrictable(_token).restrictionDecrease(data.account, data.purpose, data.amount);
-        } else if (data.goal == HookGoal.Revoke) {
-            ILendingMarket(_market).revokeLoan(data.loanId);
-        } else {
-            revert InvalidConfiguredGoal();
-        }
-
-        data.invoked = true;
-        emit HookInvoked(txId, data.goal);
     }
 
     /**
@@ -231,4 +182,14 @@ contract PixCreditAgent is
      * @param newImplementation The address of the new implementation contract.
      */
     function _authorizeUpgrade(address newImplementation) internal onlyRole(OWNER_ROLE) override {}
+
+    /// @dev TODO
+    function _processPixRequesting(bytes32 pixTxId) internal pure {
+        pixTxId;
+    }
+
+    /// @dev TODO
+    function _processPixReversing(bytes32 pixTxId) internal pure {
+        pixTxId;
+    }
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -44,16 +44,26 @@ contract PixCashier is
     /// @dev The role of cashier that is allowed to execute the cash-in operations.
     bytes32 public constant CASHIER_ROLE = keccak256("CASHIER_ROLE");
 
-    /// @dev TODO
-    uint256 private ALL_CASH_IN_HOOK_FLAGS =
-        uint256(HookKind.CashInCommonBefore) + uint256(HookKind.CashInCommonAfter) +
-        uint256(HookKind.CashInPremintBefore) + uint256(HookKind.CashInPremintAfter);
+    /**
+     * @dev Represents all hook flags for cash-in operations.
+     */
+    uint256 private constant ALL_CASH_IN_HOOK_FLAGS =
+    (1 << uint256(HookKind.CashInDefaultBefore)) |
+    (1 << uint256(HookKind.CashInDefaultAfter)) |
+    (1 << uint256(HookKind.CashInPremintBefore)) |
+    (1 << uint256(HookKind.CashInPremintAfter));
 
-    /// @dev TODO
-    uint256 private ALL_CASH_OUT_HOOK_FLAGS =
-        uint256(HookKind.CashOutRequestBefore) + uint256(HookKind.CashOutRequestAfter) +
-        uint256(HookKind.CashOutConfirmationBefore) + uint256(HookKind.CashOutConfirmationAfter) +
-        uint256(HookKind.CashOutReversalBefore) + uint256(HookKind.CashOutReversalBefore);
+     /**
+     * @dev Represents all hook flags for cash-out operations.
+     */
+    uint256 private constant ALL_CASH_OUT_HOOK_FLAGS =
+    (1 << uint256(HookKind.CashOutRequestBefore)) |
+    (1 << uint256(HookKind.CashOutRequestAfter)) |
+    (1 << uint256(HookKind.CashOutConfirmationBefore)) |
+    (1 << uint256(HookKind.CashOutConfirmationAfter)) |
+    (1 << uint256(HookKind.CashOutReversalBefore)) |
+    (1 << uint256(HookKind.CashOutReversalAfter));
+
 
     // -------------------- Errors -----------------------------------
 
@@ -119,10 +129,14 @@ contract PixCashier is
      */
     error InappropriatePremintReleaseTime();
 
-    /// @dev TODO
+    /**
+     * @dev The provided hook flags are invalid.
+     */
     error HookFlagsInvalid();
 
-    /// @dev TODO
+    /**
+     * @dev The hooks are already registered.
+     */
     error HooksAlreadyRegistered();
 
     // -------------------- Functions --------------------------------
@@ -558,7 +572,12 @@ contract PixCashier is
         }
     }
 
-    /// @dev TODO
+    /**
+     * @dev Registers cash-in hooks for a transaction.
+     * @param txId The unique identifier of the transaction.
+     * @param newCallableContract The address of the new callable contract.
+     * @param newHookFlags The flags indicating the hook types to register.
+     */
     function registerCashInHooks(
         bytes32 txId,
         address newCallableContract,
@@ -571,7 +590,12 @@ contract PixCashier is
         _registerHooks(txId, newCallableContract, newHookFlags, hooksConfig);
     }
 
-    /// @dev TODO
+     /**
+     * @dev Registers cash-out hooks for a transaction.
+     * @param txId The unique identifier of the transaction.
+     * @param newCallableContract The address of the new callable contract.
+     * @param newHookFlags The flags indicating the hook types to register.
+     */
     function registerCashOutHooks(
         bytes32 txId,
         address newCallableContract,
@@ -583,6 +607,7 @@ contract PixCashier is
         HooksConfig storage hooksConfig = _cashOutHookConfigs[txId];
         _registerHooks(txId, newCallableContract, newHookFlags, hooksConfig);
     }
+
 
     /**
      * @dev Executes a cash-in operation internally depending on the execution policy and release time.
@@ -629,11 +654,11 @@ contract PixCashier is
                 amount: amount
             });
             emit CashIn(account, amount, txId);
-            _callCashInHookIfConfigured(txId, HookKind.CashInCommonBefore);
+            _callCashInHookIfConfigured(txId, HookKind.CashInDefaultBefore);
             if (!IERC20Mintable(_token).mint(account, amount)) {
                 revert TokenMintingFailure();
             }
-            _callCashInHookIfConfigured(txId, HookKind.CashInCommonAfter);
+            _callCashInHookIfConfigured(txId, HookKind.CashInDefaultAfter);
         } else {
             _cashIns[txId] = CashInOperation({
                 status: CashInStatus.PremintExecuted,
@@ -866,7 +891,13 @@ contract PixCashier is
         }
     }
 
-    /// @dev TODO
+    /**
+     * @dev Registers hooks for a transaction, associating a callable contract and hook flags.
+     * @param txId The unique identifier of the transaction.
+     * @param newCallableContract The address of the new callable contract.
+     * @param newHookFlags The flags indicating the hook types to register.
+     * @param hooksConfig The storage reference to the HooksConfig struct for the transaction.
+     */
     function _registerHooks(
         bytes32 txId,
         address newCallableContract,
@@ -890,22 +921,35 @@ contract PixCashier is
         );
     }
 
-    /// @dev TODO
+    /**
+     * @dev Calls the cash-in hook if configured for the given transaction and hook kind.
+     * @param txId The unique identifier of the transaction.
+     * @param hookKind The kind of hook to call.
+     */
     function _callCashInHookIfConfigured(bytes32 txId, HookKind hookKind) internal {
-        _callHookIfConfigured(txId, hookKind, _cashInHookConfigs[txId]);
+        _callCashInHookIfConfigured(txId, hookKind, _cashInHookConfigs[txId]);
     }
 
-    /// @dev TODO
+    /**
+     * @dev Calls the cash-out hook if configured for the given transaction and hook kind.
+     * @param txId The unique identifier of the transaction.
+     * @param hookKind The kind of hook to call.
+     */
     function _callCashOutHookIfConfigured(bytes32 txId, HookKind hookKind) internal {
-        _callHookIfConfigured(txId, hookKind, _cashOutHookConfigs[txId]);
+        _callCashOutHookIfConfigured(txId, hookKind, _cashOutHookConfigs[txId]);
     }
 
-    /// @dev TODO
-    function _callHookIfConfigured(bytes32 txId, HookKind hookKind, HooksConfig storage hooksConfig) internal {
+    /**
+     * @dev Calls the cash-in hook if configured for the given transaction, hook kind, and hook configuration.
+     * @param txId The unique identifier of the transaction.
+     * @param hookKind The kind of hook to call.
+     * @param hooksConfig The storage reference to the HooksConfig struct for the transaction.
+     */
+    function _callCashInHookIfConfigured(bytes32 txId, HookKind hookKind, HooksConfig storage hooksConfig) internal {
         uint256 hookIndex = uint256(hookKind);
         if ((hooksConfig.hookFlags & hookIndex) != 0) {
             IPixHook callableContract = IPixHook(hooksConfig.callableContract);
-            callableContract.onPixHook(hookIndex, txId);
+            callableContract.onPixCashInHook(hookIndex, txId, hooksConfig.hookFlags);
             emit HookInvoked(
                 txId,
                 hookKind,
@@ -913,4 +957,24 @@ contract PixCashier is
             );
         }
     }
+
+    /**
+     * @dev Calls the cash-out hook if configured for the given transaction, hook kind, and hook configuration.
+     * @param txId The unique identifier of the transaction.
+     * @param hookKind The kind of hook to call.
+     * @param hooksConfig The storage reference to the HooksConfig struct for the transaction.
+     */
+    function _callCashOutHookIfConfigured(bytes32 txId, HookKind hookKind, HooksConfig storage hooksConfig) internal {
+        uint256 hookIndex = uint256(hookKind);
+        if ((hooksConfig.hookFlags & hookIndex) != 0) {
+            IPixHook callableContract = IPixHook(hooksConfig.callableContract);
+            callableContract.onPixCashOutHook(hookIndex, txId, hooksConfig.hookFlags);
+            emit HookInvoked(
+                txId,
+                hookKind,
+                address(callableContract)
+            );
+        }
+    }
+
 }

@@ -450,18 +450,18 @@ contract PixCashier is
     /**
      * @inheritdoc IPixCashier
      */
-    function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
-        return _cashInOperations[txId];
+    function getCashIn(bytes32 txId) external view returns (CashInOperationV2 memory) {
+        return _copyCashIn(_cashInOperations[txId]);
     }
 
     /**
      * @inheritdoc IPixCashier
      */
-    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
+    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperationV2[] memory) {
         uint256 len = txIds.length;
-        CashInOperation[] memory cashInOperations = new CashInOperation[](len);
+        CashInOperationV2[] memory cashInOperations = new CashInOperationV2[](len);
         for (uint256 i = 0; i < len; i++) {
-            cashInOperations[i] = _cashInOperations[txIds[i]];
+            cashInOperations[i] = _copyCashIn(_cashInOperations[txIds[i]]);
         }
         return cashInOperations;
     }
@@ -489,7 +489,7 @@ contract PixCashier is
      * @inheritdoc IPixCashier
      */
     function getCashOut(bytes32 txIds) external view returns (CashOutOperationV2 memory) {
-        return _copy(_cashOutOperations[txIds]);
+        return _copyCashOut(_cashOutOperations[txIds]);
     }
 
     /**
@@ -499,7 +499,7 @@ contract PixCashier is
         uint256 len = txIds.length;
         CashOutOperationV2[] memory cashOutOperations = new CashOutOperationV2[](len);
         for (uint256 i = 0; i < len; i++) {
-            cashOutOperations[i] = _copy(_cashOutOperations[txIds[i]]);
+            cashOutOperations[i] = _copyCashOut(_cashOutOperations[txIds[i]]);
         }
         return cashOutOperations;
     }
@@ -829,10 +829,19 @@ contract PixCashier is
         _checkRole(OWNER_ROLE);
     }
 
-    /// @dev Copies the data from the `CashInOperation` to the `CashInOperationV2` structure.
+    /// @dev Copies the data from the `CashInOperation` structure to the `CashInOperationV2` one.
     /// @param from The source structure.
     /// @return to The target structure.
-    function _copy(CashOutOperation storage from) internal view returns (CashOutOperationV2 memory to) {
+    function _copyCashIn(CashInOperation storage from) internal view returns (CashInOperationV2 memory to) {
+        to.status = from.status;
+        to.account = from.account;
+        to.amount = from.amount;
+    }
+
+    /// @dev Copies the data from the `CashOutOperation` structure to the `CashOutOperationV2` one.
+    /// @param from The source structure.
+    /// @return to The target structure.
+    function _copyCashOut(CashOutOperation storage from) internal view returns (CashOutOperationV2 memory to) {
         to.status = from.status;
         to.account = from.account;
         to.amount = from.amount;

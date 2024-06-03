@@ -83,19 +83,26 @@ interface IPixCashierTypes {
         uint64 amount;       // The amount of tokens to cash-in.
     }
 
+    /// @dev Structure with data of a single cash-in operation used for backward compatability with V2.
+    struct CashInOperationV2 {
+        address account;     // The owner of tokens to cash-in.
+        uint256 amount;      // The amount of tokens to cash-in.
+        CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
+    }
+
     /// @dev Structure with data of a batch cash-in operation.
     struct CashInBatchOperation {
         CashInBatchStatus status; // The status of the cash-in batch operation according to the {CashInBatchStatus}.
     }
 
-    /// @dev Structure with data of a single cash-in operation.
+    /// @dev Structure with data of a single cash-out operation.
     struct CashOutOperation {
         CashOutStatus status; // The status of the cash-out operation according to the {CashOutStatus} enum.
         address account;      // The owner of tokens to cash-out.
         uint64 amount;        // The amount of tokens to cash-out.
     }
 
-    /// @dev Structure with data of a single cash-in operation used for backcompatability with V2.
+    /// @dev Structure with data of a single cash-out operation used for backward compatability with V2.
     struct CashOutOperationV2 {
         address account;      // The owner of tokens to cash-out.
         uint256 amount;       // The amount of tokens to cash-out.
@@ -373,13 +380,13 @@ interface IPixCashier is IPixCashierTypes {
      * @dev Returns the data of a single cash-in operation.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function getCashIn(bytes32 txId) external view returns (CashInOperation memory);
+    function getCashIn(bytes32 txId) external view returns (CashInOperationV2 memory);
 
     /**
      * @dev Returns the data of multiple cash-in operations.
      * @param txIds The off-chain transaction identifiers of the operations.
      */
-    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory);
+    function getCashIns(bytes32[] memory txIds) external view returns (CashInOperationV2[] memory);
 
     /**
      * @dev Returns the data of a cash-in batch operation.

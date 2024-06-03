@@ -88,7 +88,7 @@ interface IPixCashierTypes {
         CashInBatchStatus status; // The status of the cash-in batch operation according to the {CashInBatchStatus}.
     }
 
-    /// @dev Structure with data of a single cash-in operation.
+    /// @dev Structure with data of a single cash-out operation.
     struct CashOutOperation {
         CashOutStatus status; // The status of the cash-out operation according to the {CashOutStatus} enum.
         address account;      // The owner of tokens to cash-out.

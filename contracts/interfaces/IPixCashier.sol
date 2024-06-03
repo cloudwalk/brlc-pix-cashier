@@ -94,6 +94,13 @@ interface IPixCashierTypes {
         address account;      // The owner of tokens to cash-out.
         uint64 amount;        // The amount of tokens to cash-out.
     }
+
+    /// @dev Structure with data of a single cash-in operation used for backcompatability with V2.
+    struct CashOutOperationV2 {
+        address account;      // The owner of tokens to cash-out.
+        uint256 amount;       // The amount of tokens to cash-out.
+        CashOutStatus status; // The status of the cash-out operation according to the {CashOutStatus} enum.
+    }
 }
 
 /**
@@ -390,13 +397,13 @@ interface IPixCashier is IPixCashierTypes {
      * @dev Returns the data of a single cash-out operation.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function getCashOut(bytes32 txId) external view returns (CashOutOperation memory);
+    function getCashOut(bytes32 txId) external view returns (CashOutOperationV2 memory);
 
     /**
      * @dev Returns the data of multiple cash-out operations.
      * @param txIds The off-chain transaction identifiers of the operations.
      */
-    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory);
+    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperationV2[] memory);
 
     /**
      * @dev Returns the off-chain transaction identifiers of pending cash-out operations.

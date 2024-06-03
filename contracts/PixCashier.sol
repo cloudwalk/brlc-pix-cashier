@@ -488,18 +488,18 @@ contract PixCashier is
     /**
      * @inheritdoc IPixCashier
      */
-    function getCashOut(bytes32 txIds) external view returns (CashOutOperation memory) {
-        return _cashOutOperations[txIds];
+    function getCashOut(bytes32 txIds) external view returns (CashOutOperationV2 memory) {
+        return _copy(_cashOutOperations[txIds]);
     }
 
     /**
      * @inheritdoc IPixCashier
      */
-    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
+    function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperationV2[] memory) {
         uint256 len = txIds.length;
-        CashOutOperation[] memory cashOutOperations = new CashOutOperation[](len);
+        CashOutOperationV2[] memory cashOutOperations = new CashOutOperationV2[](len);
         for (uint256 i = 0; i < len; i++) {
-            cashOutOperations[i] = _cashOutOperations[txIds[i]];
+            cashOutOperations[i] = _copy(_cashOutOperations[txIds[i]]);
         }
         return cashOutOperations;
     }
@@ -827,6 +827,15 @@ contract PixCashier is
     function _authorizeUpgrade(address newImplementation) internal view override {
         newImplementation; // Suppresses a compiler warning about the unused variable
         _checkRole(OWNER_ROLE);
+    }
+
+    /// @dev Copies the data from the `CashInOperation` to the `CashInOperationV2` structure.
+    /// @param from The source structure.
+    /// @return to The target structure.
+    function _copy(CashOutOperation storage from) internal view returns (CashOutOperationV2 memory to) {
+        to.status = from.status;
+        to.account = from.account;
+        to.amount = from.amount;
     }
 
     // ------------------ Service functions ----------------------- //

@@ -45,14 +45,19 @@ contract PixCashier is
 
     /// @dev TODO
     uint256 private constant ALL_CASH_IN_HOOK_FLAGS =
-    uint256(HookKind.CashInCommonBefore) + uint256(HookKind.CashInCommonAfter) +
-    uint256(HookKind.CashInPremintBefore) + uint256(HookKind.CashInPremintAfter);
+        (1 << uint256(HookKind.CashInCommonBefore)) +
+        (1 << uint256(HookKind.CashInCommonAfter)) +
+        (1 << uint256(HookKind.CashInPremintBefore)) +
+        (1 << uint256(HookKind.CashInPremintAfter));
 
     /// @dev TODO
     uint256 private constant ALL_CASH_OUT_HOOK_FLAGS =
-    uint256(HookKind.CashOutRequestBefore) + uint256(HookKind.CashOutRequestAfter) +
-    uint256(HookKind.CashOutConfirmationBefore) + uint256(HookKind.CashOutConfirmationAfter) +
-    uint256(HookKind.CashOutReversalBefore) + uint256(HookKind.CashOutReversalBefore);
+        (1 << uint256(HookKind.CashOutRequestBefore)) +
+        (1 << uint256(HookKind.CashOutRequestAfter)) +
+        (1 << uint256(HookKind.CashOutConfirmationBefore)) +
+        (1 << uint256(HookKind.CashOutConfirmationAfter)) +
+        (1 << uint256(HookKind.CashOutReversalBefore)) +
+        (1 << uint256(HookKind.CashOutReversalBefore));
 
     // ------------------ Errors ---------------------------------- //
 

@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IPixCashierTypes } from "./interfaces/IPixCashier.sol";
+import { IPixHookableTypes } from "./interfaces/IPixHookable.sol";
 
 /**
  * @title PixCashier storage version 1
@@ -29,6 +30,16 @@ abstract contract PixCashierStorageV1 is IPixCashierTypes {
 }
 
 /**
+ * @title PixCashier storage version 2
+ */
+abstract contract PixCashierStorageV2 is IPixHookableTypes {
+    /// @dev TODO
+    mapping(bytes32 => HooksConfig) internal _cashInHookConfigs;
+    /// @dev TODO
+    mapping(bytes32 => HooksConfig) internal _cashOutHookConfigs;
+}
+
+/**
  * @title PixCashier storage
  * @dev Contains storage variables of the {PixCashier} contract.
  *
@@ -38,10 +49,10 @@ abstract contract PixCashierStorageV1 is IPixCashierTypes {
  * e.g. PixCashierStorage<versionNumber>, so finally it would look like
  * "contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2".
  */
-abstract contract PixCashierStorage is PixCashierStorageV1 {
+abstract contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2  {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      */
-    uint256[43] private __gap;
+    uint256[41] private __gap;
 }

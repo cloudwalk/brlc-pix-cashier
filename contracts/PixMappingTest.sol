@@ -23,6 +23,7 @@ contract PixMappingV2Test is UUPSUpgradeable {
     mapping(bytes32 => CashInOperationV2) public cashInOperations;
 
     function writeWithValidation1(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             if (cashInOperations[ids[i]].status != CashInStatus.Nonexistent) {
                 revert AlreadyExists();
@@ -32,6 +33,7 @@ contract PixMappingV2Test is UUPSUpgradeable {
     }
 
     function writeWithValidation2(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             CashInOperationV2 memory operation = cashInOperations[ids[i]];
             if (operation.status != CashInStatus.Nonexistent) {
@@ -42,6 +44,7 @@ contract PixMappingV2Test is UUPSUpgradeable {
     }
 
     function writeWithValidation3(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             CashInOperationV2 storage operation = cashInOperations[ids[i]];
             if (operation.status != CashInStatus.Nonexistent) {
@@ -52,6 +55,7 @@ contract PixMappingV2Test is UUPSUpgradeable {
     }
 
     function writeWithValidation4(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             CashInOperationV2 storage operation = cashInOperations[ids[i]];
             if (operation.status != CashInStatus.Nonexistent) {
@@ -64,6 +68,7 @@ contract PixMappingV2Test is UUPSUpgradeable {
     }
 
     function writeWithoutValidation(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             cashInOperations[ids[i]] = operations[i];
         }
@@ -92,6 +97,7 @@ contract PixMappingV3Test is UUPSUpgradeable {
     mapping(bytes32 => CashInOperationV3) public cashInOperations;
 
     function writeWithValidation1(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             if (cashInOperations[ids[i]].status != CashInStatus.Nonexistent) {
                 revert AlreadyExists();
@@ -101,6 +107,7 @@ contract PixMappingV3Test is UUPSUpgradeable {
     }
 
     function writeWithValidation2(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             CashInOperationV3 memory operation = cashInOperations[ids[i]];
             if (operation.status != CashInStatus.Nonexistent) {
@@ -111,6 +118,7 @@ contract PixMappingV3Test is UUPSUpgradeable {
     }
 
     function writeWithValidation3(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             CashInOperationV3 storage operation = cashInOperations[ids[i]];
             if (operation.status != CashInStatus.Nonexistent) {
@@ -121,6 +129,7 @@ contract PixMappingV3Test is UUPSUpgradeable {
     }
 
     function writeWithValidation4(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             CashInOperationV3 storage operation = cashInOperations[ids[i]];
             if (operation.status != CashInStatus.Nonexistent) {
@@ -133,6 +142,7 @@ contract PixMappingV3Test is UUPSUpgradeable {
     }
 
     function writeWithoutValidation(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             cashInOperations[ids[i]] = operations[i];
         }

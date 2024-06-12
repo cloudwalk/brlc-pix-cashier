@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.24;
 
@@ -19,8 +20,19 @@ contract PixMappingV2Test is UUPSUpgradeable {
     error AlreadyExists();
 
     uint256 public operationCount;
-
     mapping(bytes32 => CashInOperationV2) public cashInOperations;
+
+    uint256 public operationCount2;
+    mapping(bytes32 => CashInOperationV2) public cashInOperations2;
+
+    uint256 public operationCount3;
+    mapping(bytes32 => CashInOperationV2) public cashInOperations3;
+
+    uint256 public operationCount4;
+    mapping(bytes32 => CashInOperationV2) public cashInOperations4;
+
+    uint256 public operationCount5;
+    mapping(bytes32 => CashInOperationV2) public cashInOperations5;
 
     function writeWithValidation1(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
         operationCount += ids.length;
@@ -67,10 +79,38 @@ contract PixMappingV2Test is UUPSUpgradeable {
         }
     }
 
-    function writeWithoutValidation(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+    function writeWithoutValidation1(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
         operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             cashInOperations[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation2(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount2 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations2[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation3(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount3 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations3[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation4(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount4 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations4[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation5(bytes32[] memory ids, CashInOperationV2[] memory operations) external {
+        operationCount5 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations5[ids[i]] = operations[i];
         }
     }
 
@@ -93,8 +133,19 @@ contract PixMappingV3Test is UUPSUpgradeable {
     error AlreadyExists();
 
     uint256 public operationCount;
-
     mapping(bytes32 => CashInOperationV3) public cashInOperations;
+
+    uint256 public operationCount2;
+    mapping(bytes32 => CashInOperationV3) public cashInOperations2;
+
+    uint256 public operationCount3;
+    mapping(bytes32 => CashInOperationV3) public cashInOperations3;
+
+    uint256 public operationCount4;
+    mapping(bytes32 => CashInOperationV3) public cashInOperations4;
+
+    uint256 public operationCount5;
+    mapping(bytes32 => CashInOperationV3) public cashInOperations5;
 
     function writeWithValidation1(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
         operationCount += ids.length;
@@ -141,10 +192,38 @@ contract PixMappingV3Test is UUPSUpgradeable {
         }
     }
 
-    function writeWithoutValidation(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+    function writeWithoutValidation1(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
         operationCount += ids.length;
         for (uint256 i; i < operations.length; i++) {
             cashInOperations[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation2(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount2 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations2[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation3(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount3 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations3[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation4(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount4 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations4[ids[i]] = operations[i];
+        }
+    }
+
+    function writeWithoutValidation5(bytes32[] memory ids, CashInOperationV3[] memory operations) external {
+        operationCount5 += ids.length;
+        for (uint256 i; i < operations.length; i++) {
+            cashInOperations5[ids[i]] = operations[i];
         }
     }
 

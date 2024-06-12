@@ -10,6 +10,26 @@
       "address": "0xC4D666f2cb4CB0F73f72236104a6AFf35f4a3efE",
       "txHash": "0xf36e459e403abbd4bbd66d773c926a2200c49aaaebe080cbf411c628a82e0ea0",
       "kind": "uups"
+    },
+    {
+      "address": "0x4D8Cb81B8C1095ff2923ab3478D7CA4e93DB0817",
+      "txHash": "0x02dcbbc4aa0f49267545f971e6302779e0daeb21e89b0b2a7a9453e25e5dccd7",
+      "kind": "uups"
+    },
+    {
+      "address": "0xD7a4adC13d1144BE5f16A4a6e788eaec779D9914",
+      "txHash": "0xee4fcb9f66805a4c67ae27b7c684fee922fffb5e8976904d073fa8749147ee13",
+      "kind": "uups"
+    },
+    {
+      "address": "0x8772aa4F8c561a6f8E81933b9f237B0377151205",
+      "txHash": "0x7f68d9a1929aca687f36eaaaf589c554c812274024b464908aa7e33e8eb8ad60",
+      "kind": "uups"
+    },
+    {
+      "address": "0xf44f41Aa2677072bfBb42b560bc825Ef6f3f980B",
+      "txHash": "0xdc88323f9241032b02b48c244bc14e67b169b9b4e6e28b42fb4374a15201bddc",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -333,6 +353,622 @@
               "slot": "0"
             }
           ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "e0b920bc2c312b52c98bb125227b5d3b30419bc4ea46ef494fefe0975d0e99c0": {
+      "address": "0x33D2a274E0D1d8BE10E0422d26Ef6f63747D4730",
+      "txHash": "0xeae7389696c5b1ad87e386f74d3d7027dacb257550e6b635dd6a5fd4cd44bd8d",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "operationCount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:22"
+          },
+          {
+            "label": "cashInOperations",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV2)1139_storage)",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:24"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)10_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(CashInStatus)1131": {
+            "label": "enum PixMappingV2Test.CashInStatus",
+            "members": [
+              "Nonexistent",
+              "Executed",
+              "PremintExecuted"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInOperationV2)1139_storage)": {
+            "label": "mapping(bytes32 => struct PixMappingV2Test.CashInOperationV2)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashInOperationV2)1139_storage": {
+            "label": "struct PixMappingV2Test.CashInOperationV2",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInStatus)1131",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "c1279190d5ca5a4e5c7c1cfd427bd69cb3ee405cd85b3dd36d9fa07c5f07045e": {
+      "address": "0xa65E67B86752EA9650870Ea4672Fee968A901333",
+      "txHash": "0x8b12988f16d979f30833cdb8395bd7d9f32af3f425edd2f473b36248149f5491",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "operationCount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:96"
+          },
+          {
+            "label": "cashInOperations",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV3)1448_storage)",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:98"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)10_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(CashInStatus)1440": {
+            "label": "enum PixMappingV3Test.CashInStatus",
+            "members": [
+              "Nonexistent",
+              "Executed",
+              "PremintExecuted"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInOperationV3)1448_storage)": {
+            "label": "mapping(bytes32 => struct PixMappingV3Test.CashInOperationV3)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashInOperationV3)1448_storage": {
+            "label": "struct PixMappingV3Test.CashInOperationV3",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInStatus)1440",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "8f8f8b340a342f15384a7b5c2e41850bcea09b55ec1f6a4fc076685b07b1d5e8": {
+      "address": "0x30DC459176fCB0e6b9c9716d7b0a8cf54816302D",
+      "txHash": "0xe41c309dddff769fbdedf7bd5ad11bc622a69c6cf0b2b8089094e5d122c8ab03",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "operationCount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:22"
+          },
+          {
+            "label": "cashInOperations",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV2)5399_storage)",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:23"
+          },
+          {
+            "label": "operationCount2",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:25"
+          },
+          {
+            "label": "cashInOperations2",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV2)5399_storage)",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:26"
+          },
+          {
+            "label": "operationCount3",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:28"
+          },
+          {
+            "label": "cashInOperations3",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV2)5399_storage)",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:29"
+          },
+          {
+            "label": "operationCount4",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:31"
+          },
+          {
+            "label": "cashInOperations4",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV2)5399_storage)",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:32"
+          },
+          {
+            "label": "operationCount5",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:34"
+          },
+          {
+            "label": "cashInOperations5",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV2)5399_storage)",
+            "contract": "PixMappingV2Test",
+            "src": "contracts\\PixMappingTest.sol:35"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)95_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(CashInStatus)5391": {
+            "label": "enum PixMappingV2Test.CashInStatus",
+            "members": [
+              "Nonexistent",
+              "Executed",
+              "PremintExecuted"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInOperationV2)5399_storage)": {
+            "label": "mapping(bytes32 => struct PixMappingV2Test.CashInOperationV2)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashInOperationV2)5399_storage": {
+            "label": "struct PixMappingV2Test.CashInOperationV2",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInStatus)5391",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "2d4c2c3c678c5a4e768e8e6219766e7c6d5cb23e1c663ec8f71b625508aa56cb": {
+      "address": "0x80BA81128D6bB32B21B0196ac3283D1A96325D05",
+      "txHash": "0xc8a3e49f7adcc46413525bf46d70e2067263fdfbbb8e58ba051241aeb214fcbb",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "operationCount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:135"
+          },
+          {
+            "label": "cashInOperations",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV3)5888_storage)",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:136"
+          },
+          {
+            "label": "operationCount2",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:138"
+          },
+          {
+            "label": "cashInOperations2",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV3)5888_storage)",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:139"
+          },
+          {
+            "label": "operationCount3",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:141"
+          },
+          {
+            "label": "cashInOperations3",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV3)5888_storage)",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:142"
+          },
+          {
+            "label": "operationCount4",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:144"
+          },
+          {
+            "label": "cashInOperations4",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV3)5888_storage)",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:145"
+          },
+          {
+            "label": "operationCount5",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:147"
+          },
+          {
+            "label": "cashInOperations5",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperationV3)5888_storage)",
+            "contract": "PixMappingV3Test",
+            "src": "contracts\\PixMappingTest.sol:148"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)95_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(CashInStatus)5880": {
+            "label": "enum PixMappingV3Test.CashInStatus",
+            "members": [
+              "Nonexistent",
+              "Executed",
+              "PremintExecuted"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInOperationV3)5888_storage)": {
+            "label": "mapping(bytes32 => struct PixMappingV3Test.CashInOperationV3)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashInOperationV3)5888_storage": {
+            "label": "struct PixMappingV3Test.CashInOperationV3",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInStatus)5880",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
           "erc7201:openzeppelin.storage.Initializable": [
             {
               "contract": "Initializable",

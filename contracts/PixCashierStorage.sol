@@ -4,6 +4,7 @@ pragma solidity 0.8.16;
 
 import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import { IPixCashierTypes } from "./interfaces/IPixCashier.sol";
+import { IPixHookableTypes } from "./interfaces/IPixHookable.sol";
 
 /**
  * @title PixCashier storage version 1
@@ -42,6 +43,16 @@ abstract contract PixCashierStorageV3 is IPixCashierTypes {
 }
 
 /**
+ * @title PixCashier storage version 4
+ */
+abstract contract PixCashierStorageV4 is IPixHookableTypes {
+    /// @dev TODO
+    mapping(bytes32 => HooksConfig) internal _cashInHookConfigs;
+    /// @dev TODO
+    mapping(bytes32 => HooksConfig) internal _cashOutHookConfigs;
+}
+
+/**
  * @title PixCashier storage
  * @dev Contains storage variables of the {PixCashier} contract.
  *
@@ -51,4 +62,9 @@ abstract contract PixCashierStorageV3 is IPixCashierTypes {
  * e.g. PixCashierStorage<versionNumber>, so finally it would look like
  * "contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2".
  */
-abstract contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2, PixCashierStorageV3 {}
+abstract contract PixCashierStorage is
+    PixCashierStorageV1,
+    PixCashierStorageV2,
+    PixCashierStorageV3,
+    PixCashierStorageV4
+{}

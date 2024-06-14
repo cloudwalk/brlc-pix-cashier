@@ -76,9 +76,20 @@ interface IPixCashierTypes {
         Confirmed    // 3
     }
 
+    /// @dev TODO
+    enum CashInFlagIndex {
+        SomeHookRegistered // 0
+    }
+
+    /// @dev TODO
+    enum CashOutFlagIndex {
+        SomeHookRegistered // 0
+    }
+
     /// @dev Structure with data of a single cash-in operation.
     struct CashInOperation {
         CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
+        uint8 flags;         // TODO
         address account;     // The owner of tokens to cash-in.
         uint256 amount;      // The amount of tokens to cash-in.
     }
@@ -93,6 +104,7 @@ interface IPixCashierTypes {
         address account;      // The owner of tokens to cash-out.
         uint256 amount;       // The amount of tokens to cash-out.
         CashOutStatus status; // The status of the cash-out operation according to the {CashOutStatus} enum.
+        uint8 flags;          // TODO
     }
 }
 

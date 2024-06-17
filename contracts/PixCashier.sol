@@ -65,7 +65,7 @@ contract PixCashier is
         (1 << uint256(HookIndex.CashOutConfirmationBefore)) +
         (1 << uint256(HookIndex.CashOutConfirmationAfter)) +
         (1 << uint256(HookIndex.CashOutReversalBefore)) +
-        (1 << uint256(HookIndex.CashOutReversalBefore));
+        (1 << uint256(HookIndex.CashOutReversalAfter));
 
     // -------------------- Errors -----------------------------------
 

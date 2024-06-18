@@ -19,7 +19,7 @@ interface IPixHookableTypes {
         CashOutRequestBefore,      // 4
         CashOutRequestAfter,       // 5
         CashOutConfirmationBefore, // 6
-        CashOutConfirmationAfter,  // 7
+        CashOutConfirmationAfter,  // 7 TODO: is not called during internal cash-out operations
         CashOutReversalBefore,     // 8
         CashOutReversalAfter       // 9
     }

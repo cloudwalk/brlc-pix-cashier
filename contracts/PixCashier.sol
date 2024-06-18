@@ -574,6 +574,16 @@ contract PixCashier is
     }
 
     /// @dev TODO
+    function executeInternalCashOut(
+        bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
+        address from,
+        address to,
+        uint256 amount
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        _executeInternalCashOut(txId, from, to, amount);
+    }
+
+    /// @dev TODO
     function registerCashInHooks(
         bytes32 txId,
         address newCallableContract,
@@ -826,26 +836,7 @@ contract PixCashier is
         uint256 amount,
         bytes32 txId
     ) internal {
-        if (account == address(0)) {
-            revert ZeroAccount();
-        }
-        if (amount == 0) {
-            revert ZeroAmount();
-        }
-        if (txId == 0) {
-            revert ZeroTxId();
-        }
-        if (isBlocklisted(account)) {
-            revert BlocklistedAccount(account);
-        }
-
-        CashOut storage operation = _cashOuts[txId];
-        CashOutStatus status = operation.status;
-        if (status == CashOutStatus.Pending || status == CashOutStatus.Confirmed) {
-            revert InappropriateCashOutStatus(txId, status);
-        } else if (status == CashOutStatus.Reversed && operation.account != account) {
-            revert InappropriateCashOutAccount(txId, operation.account);
-        }
+        CashOut storage operation = _prepareCashOutForRequesting(account, amount, txId);
 
         operation.account = account;
         operation.amount = amount;
@@ -908,6 +899,60 @@ contract PixCashier is
             } else {
                 IERC20Upgradeable(_token).safeTransfer(account, amount);
             }
+        }
+    }
+
+    /// @dev TODO
+    function _prepareCashOutForRequesting(
+        address account, // This comment prevents Prettier from collapsing parameters into a singe line.
+        uint256 amount,
+        bytes32 txId
+    ) internal view returns (CashOut storage operation) {
+        if (account == address(0)) {
+            revert ZeroAccount();
+        }
+        if (amount == 0) {
+            revert ZeroAmount();
+        }
+        if (txId == 0) {
+            revert ZeroTxId();
+        }
+        if (isBlocklisted(account)) {
+            revert BlocklistedAccount(account);
+        }
+
+        operation = _cashOuts[txId];
+        CashOutStatus status = operation.status;
+        if (status == CashOutStatus.Pending || status == CashOutStatus.Confirmed) {
+            revert InappropriateCashOutStatus(txId, status);
+        } else if (status == CashOutStatus.Reversed && operation.account != account) {
+            revert InappropriateCashOutAccount(txId, operation.account);
+        }
+    }
+
+    /// @dev TODO
+    function _executeInternalCashOut(
+        bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
+        address from,
+        address to,
+        uint256 amount
+    ) internal {
+        CashOut storage operation = _prepareCashOutForRequesting(from, amount, txId);
+
+        operation.account = from;
+        operation.amount = amount;
+        operation.status = CashOutStatus.Confirmed;
+        _processedCashOutCounter += 1;
+
+        emit InternalCashOut(from, txId, to, amount);
+
+        if (operation.flags & CASH_OUT_FLAG_SOME_HOOK_CONFIGURED != 0) {
+            _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutRequestBefore));
+            _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutConfirmationBefore));
+            IERC20Upgradeable(_token).safeTransferFrom(from, to, amount);
+            _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutConfirmationAfter));
+        } else {
+            IERC20Upgradeable(_token).safeTransferFrom(from, to, amount);
         }
     }
 

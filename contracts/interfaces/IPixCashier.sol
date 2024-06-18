@@ -68,12 +68,14 @@ interface IPixCashierTypes {
      * - Pending ----- The status immediately after the operation requesting.
      * - Reversed ---- The operation was reversed.
      * - Confirmed --- The operation was confirmed.
+     * - Internal ---- The operation executed internally
      */
     enum CashOutStatus {
         Nonexistent, // 0
         Pending,     // 1
         Reversed,    // 2
-        Confirmed    // 3
+        Confirmed,   // 3
+        Internal     // 4
     }
 
     /// @dev TODO
@@ -159,6 +161,14 @@ interface IPixCashier is IPixCashierTypes {
         uint256 amount,          // The amount of tokens to cash-out.
         uint256 balance,         // The new pending cash-out balance of the account.
         bytes32 indexed txId     // The off-chain transaction identifier.
+    );
+
+    /// @dev Emitted when an internal cash-out operation is executed.
+    event InternalCashOut(
+        address indexed from, // The account that owns the tokens to cash-out.
+        bytes32 indexed txId, // The off-chain transaction identifier.
+        address indexed to,   // The account that received the tokens through the internal cash-out.
+        uint256 amount        // The amount of tokens to cash-out.
     );
 
     /**
@@ -444,4 +454,12 @@ interface IPixCashier is IPixCashierTypes {
      * @param txIds The off-chain transaction identifiers of the operations.
      */
     function reverseCashOutBatch(bytes32[] memory txIds) external;
+
+    /// @dev TODO
+    function executeInternalCashOut(
+        bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
+        address from,
+        address to,
+        uint256 amount
+    ) external;
 }

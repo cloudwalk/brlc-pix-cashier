@@ -34,6 +34,17 @@ enum CashOutStatus {
   Confirmed = 3
 }
 
+enum HookIndex {
+  Unused1 = 5,
+  CashOutRequestBefore = 6,
+  CashOutRequestAfter = 7,
+  CashOutConfirmationBefore = 8,
+  CashOutConfirmationAfter = 9,
+  CashOutReversalBefore = 10,
+  CashOutReversalAfter = 11,
+  Unused2 = 12
+}
+
 interface TestCashIn {
   account: SignerWithAddress;
   amount: number;
@@ -66,6 +77,14 @@ interface PixCashierState {
 interface Fixture {
   pixCashier: Contract;
   tokenMock: Contract;
+  pixHookMock: Contract;
+}
+
+interface HookConfig {
+  callableContract: string;
+  hookFlags: number;
+
+  [key: string]: number | string; // Indexing signature to ensure that fields are iterated over in a key-value style
 }
 
 function checkCashOutEquality(
@@ -147,6 +166,15 @@ function checkCashInBatchEquality(
   );
 }
 
+function checkHookConfigEquality(actualHookConfig: HookConfig, expectedHookConfig: HookConfig) {
+  Object.keys(expectedHookConfig).forEach(property => {
+    expect(actualHookConfig[property]).to.eq(
+      expectedHookConfig[property],
+      `Mismatch in the "${property}" property of the hook config`
+    );
+  });
+}
+
 async function setUpFixture<T>(func: () => Promise<T>): Promise<T> {
   if (network.name === "hardhat") {
     return loadFixture(func);
@@ -171,6 +199,13 @@ describe("Contract 'PixCashier'", async () => {
   const BATCH_ID_STUB2 = ethers.utils.formatBytes32String("MOCK_BATCH_ID2");
   const TRANSACTION_ID_ZERO = ethers.constants.HashZero;
   const BATCH_ID_ZERO = ethers.constants.HashZero;
+  const ALL_CASH_OUT_HOOK_FLAGS: number =
+    (1 << HookIndex.CashOutRequestBefore) +
+    (1 << HookIndex.CashOutRequestAfter) +
+    (1 << HookIndex.CashOutConfirmationBefore) +
+    (1 << HookIndex.CashOutConfirmationAfter) +
+    (1 << HookIndex.CashOutReversalBefore) +
+    (1 << HookIndex.CashOutReversalAfter);
 
   const REVERT_MESSAGE_IF_CONTRACT_IS_ALREADY_INITIALIZED = "Initializable: contract is already initialized";
   const REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED = "Pausable: paused";
@@ -195,9 +230,10 @@ describe("Contract 'PixCashier'", async () => {
   const EVENT_NAME_CASH_IN = "CashIn";
   const EVENT_NAME_CASH_IN_BATCH = "CashInBatch";
   const EVENT_NAME_CASH_IN_PREMINT = "CashInPremint";
+  const EVENT_NAME_CASH_OUT_HOOK_CONFIG_CHANGED = "CashOutHookConfigChanged";
+  const EVENT_NAME_CASH_OUT_CONFIRMATION = "ConfirmCashOut";
   const EVENT_NAME_CASH_OUT_REQUESTING = "RequestCashOut";
   const EVENT_NAME_CASH_OUT_REVERSING = "ReverseCashOut";
-  const EVENT_NAME_CASH_OUT_CONFIRMATION = "ConfirmCashOut";
   const EVENT_NAME_INTERNAL_CASH_OUT = "InternalCashOut";
   const EVENT_NAME_MOCK_PREMINT_INCREASING = "MockPremintIncreasing";
   const EVENT_NAME_MOCK_PREMINT_DECREASING = "MockPremintDecreasing";
@@ -205,6 +241,7 @@ describe("Contract 'PixCashier'", async () => {
 
   let pixCashierFactory: ContractFactory;
   let tokenMockFactory: ContractFactory;
+  let pixHookMockFactory: ContractFactory;
   let deployer: SignerWithAddress;
   let cashier: SignerWithAddress;
   let receiver: SignerWithAddress;
@@ -221,6 +258,7 @@ describe("Contract 'PixCashier'", async () => {
   before(async () => {
     pixCashierFactory = await ethers.getContractFactory("PixCashier");
     tokenMockFactory = await ethers.getContractFactory("ERC20TokenMock");
+    pixHookMockFactory = await ethers.getContractFactory("PixHookMock");
 
     let secondUser: SignerWithAddress;
     let thirdUser: SignerWithAddress;
@@ -239,25 +277,32 @@ describe("Contract 'PixCashier'", async () => {
     return tokenMock;
   }
 
+  async function deployPixHookMock(): Promise<Contract> {
+    const pixHookMock: Contract = await pixHookMockFactory.deploy();
+    await pixHookMock.deployed();
+
+    return pixHookMock;
+  }
+
   async function deployContracts(): Promise<Fixture> {
     const tokenMock = await deployTokenMock();
+    const pixHookMock = await deployPixHookMock();
     const pixCashier: Contract = await upgrades.deployProxy(pixCashierFactory, [tokenMock.address]);
     await pixCashier.deployed();
 
-    return { pixCashier, tokenMock };
+    return { pixCashier, tokenMock, pixHookMock };
   }
 
   async function deployAndConfigureContracts(): Promise<Fixture> {
-    const tokenMock = await deployTokenMock();
-    const pixCashier: Contract = await upgrades.deployProxy(pixCashierFactory, [tokenMock.address]);
-    await pixCashier.deployed();
+    const fixture: Fixture = await deployContracts();
+    const { pixCashier, tokenMock } = fixture;
     await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
     for (const user of users) {
       await proveTx(tokenMock.mint(user.address, INITIAL_USER_BALANCE));
       await proveTx(tokenMock.connect(user).approve(pixCashier.address, ethers.constants.MaxUint256));
     }
 
-    return { pixCashier, tokenMock };
+    return fixture;
   }
 
   async function pauseContract(contract: Contract) {
@@ -2088,6 +2133,79 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
+  describe("Function configureCashOutHooks()", async () => {
+    async function checkCashOutHookConfiguring(pixCashier: Contract, props: {
+      newCallableContract: string;
+      newHookFlags: number;
+      oldCallableContract?: string;
+      oldHookFlags?: number;
+    }) {
+      const newCallableContract = props.newCallableContract;
+      const newHookFlags = props.newHookFlags;
+      const oldCallableContract = props.oldCallableContract ?? ADDRESS_ZERO;
+      const oldHookFlags = props.oldHookFlags ?? 0;
+      const tx = await pixCashier.connect(cashier).configureCashOutHooks(
+        TRANSACTION_ID1,
+        newCallableContract,
+        newHookFlags
+      );
+      await expect(tx).to.emit(pixCashier, EVENT_NAME_CASH_OUT_HOOK_CONFIG_CHANGED).withArgs(
+        TRANSACTION_ID1,
+        newCallableContract,
+        oldCallableContract,
+        newHookFlags,
+        oldHookFlags
+      );
+      const expectedHookConfig: HookConfig = {
+        callableContract: newCallableContract,
+        hookFlags: newHookFlags
+      };
+      const actualHookConfig = await pixCashier.getCashOutHookConfig(TRANSACTION_ID1);
+      checkHookConfigEquality(actualHookConfig, expectedHookConfig);
+    }
+
+    it("Executes as expected", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+
+      // Set hooks
+      await checkCashOutHookConfiguring(pixCashier, {
+        newCallableContract: user.address,
+        newHookFlags: ALL_CASH_OUT_HOOK_FLAGS
+      });
+
+      // Remove hooks
+      await checkCashOutHookConfiguring(pixCashier, {
+        newCallableContract: ADDRESS_ZERO,
+        newHookFlags: 0,
+        oldCallableContract: user.address,
+        oldHookFlags: ALL_CASH_OUT_HOOK_FLAGS
+      });
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await pauseContract(pixCashier);
+      await expect(
+        pixCashier.connect(cashier).configureCashOutHooks(
+          TRANSACTION_ID1,
+          user.address, // newCallableContract
+          ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
+        )
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashier.connect(deployer).configureCashOutHooks(
+          TRANSACTION_ID1,
+          user.address, // newCallableContract
+          ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
+        )
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+  });
+
   describe("Function 'getPendingCashOutTxIds()'", async () => {
     it("Returns expected values in different cases", async () => {
       const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
@@ -2119,7 +2237,10 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
-  describe("Complex scenarios", async () => {
+  describe("Scenarios without hooks", async () => {
+  });
+
+  describe("Complex scenarios without", async () => {
     it("Scenario 1 with cash-out reversing executes successfully", async () => {
       const fixture = await setUpFixture(deployAndConfigureContracts);
       const { pixCashier, tokenMock } = fixture;

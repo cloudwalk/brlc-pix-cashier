@@ -41,7 +41,7 @@ interface IPixHookableTypes {
  */
 interface IPixHookable is IPixHookableTypes {
     /// @dev TODO
-    event CashOutHooksRegistered(
+    event CashOutHookConfigChanged(
         bytes32 indexed txId,
         address newCallableContract,
         address oldCallableContract,

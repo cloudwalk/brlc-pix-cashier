@@ -941,7 +941,7 @@ contract PixCashier is
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);
 
-        emit CashOutHooksRegistered(
+        emit CashOutHookConfigChanged(
             txId,
             newCallableContract,
             oldCallableContract,

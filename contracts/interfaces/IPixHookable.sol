@@ -27,7 +27,7 @@ interface IPixHookableTypes {
     /// @dev TODO
     struct HooksConfig {
         address callableContract;
-        uint256 hookFlags; // TODO like (1 << HookIndex.CashInCommonBefore) + (1 << HookIndex.CashInCommonAfter) + ...
+        uint32 hookFlags; // TODO like (1 << HookIndex.CashInCommonBefore) + (1 << HookIndex.CashInCommonAfter) + ...
     }
 }
 

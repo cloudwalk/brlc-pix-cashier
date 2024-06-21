@@ -972,7 +972,7 @@ contract PixCashier is
             revert HookCallableContractAddressZero();
         }
         hooksConfig.callableContract = newCallableContract;
-        hooksConfig.hookFlags = newHookFlags;
+        hooksConfig.hookFlags = uint32(newHookFlags);
 
         emit CashInHooksRegistered(
             txId,

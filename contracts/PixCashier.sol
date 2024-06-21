@@ -277,6 +277,13 @@ contract PixCashier is
     }
 
     /**
+     * @dev See {IPixHookable-getCashOutHooksConfig}.
+     */
+    function getCashOutHookConfig(bytes32 txId) external view returns (HooksConfig memory) {
+        return _cashOutHookConfigs[txId];
+    }
+
+    /**
      * @dev See {IPixCashier-cashIn}.
      *
      * Requirements:

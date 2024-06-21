@@ -29,7 +29,7 @@ interface IPixHookableTypes {
     }
 
     /// @dev TODO
-    struct HooksConfig {
+    struct HookConfig {
         address callableContract;
         uint32 hookFlags; // TODO like (1 << HookIndex.CashInCommonBefore) + (1 << HookIndex.CashInCommonAfter) + ...
     }
@@ -64,5 +64,5 @@ interface IPixHookable is IPixHookableTypes {
     /**
      * @dev TODO
      */
-    function getCashOutHookConfig(bytes32 txId) external view returns (HooksConfig memory);
+    function getCashOutHookConfig(bytes32 txId) external view returns (HookConfig memory);
 }

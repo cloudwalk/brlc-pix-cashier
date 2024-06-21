@@ -279,7 +279,7 @@ contract PixCashier is
     /**
      * @dev See {IPixHookable-getCashOutHooksConfig}.
      */
-    function getCashOutHookConfig(bytes32 txId) external view returns (HooksConfig memory) {
+    function getCashOutHookConfig(bytes32 txId) external view returns (HookConfig memory) {
         return _cashOutHookConfigs[txId];
     }
 
@@ -595,7 +595,7 @@ contract PixCashier is
         } else {
             _cashOuts[txId].flags &= uint8(~CASH_OUT_FLAG_SOME_HOOK_CONFIGURED);
         }
-        HooksConfig storage hooksConfig = _cashOutHookConfigs[txId];
+        HookConfig storage hooksConfig = _cashOutHookConfigs[txId];
         _registerHooks(txId, newCallableContract, newHookFlags, hooksConfig);
     }
 
@@ -928,7 +928,7 @@ contract PixCashier is
         bytes32 txId,
         address newCallableContract,
         uint256 newHookFlags,
-        HooksConfig storage hooksConfig
+        HookConfig storage hooksConfig
     ) internal {
         address oldCallableContract = hooksConfig.callableContract;
         uint256 oldHookFlags = hooksConfig.hookFlags;
@@ -956,7 +956,7 @@ contract PixCashier is
     }
 
     /// @dev TODO
-    function _callHookIfConfigured(bytes32 txId, uint256 hookIndex, HooksConfig storage hooksConfig) internal {
+    function _callHookIfConfigured(bytes32 txId, uint256 hookIndex, HookConfig storage hooksConfig) internal {
         if ((hooksConfig.hookFlags & hookIndex) != 0) {
             IPixHook callableContract = IPixHook(hooksConfig.callableContract);
             callableContract.pixHook(hookIndex, txId);

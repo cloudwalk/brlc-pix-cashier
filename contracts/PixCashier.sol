@@ -581,7 +581,7 @@ contract PixCashier is
     }
 
     /// @dev TODO
-    function registerCashOutHooks(
+    function configureCashOutHooks(
         bytes32 txId,
         address newCallableContract,
         uint256 newHookFlags

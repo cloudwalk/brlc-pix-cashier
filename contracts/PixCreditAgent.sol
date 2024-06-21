@@ -178,7 +178,7 @@ contract PixCreditAgent is
             revert PixCreditStatusInappropriate(pixTxId, pixCredit.status);
         }
 
-        IPixHookable(_pixCashier).registerCashOutHooks(pixTxId, address(this), NEEDED_PIX_CASH_OUT_HOOK_FLAGS);
+        IPixHookable(_pixCashier).configureCashOutHooks(pixTxId, address(this), NEEDED_PIX_CASH_OUT_HOOK_FLAGS);
 
         pixCredit.borrower = borrower;
         pixCredit.programId = programId.toUint32();
@@ -208,7 +208,7 @@ contract PixCreditAgent is
             revert PixCreditStatusInappropriate(pixTxId, pixCredit.status);
         }
 
-        IPixHookable(_pixCashier).registerCashOutHooks(pixTxId, address(this), 0);
+        IPixHookable(_pixCashier).configureCashOutHooks(pixTxId, address(this), 0);
 
         _changePixCreditStatus(
             pixTxId,

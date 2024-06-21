@@ -1,11 +1,11 @@
-import { ethers, network, upgrades } from "hardhat";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { ethers, network, upgrades } from "hardhat";
 import { proveTx } from "../test-utils/eth";
 import { createRevertMessageDueToMissingRole } from "../test-utils/misc";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 
 const ADDRESS_ZERO = ethers.constants.AddressZero;
 
@@ -198,6 +198,7 @@ describe("Contract 'PixCashier'", async () => {
   const EVENT_NAME_CASH_OUT_REQUESTING = "RequestCashOut";
   const EVENT_NAME_CASH_OUT_REVERSING = "ReverseCashOut";
   const EVENT_NAME_CASH_OUT_CONFIRMATION = "ConfirmCashOut";
+  const EVENT_NAME_INTERNAL_CASH_OUT = "InternalCashOut";
   const EVENT_NAME_MOCK_PREMINT_INCREASING = "MockPremintIncreasing";
   const EVENT_NAME_MOCK_PREMINT_DECREASING = "MockPremintDecreasing";
   const EVENT_NAME_MOCK_PREMINT_PREMINT_RESCHEDULING = "MockPremintReleaseRescheduling";
@@ -206,6 +207,7 @@ describe("Contract 'PixCashier'", async () => {
   let tokenMockFactory: ContractFactory;
   let deployer: SignerWithAddress;
   let cashier: SignerWithAddress;
+  let receiver: SignerWithAddress;
   let user: SignerWithAddress;
   let users: SignerWithAddress[];
   let userAddresses: string[];
@@ -222,7 +224,7 @@ describe("Contract 'PixCashier'", async () => {
 
     let secondUser: SignerWithAddress;
     let thirdUser: SignerWithAddress;
-    [deployer, cashier, user, secondUser, thirdUser] = await ethers.getSigners();
+    [deployer, cashier, receiver, user, secondUser, thirdUser] = await ethers.getSigners();
     users = [user, secondUser, thirdUser];
     userAddresses = users.map(user => user.address);
   });
@@ -1942,6 +1944,150 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
+  describe("Function 'makeInternalCashOut()'", async () => {
+    it("Executes as expected", async () => {
+      const fixture: Fixture = await setUpFixture(deployAndConfigureContracts);
+      const { pixCashier, tokenMock } = fixture;
+
+      const [cashOut] = defineTestCashOuts();
+
+      await checkPixCashierState(fixture, [cashOut]);
+      const tx = pixCashier.connect(cashier).makeInternalCashOut(
+        cashOut.account.address,
+        receiver.address,
+        cashOut.amount,
+        cashOut.txId
+      );
+      await expect(tx).to.changeTokenBalances(
+        tokenMock,
+        [pixCashier, cashier, cashOut.account, receiver.address],
+        [0, 0, -cashOut.amount, +cashOut.amount]
+      );
+      await expect(tx).to.emit(pixCashier, EVENT_NAME_INTERNAL_CASH_OUT).withArgs(
+        cashOut.account.address, // from
+        cashOut.txId,
+        receiver.address, // to
+        cashOut.amount
+      );
+      cashOut.status = CashOutStatus.Confirmed;
+      await checkPixCashierState(fixture, [cashOut]);
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await pauseContract(pixCashier);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(user.address, receiver.address, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashier.connect(deployer).makeInternalCashOut(user.address, receiver.address, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+    });
+
+    it("Is reverted if the account is blocklisted", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await proveTx(pixCashier.connect(user).selfBlocklist());
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(user.address, receiver.address, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_BLOCKLISTED);
+    });
+
+    it("Is reverted if the sender address is zero", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(ADDRESS_ZERO, receiver.address, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the receiver address is zero", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(user.address, ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the token amount is zero", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(
+          user.address,
+          receiver.address,
+          TOKEN_AMOUNT_ZERO,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the off-chain transaction ID is zero", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(
+          user.address,
+          receiver.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID_ZERO
+        )
+      ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
+    });
+
+    it("Is reverted if the cash-out with the provided txId is already pending", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await pixCashier.connect(cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(user.address, receiver.address, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS
+      ).withArgs(TRANSACTION_ID1, CashOutStatus.Pending);
+    });
+
+    it("Is reverted if the cash-out with the provided txId is already confirmed", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await pixCashier.connect(cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await pixCashier.connect(cashier).confirmCashOut(TRANSACTION_ID1);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(user.address, receiver.address, TOKEN_AMOUNT, TRANSACTION_ID1)
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS
+      ).withArgs(TRANSACTION_ID1, CashOutStatus.Confirmed);
+    });
+
+    it("Is reverted if txId of a reversed cash-out operation is reused for another account", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      await pixCashier.connect(cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await pixCashier.connect(cashier).reverseCashOut(TRANSACTION_ID1);
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(
+          deployer.address,
+          receiver.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        pixCashier,
+        REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT
+      ).withArgs(TRANSACTION_ID1, user.address);
+    });
+
+    it("Is reverted if the user has not enough tokens", async () => {
+      const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
+      const tokenAmount = INITIAL_USER_BALANCE + 1;
+      await expect(
+        pixCashier.connect(cashier).makeInternalCashOut(
+          user.address,
+          receiver.address,
+          tokenAmount,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWith(REVERT_MESSAGE_IF_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE);
+    });
+  });
+
   describe("Function 'getPendingCashOutTxIds()'", async () => {
     it("Returns expected values in different cases", async () => {
       const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
@@ -2032,6 +2178,27 @@ describe("Contract 'PixCashier'", async () => {
         .to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS)
         .withArgs(cashOut.txId, CashOutStatus.Confirmed);
 
+      expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
+    });
+
+    it("Scenario 3 with internal cash-out after reversing the previous one with the same ID", async () => {
+      const fixture = await setUpFixture(deployAndConfigureContracts);
+      const { pixCashier, tokenMock } = fixture;
+      const [cashOut] = defineTestCashOuts();
+      await requestCashOuts(pixCashier, [cashOut]);
+      await proveTx(pixCashier.connect(cashier).reverseCashOut(cashOut.txId));
+      cashOut.status = CashOutStatus.Reversed;
+      await checkPixCashierState(fixture, [cashOut]);
+
+      // After reversing a cash-out with the same txId can be requested again for an internal cash-out.
+      await proveTx(pixCashier.connect(cashier).makeInternalCashOut(
+        cashOut.account.address,
+        receiver.address,
+        cashOut.amount,
+        cashOut.txId
+      ));
+      cashOut.status = CashOutStatus.Confirmed;
+      await checkPixCashierState(fixture, [cashOut], 2);
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
     });
   });

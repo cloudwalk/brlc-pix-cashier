@@ -46,17 +46,7 @@ contract PixCashier is
     bytes32 public constant CASHIER_ROLE = keccak256("CASHIER_ROLE");
 
     /// @dev TODO
-    uint256 private constant CASH_IN_FLAG_SOME_HOOK_CONFIGURED = (1 << uint256(CashInFlagIndex.SomeHookRegistered));
-
-    /// @dev TODO
     uint256 private constant CASH_OUT_FLAG_SOME_HOOK_CONFIGURED = (1 << uint256(CashOutFlagIndex.SomeHookRegistered));
-
-    /// @dev TODO
-    uint256 private constant ALL_CASH_IN_HOOK_FLAGS =
-        (1 << uint256(HookIndex.CashInCommonBefore)) +
-        (1 << uint256(HookIndex.CashInCommonAfter)) +
-        (1 << uint256(HookIndex.CashInPremintBefore)) +
-        (1 << uint256(HookIndex.CashInPremintAfter));
 
     /// @dev TODO
     uint256 private constant ALL_CASH_OUT_HOOK_FLAGS =
@@ -584,25 +574,6 @@ contract PixCashier is
     }
 
     /// @dev TODO
-    function registerCashInHooks(
-        bytes32 txId,
-        address newCallableContract,
-        uint256 newHookFlags
-    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if ((newHookFlags & ~ALL_CASH_IN_HOOK_FLAGS) != 0) {
-            revert HookFlagsInvalid();
-        }
-
-        if (newHookFlags != 0) {
-            _cashIns[txId].flags |= uint8(CASH_IN_FLAG_SOME_HOOK_CONFIGURED);
-        } else {
-            _cashIns[txId].flags &= uint8(~CASH_IN_FLAG_SOME_HOOK_CONFIGURED);
-        }
-        HooksConfig storage hooksConfig = _cashInHookConfigs[txId];
-        _registerHooks(txId, newCallableContract, newHookFlags, hooksConfig);
-    }
-
-    /// @dev TODO
     function registerCashOutHooks(
         bytes32 txId,
         address newCallableContract,
@@ -665,29 +636,15 @@ contract PixCashier is
             operation.account = account;
             operation.amount = amount;
             emit CashIn(account, amount, txId);
-            if (uint256(operation.flags) & CASH_IN_FLAG_SOME_HOOK_CONFIGURED != 0) {
-                _callCashInHookIfConfigured(txId, uint256(HookIndex.CashInCommonBefore));
-                if (!IERC20Mintable(_token).mint(account, amount)) {
-                    revert TokenMintingFailure();
-                }
-                _callCashInHookIfConfigured(txId, uint256(HookIndex.CashInCommonAfter));
-            } else {
-                if (!IERC20Mintable(_token).mint(account, amount)) {
-                    revert TokenMintingFailure();
-                }
+            if (!IERC20Mintable(_token).mint(account, amount)) {
+                revert TokenMintingFailure();
             }
         } else {
             operation.status = CashInStatus.PremintExecuted;
             operation.account = account;
             operation.amount = amount;
             emit CashInPremint(account, amount, 0, txId, releaseTime);
-            if (uint256(operation.flags) & CASH_IN_FLAG_SOME_HOOK_CONFIGURED != 0) {
-                _callCashInHookIfConfigured(txId, uint256(HookIndex.CashInPremintBefore));
-                IERC20Mintable(_token).premintIncrease(account, amount, releaseTime);
-                _callCashInHookIfConfigured(txId, uint256(HookIndex.CashInPremintAfter));
-            } else {
-                IERC20Mintable(_token).premintIncrease(account, amount, releaseTime);
-            }
+            IERC20Mintable(_token).premintIncrease(account, amount, releaseTime);
         }
         return CashInExecutionResult.Success;
     }
@@ -974,18 +931,13 @@ contract PixCashier is
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);
 
-        emit CashInHooksRegistered(
+        emit CashOutHooksRegistered(
             txId,
             newCallableContract,
             oldCallableContract,
             newHookFlags,
             oldHookFlags
         );
-    }
-
-    /// @dev TODO
-    function _callCashInHookIfConfigured(bytes32 txId, uint256 hookIndex) internal {
-        _callHookIfConfigured(txId, hookIndex, _cashInHookConfigs[txId]);
     }
 
     /// @dev TODO

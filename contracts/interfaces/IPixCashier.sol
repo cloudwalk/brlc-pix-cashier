@@ -91,7 +91,7 @@ interface IPixCashierTypes {
     /// @dev Structure with data of a single cash-in operation.
     struct CashInOperation {
         CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
-        uint8 flags;         // TODO
+        uint8 flags;         // TODO Is not used for now. Reserved for the future
         address account;     // The owner of tokens to cash-in.
         uint256 amount;      // The amount of tokens to cash-in.
     }

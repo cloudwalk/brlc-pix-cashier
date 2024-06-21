@@ -46,7 +46,7 @@ abstract contract PixCashierStorageV3 is IPixCashierTypes {
  * @title PixCashier storage version 4
  */
 abstract contract PixCashierStorageV4 is IPixHookableTypes {
-    /// @dev TODO
+    /// @dev TODO Is not used for now. Reserved for future
     mapping(bytes32 => HooksConfig) internal _cashInHookConfigs;
     /// @dev TODO
     mapping(bytes32 => HooksConfig) internal _cashOutHookConfigs;

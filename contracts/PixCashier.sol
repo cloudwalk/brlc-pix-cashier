@@ -62,7 +62,7 @@ contract PixCashier is
     /// @dev The zero token address has been passed as a function argument.
     error ZeroTokenAddress();
 
-    /// @dev The zero account has been passed as a function argument.
+    /// @dev The zero account address has been passed as a function argument.
     error ZeroAccount();
 
     /// @dev The zero token amount has been passed as a function argument.
@@ -565,12 +565,12 @@ contract PixCashier is
 
     /// @dev TODO
     function makeInternalCashOut(
-        bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
-        address from,
+        address from, // This comment prevents Prettier from collapsing parameters into a singe line.
         address to,
-        uint256 amount
+        uint256 amount,
+        bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _makeInternalCashOut(txId, from, to, amount);
+        _makeInternalCashOut(from, to, amount, txId);
     }
 
     /// @dev TODO
@@ -889,12 +889,15 @@ contract PixCashier is
 
     /// @dev TODO
     function _makeInternalCashOut(
-        bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
-        address from,
+        address from, // This comment prevents Prettier from collapsing parameters into a singe line.
         address to,
-        uint256 amount
+        uint256 amount,
+        bytes32 txId
     ) internal {
         CashOut storage operation = _prepareCashOutForRequesting(from, amount, txId);
+        if (to == address(0)) {
+            revert ZeroAccount();
+        }
 
         operation.account = from;
         operation.amount = amount;

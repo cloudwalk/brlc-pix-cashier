@@ -457,9 +457,9 @@ interface IPixCashier is IPixCashierTypes {
 
     /// @dev TODO
     function makeInternalCashOut(
-        bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
-        address from,
+        address from, // This comment prevents Prettier from collapsing parameters into a singe line.
         address to,
-        uint256 amount
+        uint256 amount,
+        bytes32 txId
     ) external;
 }

@@ -564,13 +564,13 @@ contract PixCashier is
     }
 
     /// @dev TODO
-    function executeInternalCashOut(
+    function makeInternalCashOut(
         bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
         address from,
         address to,
         uint256 amount
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        _executeInternalCashOut(txId, from, to, amount);
+        _makeInternalCashOut(txId, from, to, amount);
     }
 
     /// @dev TODO
@@ -888,7 +888,7 @@ contract PixCashier is
     }
 
     /// @dev TODO
-    function _executeInternalCashOut(
+    function _makeInternalCashOut(
         bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
         address from,
         address to,

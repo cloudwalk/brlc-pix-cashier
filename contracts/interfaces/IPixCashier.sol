@@ -456,7 +456,7 @@ interface IPixCashier is IPixCashierTypes {
     function reverseCashOutBatch(bytes32[] memory txIds) external;
 
     /// @dev TODO
-    function executeInternalCashOut(
+    function makeInternalCashOut(
         bytes32 txId, // This comment prevents Prettier from collapsing parameters into a singe line.
         address from,
         address to,

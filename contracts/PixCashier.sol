@@ -957,7 +957,7 @@ contract PixCashier is
 
     /// @dev TODO
     function _callHookIfConfigured(bytes32 txId, uint256 hookIndex, HookConfig storage hooksConfig) internal {
-        if ((hooksConfig.hookFlags & hookIndex) != 0) {
+        if ((hooksConfig.hookFlags & (1 << hookIndex)) != 0) {
             IPixHook callableContract = IPixHook(hooksConfig.callableContract);
             callableContract.pixHook(hookIndex, txId);
             emit HookInvoked(

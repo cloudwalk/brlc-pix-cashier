@@ -3,14 +3,18 @@
 pragma solidity ^0.8.0;
 
 contract PixHookMock {
+    uint256 public hookCallCounter;
+
     /// @dev TODO
-    event PixHookActivated(
+    event MockPixHookCalled(
+        bytes32 txId,
         uint256 hookIndex,
-        bytes32 txId
+        uint256 hookCallCounter
     );
 
     /// @dev TODO
     function pixHook(uint256 hookIndex, bytes32 txId) external {
-        emit PixHookActivated(hookIndex, txId);
+        hookCallCounter += 1;
+        emit MockPixHookCalled(txId, hookIndex, hookCallCounter);
     }
 }

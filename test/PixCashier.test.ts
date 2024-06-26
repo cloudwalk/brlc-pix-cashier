@@ -249,6 +249,7 @@ describe("Contract 'PixCashier'", async () => {
   let pixHookMockFactory: ContractFactory;
   let deployer: SignerWithAddress;
   let cashier: SignerWithAddress;
+  let hookAdmin: SignerWithAddress;
   let receiver: SignerWithAddress;
   let user: SignerWithAddress;
   let users: SignerWithAddress[];
@@ -259,6 +260,7 @@ describe("Contract 'PixCashier'", async () => {
   const pauserRole: string = ethers.utils.id("PAUSER_ROLE");
   const rescuerRole: string = ethers.utils.id("RESCUER_ROLE");
   const cashierRole: string = ethers.utils.id("CASHIER_ROLE");
+  const hookAdminRole: string = ethers.utils.id("HOOK_ADMIN_ROLE");
 
   before(async () => {
     pixCashierFactory = await ethers.getContractFactory("PixCashier");
@@ -267,7 +269,7 @@ describe("Contract 'PixCashier'", async () => {
 
     let secondUser: SignerWithAddress;
     let thirdUser: SignerWithAddress;
-    [deployer, cashier, receiver, user, secondUser, thirdUser] = await ethers.getSigners();
+    [deployer, cashier, hookAdmin, receiver, user, secondUser, thirdUser] = await ethers.getSigners();
     users = [user, secondUser, thirdUser];
     userAddresses = users.map(user => user.address);
   });
@@ -302,6 +304,7 @@ describe("Contract 'PixCashier'", async () => {
     const fixture: Fixture = await deployContracts();
     const { pixCashier, tokenMock } = fixture;
     await proveTx(pixCashier.grantRole(cashierRole, cashier.address));
+    await proveTx(pixCashier.grantRole(hookAdminRole, hookAdmin.address));
     for (const user of users) {
       await proveTx(tokenMock.mint(user.address, INITIAL_USER_BALANCE));
       await proveTx(tokenMock.connect(user).approve(pixCashier.address, ethers.constants.MaxUint256));
@@ -495,6 +498,7 @@ describe("Contract 'PixCashier'", async () => {
       expect(await pixCashier.PAUSER_ROLE()).to.equal(pauserRole);
       expect(await pixCashier.RESCUER_ROLE()).to.equal(rescuerRole);
       expect(await pixCashier.CASHIER_ROLE()).to.equal(cashierRole);
+      expect(await pixCashier.HOOK_ADMIN_ROLE()).to.equal(hookAdminRole);
 
       // The role admins
       expect(await pixCashier.getRoleAdmin(ownerRole)).to.equal(ownerRole);
@@ -502,6 +506,7 @@ describe("Contract 'PixCashier'", async () => {
       expect(await pixCashier.getRoleAdmin(pauserRole)).to.equal(ownerRole);
       expect(await pixCashier.getRoleAdmin(rescuerRole)).to.equal(ownerRole);
       expect(await pixCashier.getRoleAdmin(cashierRole)).to.equal(ownerRole);
+      expect(await pixCashier.getRoleAdmin(hookAdminRole)).to.equal(ownerRole);
 
       // The deployer should have the owner role, but not the other roles
       expect(await pixCashier.hasRole(ownerRole, deployer.address)).to.equal(true);
@@ -509,6 +514,7 @@ describe("Contract 'PixCashier'", async () => {
       expect(await pixCashier.hasRole(pauserRole, deployer.address)).to.equal(false);
       expect(await pixCashier.hasRole(rescuerRole, deployer.address)).to.equal(false);
       expect(await pixCashier.hasRole(cashierRole, deployer.address)).to.equal(false);
+      expect(await pixCashier.hasRole(hookAdminRole, deployer.address)).to.equal(false);
 
       // The initial contract state is unpaused
       expect(await pixCashier.paused()).to.equal(false);
@@ -2168,7 +2174,7 @@ describe("Contract 'PixCashier'", async () => {
       const oldCallableContract = props.oldCallableContract ?? ADDRESS_ZERO;
       const oldHookFlags = props.oldHookFlags ?? 0;
       const pixTxId = props.pixTxId ?? TRANSACTION_ID1;
-      const tx = await pixCashier.connect(cashier).configureCashOutHooks(
+      const tx = await pixCashier.connect(hookAdmin).configureCashOutHooks(
         pixTxId,
         newCallableContract,
         newHookFlags
@@ -2217,7 +2223,7 @@ describe("Contract 'PixCashier'", async () => {
       const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
       await pauseContract(pixCashier);
       await expect(
-        pixCashier.connect(cashier).configureCashOutHooks(
+        pixCashier.connect(hookAdmin).configureCashOutHooks(
           TRANSACTION_ID1,
           user.address, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
@@ -2225,7 +2231,7 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWith(REVERT_MESSAGE_IF_CONTRACT_IS_PAUSED);
     });
 
-    it("Is reverted if the caller does not have the cashier role", async () => {
+    it("Is reverted if the caller does not have the hook admin role", async () => {
       const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         pixCashier.connect(deployer).configureCashOutHooks(
@@ -2233,7 +2239,15 @@ describe("Contract 'PixCashier'", async () => {
           user.address, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
         )
-      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, cashierRole));
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(deployer.address, hookAdminRole));
+
+      await expect(
+        pixCashier.connect(cashier).configureCashOutHooks(
+          TRANSACTION_ID1,
+          user.address, // newCallableContract
+          ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
+        )
+      ).to.be.revertedWith(createRevertMessageDueToMissingRole(cashier.address, hookAdminRole));
     });
 
     it("Is reverted if the provided hook flags are invalid", async () => {
@@ -2241,7 +2255,7 @@ describe("Contract 'PixCashier'", async () => {
 
       // Try a hook flag with the index lower than the valid range of indexes
       await expect(
-        pixCashier.connect(cashier).configureCashOutHooks(
+        pixCashier.connect(hookAdmin).configureCashOutHooks(
           TRANSACTION_ID1,
           user.address, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS + (1 << HookIndex.UnusedLower) // newHookFlags
@@ -2250,7 +2264,7 @@ describe("Contract 'PixCashier'", async () => {
 
       // Try a hook flag with the index higher than the valid range of indexes
       await expect(
-        pixCashier.connect(cashier).configureCashOutHooks(
+        pixCashier.connect(hookAdmin).configureCashOutHooks(
           TRANSACTION_ID1,
           user.address, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS + (1 << HookIndex.UnusedHigher) // newHookFlags
@@ -2263,7 +2277,7 @@ describe("Contract 'PixCashier'", async () => {
 
       // Try the default callable contract address and hook flags
       await expect(
-        pixCashier.connect(cashier).configureCashOutHooks(
+        pixCashier.connect(hookAdmin).configureCashOutHooks(
           TRANSACTION_ID1,
           ADDRESS_ZERO, // newCallableContract
           0 // newHookFlags
@@ -2271,13 +2285,13 @@ describe("Contract 'PixCashier'", async () => {
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED);
 
       // Try previously configured callable contract address and flags
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         TRANSACTION_ID1,
         user.address, // newCallableContract
         ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
       ));
       await expect(
-        pixCashier.connect(cashier).configureCashOutHooks(
+        pixCashier.connect(hookAdmin).configureCashOutHooks(
           TRANSACTION_ID1,
           user.address, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
@@ -2290,7 +2304,7 @@ describe("Contract 'PixCashier'", async () => {
 
       // Try the default callable contract address and hook flags
       await expect(
-        pixCashier.connect(cashier).configureCashOutHooks(
+        pixCashier.connect(hookAdmin).configureCashOutHooks(
           TRANSACTION_ID1,
           ADDRESS_ZERO, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
@@ -2363,7 +2377,7 @@ describe("Contract 'PixCashier'", async () => {
       const [cashOut] = defineTestCashOuts();
       cashOut.txId = TRANSACTION_ID1;
 
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         cashOut.txId,
         pixHookMock.address, // newCallableContract,
         ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
@@ -2401,7 +2415,7 @@ describe("Contract 'PixCashier'", async () => {
         (1 << HookIndex.CashOutConfirmationBefore) +
         (1 << HookIndex.CashOutReversalBefore);
 
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         cashOut.txId,
         pixHookMock.address, // newCallableContract,
         hookFlags // newHookFlags
@@ -2435,7 +2449,7 @@ describe("Contract 'PixCashier'", async () => {
         (1 << HookIndex.CashOutConfirmationAfter) +
         (1 << HookIndex.CashOutReversalAfter);
 
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         cashOut.txId,
         pixHookMock.address, // newCallableContract,
         hookFlags // newHookFlags
@@ -2466,7 +2480,7 @@ describe("Contract 'PixCashier'", async () => {
       const [cashOut] = defineTestCashOuts();
       cashOut.txId = TRANSACTION_ID1;
 
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         cashOut.txId,
         pixHookMock.address, // newCallableContract,
         ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
@@ -2489,7 +2503,7 @@ describe("Contract 'PixCashier'", async () => {
         (1 << HookIndex.CashOutRequestBefore) +
         (1 << HookIndex.CashOutConfirmationBefore);
 
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         cashOut.txId,
         pixHookMock.address, // newCallableContract,
         hookFlags // newHookFlags
@@ -2511,7 +2525,7 @@ describe("Contract 'PixCashier'", async () => {
         (1 << HookIndex.CashOutRequestAfter) + // Is not called for internal cash-outs but still configured
         (1 << HookIndex.CashOutConfirmationAfter);
 
-      await proveTx(pixCashier.connect(cashier).configureCashOutHooks(
+      await proveTx(pixCashier.connect(hookAdmin).configureCashOutHooks(
         cashOut.txId,
         pixHookMock.address, // newCallableContract,
         hookFlags // newHookFlags

@@ -45,6 +45,9 @@ contract PixCashier is
     /// @dev The role of cashier that is allowed to execute the cash-in operations.
     bytes32 public constant CASHIER_ROLE = keccak256("CASHIER_ROLE");
 
+    /// @dev The role of cashier that is allowed to configure hook functions for operations.
+    bytes32 public constant HOOK_ADMIN_ROLE = keccak256("HOOK_ADMIN_ROLE");
+
     /// @dev TODO
     uint256 private constant CASH_OUT_FLAG_SOME_HOOK_CONFIGURED = (1 << uint256(CashOutFlagIndex.SomeHookRegistered));
 
@@ -168,6 +171,7 @@ contract PixCashier is
 
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
         _setRoleAdmin(CASHIER_ROLE, OWNER_ROLE);
+        _setRoleAdmin(HOOK_ADMIN_ROLE, OWNER_ROLE);
 
         _setupRole(OWNER_ROLE, _msgSender());
     }
@@ -585,7 +589,7 @@ contract PixCashier is
         bytes32 txId,
         address newCallableContract,
         uint256 newHookFlags
-    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    ) external whenNotPaused onlyRole(HOOK_ADMIN_ROLE) {
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
             revert HookFlagsInvalid();
         }

@@ -260,11 +260,19 @@ contract PixCashierProxyStorage {
     /// @dev The set of off-chain transaction identifiers that correspond the pending cash-out operations.
     EnumerableSet.Bytes32Set internal _pendingCashOutTxIds;
 
+    uint256 public counterCashIn;
+
+    uint256 public counterRequestCashOut;
+
+    uint256 public counterConfirmCashOut;
+
+    uint256 public counterReverseCashOut;
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      */
-    uint256[46] private __gap;
+    uint256[42] private __gap;
 }
 
 /**
@@ -426,6 +434,8 @@ contract PixCashierProxy is
         if (!IERC20Mintable(_token).mint(account, amount)) {
             revert TokenMintingFailure();
         }
+
+        counterCashIn++;
     }
 
     /**
@@ -542,6 +552,8 @@ contract PixCashierProxy is
         emit RequestCashOut(account, amount, cashOutBalance, txId, msg.sender);
 
         IERC20(_token).safeTransferFrom(account, address(this), amount);
+
+        counterRequestCashOut++;
     }
 
     /**
@@ -573,6 +585,8 @@ contract PixCashierProxy is
         emit ConfirmCashOut(account, amount, cashOutBalance, txId);
 
         IERC20Mintable(_token).burn(amount);
+
+        counterConfirmCashOut++;
     }
 
     /**
@@ -604,6 +618,8 @@ contract PixCashierProxy is
         emit ReverseCashOut(account, amount, cashOutBalance, txId);
 
         IERC20(_token).safeTransfer(account, amount);
+
+        counterReverseCashOut++;
     }
 
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {

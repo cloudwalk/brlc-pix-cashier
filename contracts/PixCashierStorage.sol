@@ -26,6 +26,14 @@ abstract contract PixCashierStorageV1 is IPixCashierTypes {
 
     /// @dev The set of off-chain transaction identifiers that correspond the pending cash-out operations.
     EnumerableSet.Bytes32Set internal _pendingCashOutTxIds;
+
+    uint256 public counterCashIn;
+
+    uint256 public counterRequestCashOut;
+
+    uint256 public counterConfirmCashOut;
+
+    uint256 public counterReverseCashOut;
 }
 
 /**
@@ -43,5 +51,5 @@ abstract contract PixCashierStorage is PixCashierStorageV1 {
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      */
-    uint256[43] private __gap;
+    uint256[39] private __gap;
 }

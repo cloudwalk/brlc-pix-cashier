@@ -180,6 +180,8 @@ contract PixCashier is
             0, // releaseTime
             CashInExecutionPolicy.Revert
         );
+
+        counterCashIn++;
     }
 
     /**
@@ -347,6 +349,7 @@ contract PixCashier is
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _requestCashOut(_msgSender(), account, amount, txId);
+        counterRequestCashOut++;
     }
 
     /**
@@ -385,6 +388,7 @@ contract PixCashier is
      */
     function confirmCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _processCashOut(txId, CashOutStatus.Confirmed);
+        counterConfirmCashOut++;
     }
 
     /**
@@ -421,6 +425,7 @@ contract PixCashier is
      */
     function reverseCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _processCashOut(txId, CashOutStatus.Reversed);
+        counterReverseCashOut++;
     }
 
     /**

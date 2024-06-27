@@ -18,7 +18,7 @@ abstract contract PixCreditAgentStorageV1 is IPixCreditAgentTypes {
     mapping(bytes32 => PixCredit) internal _pixCredits;
 
     /// @dev TODO.
-    PixCreditCounters internal _pixCreditCounters;
+    AgentState internal _agentState;
 }
 
 /**

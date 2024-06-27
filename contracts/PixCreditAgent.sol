@@ -51,15 +51,14 @@ contract PixCreditAgent is
         (1 << uint256(IPixHookableTypes.HookIndex.CashOutReversalAfter));
 
     // ------------------ Errors ---------------------------------- //
-
-    /// @dev The zero contract address has been passed as a function argument.
-    error ContractAddressZero();
-
     /// @dev The zero PIX off-chain transaction identifier has been passed as a function argument.
     error PixTxIdZero();
 
     /// @dev The zero borrower address has been passed as a function argument.
     error BorrowerAddressZero();
+
+    /// @dev The zero program ID has been passed as a function argument.
+    error ProgramIdZero();
 
     /// @dev The zero loan amount has been passed as a function argument.
     error LoanAmountZero();
@@ -85,6 +84,9 @@ contract PixCreditAgent is
 
     /// @dev TODO
     error PixHookCallerUnauthorized(address caller);
+
+    /// @dev TODO
+    error ContractNotConfigured();
 
     // ------------------ Initializers ---------------------------- //
 
@@ -126,11 +128,9 @@ contract PixCreditAgent is
         if (oldPixCashier == newPixCashier) {
             revert ConfigurationUnchanged();
         }
-        if (newPixCashier == address(0)) {
-            revert ContractAddressZero();
-        }
 
         _pixCashier = newPixCashier;
+        _changeConfiguredState();
 
         emit PixCashierChanged(newPixCashier, oldPixCashier);
     }
@@ -142,11 +142,9 @@ contract PixCreditAgent is
         if (oldLendingMarket == newLendingMarket) {
             revert ConfigurationUnchanged();
         }
-        if (newLendingMarket == address(0)) {
-            revert ContractAddressZero();
-        }
 
         _lendingMarket = newLendingMarket;
+        _changeConfiguredState();
 
         emit LendingMarketChanged(newLendingMarket, oldLendingMarket);
     }
@@ -160,21 +158,27 @@ contract PixCreditAgent is
         uint256 loanAmount,
         uint256 loanAddon
     ) external whenNotPaused onlyRole(MANAGER_ROLE) {
+        if(!_agentState.configured) {
+            revert ContractNotConfigured();
+        }
         if (pixTxId == bytes32(0)) {
             revert PixTxIdZero();
         }
         if (borrower == address(0)) {
             revert BorrowerAddressZero();
         }
-        if (loanAmount == 0) {
-            revert LoanAmountZero();
+        if (programId == 0) {
+            revert ProgramIdZero();
         }
         if (durationInPeriods == 0) {
             revert LoanDurationZero();
         }
+        if (loanAmount == 0) {
+            revert LoanAmountZero();
+        }
 
         PixCredit storage pixCredit = _pixCredits[pixTxId];
-        if (pixCredit.status != PixCreditStatus.Nonexistent || pixCredit.status != PixCreditStatus.Reversed) {
+        if (pixCredit.status != PixCreditStatus.Nonexistent && pixCredit.status != PixCreditStatus.Reversed) {
             revert PixCreditStatusInappropriate(pixTxId, pixCredit.status);
         }
 
@@ -208,7 +212,7 @@ contract PixCreditAgent is
             revert PixCreditStatusInappropriate(pixTxId, pixCredit.status);
         }
 
-        IPixHookable(_pixCashier).configureCashOutHooks(pixTxId, address(this), 0);
+        IPixHookable(_pixCashier).configureCashOutHooks(pixTxId, address(0), 0);
 
         _changePixCreditStatus(
             pixTxId,
@@ -250,16 +254,29 @@ contract PixCreditAgent is
     }
 
     /// @dev TODO
-    function pixCreditCounters() external view returns (PixCreditCounters memory) {
-        return _pixCreditCounters;
+    function agentState() external view returns (AgentState memory) {
+        return _agentState;
     }
 
     // ------------------ Internal functions ---------------------- //
 
     /// @dev TODO
     function _checkConfiguringPermission() internal view {
-        if (_pixCreditCounters.initiated > 0 || _pixCreditCounters.pending > 0) {
+        if (_agentState.initiatedCreditCounter > 0 || _agentState.pendingCreditCounter > 0) {
             revert ConfiguringProhibited();
+        }
+    }
+
+    /// @dev TODO
+    function _changeConfiguredState() internal {
+        if (_lendingMarket != address(0) && _pixCashier != address(0)) {
+            if (!_agentState.configured) {
+                _agentState.configured = true;
+            }
+        } else {
+            if (_agentState.configured) {
+                _agentState.configured = false;
+            }
         }
     }
 
@@ -284,19 +301,19 @@ contract PixCreditAgent is
 
         unchecked {
             if (oldStatus == PixCreditStatus.Initiated) {
-                _pixCreditCounters.initiated -= uint64(1);
+                _agentState.initiatedCreditCounter -= uint64(1);
             }
             else if (oldStatus == PixCreditStatus.Pending) {
-                _pixCreditCounters.pending -= uint64(1);
+                _agentState.pendingCreditCounter -= uint64(1);
             }
         }
 
         if (newStatus == PixCreditStatus.Initiated) {
-            _pixCreditCounters.initiated += uint64(1);
+            _agentState.initiatedCreditCounter += uint64(1);
         } else if (newStatus == PixCreditStatus.Pending) {
-            _pixCreditCounters.pending += uint64(1);
+            _agentState.pendingCreditCounter += uint64(1);
         } else if (newStatus == PixCreditStatus.Confirmed || newStatus == PixCreditStatus.Reversed) {
-            _pixCreditCounters.processed += uint64(1);
+            _agentState.processedCreditCounter += uint64(1);
         } else {
             return;
         }
@@ -342,8 +359,8 @@ contract PixCreditAgent is
         _changePixCreditStatus(
             pixTxId,
             pixCredit,
-            PixCreditStatus.Pending, // newStatus
-            PixCreditStatus.Confirmed // oldStatus
+            PixCreditStatus.Confirmed, // newStatus
+            PixCreditStatus.Pending // oldStatus
         );
     }
 

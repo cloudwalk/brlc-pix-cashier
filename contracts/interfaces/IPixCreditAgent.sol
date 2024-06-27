@@ -30,12 +30,13 @@ interface IPixCreditAgentTypes {
     }
 
     /// @dev TODO
-    struct PixCreditCounters {
+    struct AgentState {
         // Slot 1
-        uint64 initiated;
-        uint64 pending;
-        uint64 processed;
-        // uint64 reserved // Reserved for future use.
+        uint64 initiatedCreditCounter;
+        uint64 pendingCreditCounter;
+        uint64 processedCreditCounter;
+        bool configured;
+        // uint56 reserved // Reserved for future use.
     }
 }
 
@@ -84,7 +85,7 @@ interface IPixCreditAgentMain is IPixCreditAgentTypes {
     /**
      * @dev TODO
      */
-    function pixCreditCounters() external view returns (PixCreditCounters memory);
+    function agentState() external view returns (AgentState memory);
 }
 
 /**

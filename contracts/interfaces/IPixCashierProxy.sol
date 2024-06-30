@@ -2,105 +2,13 @@
 
 pragma solidity ^0.8.0;
 
-/**
- * @title PixCashier types interface
- */
-interface IPixCashierTypes {
-    /**
-     * @dev Possible statuses of a cash-in operation as an enum.
-     *
-     * The possible values:
-     * - Nonexistent ----- The operation does not exist (the default value).
-     * - Executed -------- The operation was executed as a common mint.
-     * - PremintExecuted - The operation was executed as a premint with some predetermined release time.
-     */
-    enum CashInStatus {
-        Nonexistent,    // 0
-        Executed,       // 1
-        PremintExecuted // 2
-    }
-
-    /**
-     * @dev Possible statuses of a cash-in batch operation as an enum.
-     *
-     * The possible values:
-     * - Nonexistent ----- The operation does not exist (the default value).
-     * - Executed -------- The operation was executed as common mints.
-     * - PremintExecuted - The operation was executed as premints or related to them.
-     */
-    enum CashInBatchStatus {
-        Nonexistent,    // 0
-        Executed,       // 1
-        PremintExecuted // 2
-    }
-
-    /**
-     * @dev Possible result statuses of a cash-in operation as an enum.
-     *
-     * The possible values:
-     * - Success ------------- The operation was executed successfully.
-     * - AlreadyExecuted ----- The operation was already executed.
-     * - InappropriateStatus - The operation has inappropriate status and cannot be modified.
-     */
-    enum CashInExecutionResult {
-        Success,            // 0
-        AlreadyExecuted,    // 1
-        InappropriateStatus // 2
-    }
-
-    /**
-     * @dev Possible execution policies of a cash-in operation as an enum.
-     *
-     * The possible values:
-     * - Revert - In case of failure the operation will be reverted.
-     * - Skip --- In case of failure the operation will be skipped.
-     */
-    enum CashInExecutionPolicy {
-        Revert, // 0
-        Skip    // 1
-    }
-
-    /**
-     * @dev Possible statuses of a cash-out operation as an enum.
-     *
-     * The possible values:
-     * - Nonexistent - The operation does not exist (the default value).
-     * - Pending ----- The status immediately after the operation requesting.
-     * - Reversed ---- The operation was reversed.
-     * - Confirmed --- The operation was confirmed.
-     */
-    enum CashOutStatus {
-        Nonexistent, // 0
-        Pending,     // 1
-        Reversed,    // 2
-        Confirmed    // 3
-    }
-
-    /// @dev Structure with data of a single cash-in operation.
-    struct CashInOperation {
-        CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
-        address account;     // The owner of tokens to cash-in.
-        uint64 amount;       // The amount of tokens to cash-in.
-    }
-
-    /// @dev Structure with data of a batch cash-in operation.
-    struct CashInBatchOperation {
-        CashInBatchStatus status; // The status of the cash-in batch operation according to the {CashInBatchStatus}.
-    }
-
-    /// @dev Structure with data of a single cash-out operation.
-    struct CashOutOperation {
-        CashOutStatus status; // The status of the cash-out operation according to the {CashOutStatus} enum.
-        address account;      // The owner of tokens to cash-out.
-        uint64 amount;        // The amount of tokens to cash-out.
-    }
-}
+import { IPixCashierTypes } from "./IPixCashier.sol";
 
 /**
  * @title PixCashier interface
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
-interface IPixCashier is IPixCashierTypes {
+interface IPixCashierProxy is IPixCashierTypes {
     // ------------------ Events ---------------------------------- //
 
     /// @dev Emitted when a new cash-in operation is executed.
@@ -117,13 +25,6 @@ interface IPixCashier is IPixCashierTypes {
         uint256 oldAmount,       // The old amount of preminted tokens.
         bytes32 indexed txId,    // The off-chain transaction identifier for the operation.
         uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
-    );
-
-    /// @dev Emitted when a new batch of cash-in operations is executed.
-    event CashInBatch(
-        bytes32 indexed batchId,                 // The off-chain batch identifier.
-        bytes32[] txIds,                         // The array of off-chain identifiers for each operation in the batch.
-        CashInExecutionResult[] executionResults // The array of execution results for each operation in the batch.
     );
 
     /// @dev Emitted when a new cash-out operation is initiated.
@@ -204,69 +105,6 @@ interface IPixCashier is IPixCashierTypes {
     ) external;
 
     /**
-     * @dev Executes a batch of cash-in operations as common mints.
-     *
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to execute cash-in operations.
-     *
-     * Emits a {CashInBatch} event.
-     * Emits a {CashIn} events.
-     *
-     * @param accounts The array of the addresses of the tokens recipient.
-     * @param amounts The array of the token amounts to be received.
-     * @param txIds The array of the off-chain transaction identifiers of the operation.
-     * @param batchId The off-chain batch identifier.
-     */
-    function cashInBatch(
-        address[] memory accounts,
-        uint256[] memory amounts,
-        bytes32[] memory txIds,
-        bytes32 batchId
-    ) external;
-
-    /**
-     * @dev Executes a batch of cash-in operations as premints with some predetermined release time.
-     *
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to execute cash-in operations.
-     *
-     * Emits a {CashInBatch} event.
-     * Emits a {CashInPremint} events.
-     *
-     * @param accounts The array of the addresses of the tokens recipient.
-     * @param amounts The array of the token amounts to be received.
-     * @param txIds The array of the off-chain transaction identifiers of the operation.
-     * @param releaseTime The timestamp when the minted tokens will become available for usage.
-     * @param batchId The off-chain batch identifier.
-     */
-    function cashInPremintBatch(
-        address[] memory accounts,
-        uint256[] memory amounts,
-        bytes32[] memory txIds,
-        uint256 releaseTime,
-        bytes32 batchId
-    ) external;
-
-    /**
-     * @dev Executes a batch revocation of the existing cash-in premints that have not been released yet.
-     *
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to execute cash-in operations.
-     *
-     * Emits a {CashInBatch} event.
-     * Emits a {CashInPremint} events.
-     *
-     * @param txIds The array of the off-chain transaction identifiers of the operation.
-     * @param releaseTime The timestamp when the minted tokens will become available for usage.
-     * @param batchId The off-chain batch identifier.
-     */
-    function cashInPremintRevokeBatch(
-        bytes32[] memory txIds,
-        uint256 releaseTime,
-        bytes32 batchId
-    ) external;
-
-    /**
      * @dev Reschedules original cash-in premint release to a new target release.
      *
      * @param originalRelease The timestamp of the original premint release to be rescheduled.
@@ -290,25 +128,6 @@ interface IPixCashier is IPixCashierTypes {
     function requestCashOutFrom(address account, uint256 amount, bytes32 txId) external;
 
     /**
-     * @dev Initiates a batch of cash-out operations from some other accounts.
-     *
-     * Transfers tokens from the accounts to the contract.
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to process cash-out operations.
-     *
-     * Emits {CashOut} events.
-     *
-     * @param accounts The array of accounts on that behalf the operation is made.
-     * @param amounts The array of amounts of tokens to be cash-outed.
-     * @param txIds The array of off-chain transaction identifiers of the operation.
-     */
-    function requestCashOutFromBatch(
-        address[] memory accounts,
-        uint256[] memory amounts,
-        bytes32[] memory txIds
-    ) external;
-
-    /**
      * @dev Confirms a single cash-out operation.
      *
      * Burns tokens previously transferred to the contract.
@@ -320,19 +139,6 @@ interface IPixCashier is IPixCashierTypes {
      * @param txId The off-chain transaction identifier of the operation.
      */
     function confirmCashOut(bytes32 txId) external;
-
-    /**
-     * @dev Confirms multiple cash-out operations.
-     *
-     * Burns tokens previously transferred to the contract.
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to process cash-out operations.
-     *
-     * Emits a {CashOutConfirm} event for each operation.
-     *
-     * @param txIds The off-chain transaction identifiers of the operations.
-     */
-    function confirmCashOutBatch(bytes32[] memory txIds) external;
 
     /**
      * @dev Reverts a single cash-out operation.
@@ -347,19 +153,6 @@ interface IPixCashier is IPixCashierTypes {
      */
     function reverseCashOut(bytes32 txId) external;
 
-    /**
-     * @dev Reverts multiple cash-out operation.
-     *
-     * Transfers tokens back from the contract to the accounts that requested the operations.
-     * This function is expected to be called by a limited number of accounts
-     * that are allowed to process cash-out operations.
-     *
-     * Emits a {CashOutReverse} event for each operation.
-     *
-     * @param txIds The off-chain transaction identifiers of the operations.
-     */
-    function reverseCashOutBatch(bytes32[] memory txIds) external;
-
     // ------------------ View functions -------------------------- //
 
     /**
@@ -373,18 +166,6 @@ interface IPixCashier is IPixCashierTypes {
      * @param txIds The off-chain transaction identifiers of the operations.
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory);
-
-    /**
-     * @dev Returns the data of a cash-in batch operation.
-     * @param batchId The off-chain identifier of the cash-in batch operation.
-     */
-    function getCashInBatch(bytes32 batchId) external view returns (CashInBatchOperation memory);
-
-    /**
-     * @dev Returns the data of multiple cash-in batch operations.
-     * @param batchIds The off-chain identifiers of the cash-in batch operations.
-     */
-    function getCashInBatches(bytes32[] memory batchIds) external view returns (CashInBatchOperation[] memory);
 
     /**
      * @dev Returns the data of a single cash-out operation.
@@ -418,7 +199,7 @@ interface IPixCashier is IPixCashierTypes {
 
     /**
      * @dev Returns the pending cash-out balance for an account.
-     * @param account The address of the account.
+     * @param account The address of the account to check.
      */
     function cashOutBalanceOf(address account) external view returns (uint256);
 
@@ -431,4 +212,22 @@ interface IPixCashier is IPixCashierTypes {
      * @dev Returns the address of the underlying token.
      */
     function underlyingToken() external view returns (address);
+
+    /**
+     * @dev Returns the number of shards in the proxy.
+     */
+    function getShardCount() external view returns (uint256);
+
+    /**
+     * @dev Returns the shard address by the off-chain transaction identifier.
+     * @param txId The off-chain transaction identifier of the operation.
+     */
+    function getShardByTxId(bytes32 txId) external view returns (address);
+
+    /**
+     * @dev Returns the array of shard addresses by the range of indexes.
+     * @param startIndex The start index of the range.
+     * @param endIndex The end index of the range.
+     */
+    function getShardsByRange(uint256 startIndex, uint256 endIndex) external view returns (address[] memory);
 }

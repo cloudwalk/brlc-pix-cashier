@@ -6,75 +6,12 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import { IPixCashierErrors, IPixCashierTypes } from "./interfaces/IPixCashier.sol";
+import { IPixCashierTypes } from "./interfaces/IPixCashier.sol";
+import { IPixCashierErrors } from "./interfaces/IPixCashierErrors.sol";
+import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
 
-interface IPixCashierShard is IPixCashierTypes, IPixCashierErrors {
-    function registerCashIn(
-        address account,
-        uint256 amount,
-        bytes32 txId,
-        CashInStatus status
-    ) external returns (Error);
+import { PixCashierShardStorage } from "./PixCashierShardStorage.sol";
 
-    function revokeCashIn(
-        bytes32 txId
-    ) external returns (address, uint256, Error);
-
-    function registerCashOut(
-        address account,
-        uint256 amount,
-        bytes32 txId
-    ) external returns (Error);
-
-    function processCashOut(
-        bytes32 txId,
-        CashOutStatus status
-    ) external returns (address, uint256, Error);
-
-    function getCashIn(bytes32 txId) external view returns (CashInOperation memory);
-
-    function getCashOut(bytes32 txId) external view returns (CashOutOperation memory);
-
-    function upgradeTo(address newImplementation) external;
-}
-
-/**
- * @title PixCashier storage version 1
- */
-abstract contract PixCashierShardStorageV1 is IPixCashierTypes {
-    /// @dev The address of the underlying token.
-    address internal _token;
-
-    /// @dev The mapping of a cash-in operation structure for a given off-chain transaction identifier.
-    mapping(bytes32 => CashInOperation) internal _cashInOperations;
-
-    /// @dev The mapping of a cash-out operation structure for a given off-chain transaction identifier.
-    mapping(bytes32 => CashOutOperation) internal _cashOutOperations;
-
-    /// @dev The mapping of a pending cash-out balance for a given account.
-    mapping(address => uint256) internal _cashOutBalances;
-
-    /// @dev The set of off-chain transaction identifiers that correspond the pending cash-out operations.
-    EnumerableSet.Bytes32Set internal _pendingCashOutTxIds;
-}
-
-/**
- * @title PixCashier storage
- * @dev Contains storage variables of the {PixCashier} contract.
- *
- * We are following Compound's approach of upgrading new contract implementations.
- * See https://github.com/compound-finance/compound-protocol.
- * When we need to add new storage variables, we create a new version of PixCashierStorage
- * e.g. PixCashierStorage<versionNumber>, so finally it would look like
- * "contract PixCashierStorage is PixCashierStorageV1, PixCashierStorageV2".
- */
-abstract contract PixCashierShardStorage is PixCashierShardStorageV1 {
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     */
-    uint256[43] private __gap;
-}
 
 /**
  * @title PixCashier contract

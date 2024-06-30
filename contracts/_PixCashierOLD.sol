@@ -11,7 +11,7 @@ import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 
-import { PixCashierStorage } from "./PixCashierStorage.sol";
+import { PixCashierStorageOLD } from "./_PixCashierStorageOLD.sol";
 
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { IPixCashier } from "./interfaces/IPixCashier.sol";
@@ -21,8 +21,8 @@ import { IPixCashier } from "./interfaces/IPixCashier.sol";
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Wrapper contract for PIX cash-in and cash-out operations.
  */
-contract PixCashier is
-    PixCashierStorage,
+contract PixCashierOLD is
+    PixCashierStorageOLD,
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
@@ -182,6 +182,23 @@ contract PixCashier is
         );
 
         counterCashIn++;
+    }
+
+    function cashInBatch(
+        address[] memory account,
+        uint256[] memory amount,
+        bytes32[] memory txId
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        for (uint256 i = 0; i < account.length; i++) {
+            _cashIn(
+                account[i],
+                amount[i],
+                txId[i],
+                0, // releaseTime
+                CashInExecutionPolicy.Revert
+            );
+        }
+        counterCashIn += account.length;
     }
 
     /**

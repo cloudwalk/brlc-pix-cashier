@@ -164,7 +164,7 @@ describe("Contract 'PixCashier'", async () => {
   const EVENT_NAME_MOCK_PREMINT_DECREASING = "MockPremintDecreasing";
   const EVENT_NAME_MOCK_PREMINT_PREMINT_RESCHEDULING = "MockPremintReleaseRescheduling";
 
-  let pixCashierProxyFactory: ContractFactory;
+  let pixCashierRootFactory: ContractFactory;
   let pixCashierShardFactory: ContractFactory;
   let tokenMockFactory: ContractFactory;
   let deployer: HardhatEthersSigner;
@@ -184,8 +184,8 @@ describe("Contract 'PixCashier'", async () => {
     users = [user, secondUser, thirdUser];
 
     // Contract factories with the explicitly specified deployer account
-    pixCashierProxyFactory = await ethers.getContractFactory("PixCashierProxy");
-    pixCashierProxyFactory = pixCashierProxyFactory.connect(deployer);
+    pixCashierRootFactory = await ethers.getContractFactory("PixCashierRoot");
+    pixCashierRootFactory = pixCashierRootFactory.connect(deployer);
     pixCashierShardFactory = await ethers.getContractFactory("PixCashierShard");
     pixCashierShardFactory = pixCashierShardFactory.connect(deployer);
     tokenMockFactory = await ethers.getContractFactory("ERC20TokenMock");
@@ -205,7 +205,7 @@ describe("Contract 'PixCashier'", async () => {
 
   async function deployContracts(): Promise<Fixture> {
     const tokenMock = await deployTokenMock();
-    let pixCashier: Contract = await upgrades.deployProxy(pixCashierProxyFactory, [getAddress(tokenMock)]);
+    let pixCashier: Contract = await upgrades.deployProxy(pixCashierRootFactory, [getAddress(tokenMock)]);
     await pixCashier.waitForDeployment();
     pixCashier = connect(pixCashier, deployer); // Explicitly specifying the initial account
 
@@ -401,20 +401,20 @@ describe("Contract 'PixCashier'", async () => {
     });
 
     it("Is reverted if the passed token address is zero", async () => {
-      const anotherPixCashier: Contract = await upgrades.deployProxy(pixCashierProxyFactory, [], {
+      const anotherPixCashier: Contract = await upgrades.deployProxy(pixCashierRootFactory, [], {
         initializer: false
       });
 
       await expect(
         anotherPixCashier.initialize(ADDRESS_ZERO)
-      ).to.be.revertedWithCustomError(pixCashierProxyFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRootFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO);
     });
   });
 
   describe("Function 'upgradeToAndCall()'", async () => {
     it("Executes as expected", async () => {
       const { pixCashier } = await setUpFixture(deployContracts);
-      await checkContractUupsUpgrading(pixCashier, pixCashierProxyFactory);
+      await checkContractUupsUpgrading(pixCashier, pixCashierRootFactory);
     });
 
     it("Is reverted if the caller is not the owner", async () => {
@@ -428,7 +428,7 @@ describe("Contract 'PixCashier'", async () => {
   describe("Function 'upgradeTo()'", async () => {
     it("Executes as expected", async () => {
       const { pixCashier } = await setUpFixture(deployContracts);
-      await checkContractUupsUpgrading(pixCashier, pixCashierProxyFactory, "upgradeTo(address)");
+      await checkContractUupsUpgrading(pixCashier, pixCashierRootFactory, "upgradeTo(address)");
     });
 
     it("Is reverted if the caller is not the owner", async () => {

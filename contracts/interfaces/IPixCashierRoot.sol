@@ -8,7 +8,7 @@ import { IPixCashierTypes } from "./IPixCashierTypes.sol";
  * @title PixCashier interface
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
-interface IPixCashierProxy is IPixCashierTypes {
+interface IPixCashierRoot is IPixCashierTypes {
     // ------------------ Events ---------------------------------- //
 
     /// @dev Emitted when a new cash-in operation is executed.

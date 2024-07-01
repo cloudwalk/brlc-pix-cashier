@@ -12,23 +12,23 @@ import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
-import { IPixCashierProxy } from "./interfaces/IPixCashierProxy.sol";
+import { IPixCashierRoot } from "./interfaces/IPixCashierRoot.sol";
 import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
 
-import { PixCashierProxyStorage } from "./PixCashierProxyStorage.sol";
+import { PixCashierRootStorage } from "./PixCashierRootStorage.sol";
 
 /**
- * @title PixCashierProxy contract
+ * @title PixCashierRoot contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Entry point contract for PIX cash-in and cash-out operations.
  */
-contract PixCashierProxy is
-    PixCashierProxyStorage,
+contract PixCashierRoot is
+    PixCashierRootStorage,
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
     UUPSUpgradeable,
-    IPixCashierProxy
+    IPixCashierRoot
 {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -89,14 +89,14 @@ contract PixCashierProxy is
      * @param token_ The address of the token to set as the underlying one.
      */
     function initialize(address token_) external initializer {
-        __PixCashierProxy_init(token_);
+        __PixCashierRoot_init(token_);
     }
 
     /**
      * @dev Internal initializer of the upgradable contract.
      * @param token_ The address of the token to set as the underlying one.
      */
-    function __PixCashierProxy_init(address token_) internal onlyInitializing {
+    function __PixCashierRoot_init(address token_) internal onlyInitializing {
         __Context_init_unchained();
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
@@ -105,7 +105,7 @@ contract PixCashierProxy is
         __PausableExt_init_unchained(OWNER_ROLE);
         __Rescuable_init_unchained(OWNER_ROLE);
         __UUPSUpgradeable_init_unchained();
-        __PixCashierProxy_init_unchained(token_);
+        __PixCashierRoot_init_unchained(token_);
     }
 
     /**
@@ -117,7 +117,7 @@ contract PixCashierProxy is
      *
      * @param token_ The address of the token to set as the underlying one
      */
-    function __PixCashierProxy_init_unchained(address token_) internal onlyInitializing {
+    function __PixCashierRoot_init_unchained(address token_) internal onlyInitializing {
         if (token_ == address(0)) {
             revert ZeroTokenAddress();
         }
@@ -132,7 +132,7 @@ contract PixCashierProxy is
     // ------------------ Functions ------------------------------- //
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -161,7 +161,7 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -223,7 +223,7 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -240,7 +240,7 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -276,7 +276,7 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -306,7 +306,7 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -336,7 +336,7 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      *
      * @dev Requirements:
      *
@@ -351,14 +351,14 @@ contract PixCashierProxy is
     // ------------------ View functions -------------------------- //
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _shard(txId).getCashIn(txId);
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -370,14 +370,14 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory) {
         return _shard(txId).getCashOut(txId);
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -408,42 +408,42 @@ contract PixCashierProxy is
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function cashOutBalanceOf(address account) external view returns (uint256) {
         return _cashOutBalances[account];
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function pendingCashOutCounter() external view returns (uint256) {
         return _pendingCashOuts.length();
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function underlyingToken() external view returns (address) {
         return _token;
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getShardCount() external view returns (uint256) {
         return _shards.length;
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getShardByTxId(bytes32 txId) external view returns (address) {
         return address(_shard(txId));
     }
 
     /**
-     * @inheritdoc IPixCashierProxy
+     * @inheritdoc IPixCashierRoot
      */
     function getShardRange(uint256 startIndex, uint256 endIndex) external view returns (address[] memory) {
         if (startIndex >= endIndex || endIndex > _shards.length) {

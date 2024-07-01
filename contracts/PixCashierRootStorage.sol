@@ -6,9 +6,9 @@ import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
 pragma solidity ^0.8.0;
 
 /**
- * @title PixCashierProxy storage version 1
+ * @title PixCashierRoot storage version 1
  */
-abstract contract PixCashierProxyStorageV1 {
+abstract contract PixCashierRootStorageV1 {
     /// @dev The address of the underlying token.
     address internal _token;
 
@@ -23,16 +23,16 @@ abstract contract PixCashierProxyStorageV1 {
 }
 
 /**
- * @title PixCashierProxy storage
+ * @title PixCashierRoot storage
  * @dev Contains storage variables of the {PixCashierShard} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.
  * See https://github.com/compound-finance/compound-protocol.
- * When we need to add new storage variables, we create a new version of PixCashierProxyStorage
- * e.g. PixCashierProxyStorage<versionNumber>, so finally it would look like
- * "contract PixCashierProxyStorage is PixCashierProxyStorageV1, PixCashierProxyStorageV2".
+ * When we need to add new storage variables, we create a new version of PixCashierRootStorage
+ * e.g. PixCashierRootStorage<versionNumber>, so finally it would look like
+ * "contract PixCashierRootStorage is PixCashierRootStorageV1, PixCashierRootStorageV2".
  */
-abstract contract PixCashierProxyStorage is PixCashierProxyStorageV1 {
+abstract contract PixCashierRootStorage is PixCashierRootStorageV1 {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

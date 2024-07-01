@@ -268,7 +268,7 @@ contract PixCashierRoot is
 
         uint256 cashOutBalance = _cashOutBalances[account] + amount;
         _cashOutBalances[account] = cashOutBalance;
-        _pendingCashOuts.add(txId);
+        _pendingCashOutTxIds.add(txId);
 
         emit RequestCashOut(account, amount, cashOutBalance, txId, msg.sender);
 
@@ -298,7 +298,7 @@ contract PixCashierRoot is
 
         uint256 cashOutBalance = _cashOutBalances[account] - amount;
         _cashOutBalances[account] = cashOutBalance;
-        _pendingCashOuts.remove(txId);
+        _pendingCashOutTxIds.remove(txId);
 
         emit ConfirmCashOut(account, amount, cashOutBalance, txId);
 
@@ -328,7 +328,7 @@ contract PixCashierRoot is
 
         uint256 cashOutBalance = _cashOutBalances[account] - amount;
         _cashOutBalances[account] = cashOutBalance;
-        _pendingCashOuts.remove(txId);
+        _pendingCashOutTxIds.remove(txId);
 
         emit ReverseCashOut(account, amount, cashOutBalance, txId);
 
@@ -388,8 +388,8 @@ contract PixCashierRoot is
         return cashOutOperations;
     }
 
-    function getPendingCashOuts(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
-        uint256 len = _pendingCashOuts.length();
+    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
+        uint256 len = _pendingCashOutTxIds.length();
         bytes32[] memory txIds;
         if (len <= index || limit == 0) {
             txIds = new bytes32[](0);
@@ -400,7 +400,7 @@ contract PixCashierRoot is
             }
             txIds = new bytes32[](len);
             for (uint256 i = 0; i < len; i++) {
-                txIds[i] = _pendingCashOuts.at(index);
+                txIds[i] = _pendingCashOutTxIds.at(index);
                 index++;
             }
         }
@@ -418,7 +418,7 @@ contract PixCashierRoot is
      * @inheritdoc IPixCashierRoot
      */
     function pendingCashOutCounter() external view returns (uint256) {
-        return _pendingCashOuts.length();
+        return _pendingCashOutTxIds.length();
     }
 
     /**

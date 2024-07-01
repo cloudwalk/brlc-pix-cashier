@@ -19,7 +19,7 @@ abstract contract PixCashierRootStorageV1 {
     mapping(address => uint256) internal _cashOutBalances;
 
     /// @dev The set of off-chain transaction identifiers that correspond the pending cash-out operations.
-    EnumerableSet.Bytes32Set internal _pendingCashOuts;
+    EnumerableSet.Bytes32Set internal _pendingCashOutTxIds;
 }
 
 /**

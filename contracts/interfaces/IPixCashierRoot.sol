@@ -205,7 +205,7 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param limit The maximum number of returned identifiers.
      * @return txIds The array of requested identifiers.
      */
-    function getPendingCashOuts(uint256 index, uint256 limit) external view returns (bytes32[] memory txIds);
+    function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory txIds);
 
     /**
      * @dev Returns the pending cash-out balance for an account.

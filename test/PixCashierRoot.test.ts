@@ -309,7 +309,7 @@ describe("Contract 'PixCashier'", async () => {
       `The pending cash-out counter is wrong`
     );
 
-    const actualPendingCashOutTxIds: string[] = await pixCashier.getPendingCashOuts(0, actualPendingCashOutCounter);
+    const actualPendingCashOutTxIds: string[] = await pixCashier.getPendingCashOutTxIds(0, actualPendingCashOutCounter);
     expect(actualPendingCashOutTxIds).to.deep.equal(
       expectedState.pendingCashOutTxIds,
       `The pending cash-out tx ids are wrong`
@@ -390,7 +390,7 @@ describe("Contract 'PixCashier'", async () => {
 
       // The initial values of counters and pending cash-outs
       expect(await pixCashier.pendingCashOutCounter()).to.equal(0);
-      expect(await pixCashier.getPendingCashOuts(0, 1)).to.be.empty;
+      expect(await pixCashier.getPendingCashOutTxIds(0, 1)).to.be.empty;
     });
 
     it("Is reverted if it is called a second time", async () => {
@@ -976,7 +976,7 @@ describe("Contract 'PixCashier'", async () => {
     });
   });
 
-  describe("Function 'getPendingCashOuts()'", async () => {
+  describe("Function 'getPendingCashOutTxIds()'", async () => {
     it("Returns expected values in different cases", async () => {
       const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
       const cashOuts = defineTestCashOuts(3);
@@ -984,25 +984,25 @@ describe("Contract 'PixCashier'", async () => {
       await requestCashOuts(pixCashier, cashOuts);
       let actualTxIds: string[];
 
-      actualTxIds = await pixCashier.getPendingCashOuts(0, 50);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(0, 50);
       expect(actualTxIds).to.be.deep.equal(txIds);
 
-      actualTxIds = await pixCashier.getPendingCashOuts(0, 2);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(0, 2);
       expect(actualTxIds).to.be.deep.equal([txIds[0], txIds[1]]);
 
-      actualTxIds = await pixCashier.getPendingCashOuts(1, 2);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(1, 2);
       expect(actualTxIds).to.be.deep.equal([txIds[1], txIds[2]]);
 
-      actualTxIds = await pixCashier.getPendingCashOuts(1, 1);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(1, 1);
       expect(actualTxIds).to.be.deep.equal([txIds[1]]);
 
-      actualTxIds = await pixCashier.getPendingCashOuts(1, 50);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(1, 50);
       expect(actualTxIds).to.be.deep.equal([txIds[1], txIds[2]]);
 
-      actualTxIds = await pixCashier.getPendingCashOuts(3, 50);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(3, 50);
       expect(actualTxIds).to.be.deep.equal([]);
 
-      actualTxIds = await pixCashier.getPendingCashOuts(1, 0);
+      actualTxIds = await pixCashier.getPendingCashOutTxIds(1, 0);
       expect(actualTxIds).to.be.deep.equal([]);
     });
   });

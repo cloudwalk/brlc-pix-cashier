@@ -13,7 +13,7 @@ abstract contract PixCashierRootStorageV1 {
     address internal _token;
 
     /// @dev The array of the underlying shard contracts.
-    IPixCashierShard[] public _shards;
+    IPixCashierShard[] internal _shards;
 
     /// @dev The mapping of a pending cash-out balance for a given account.
     mapping(address => uint256) internal _cashOutBalances;

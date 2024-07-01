@@ -137,7 +137,10 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function processCashOut(bytes32 txId, CashOutStatus targetStatus) external onlyOwner returns (address, uint256, Error) {
+    function processCashOut(
+        bytes32 txId,
+        CashOutStatus targetStatus
+    ) external onlyOwner returns (address, uint256, Error) {
         if (txId == 0) {
             return (address(0), 0, Error.ZeroTxId);
         }

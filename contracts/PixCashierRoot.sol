@@ -388,6 +388,9 @@ contract PixCashierRoot is
         return cashOutOperations;
     }
 
+    /**
+     * @inheritdoc IPixCashierRoot
+     */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
         bytes32[] memory txIds;

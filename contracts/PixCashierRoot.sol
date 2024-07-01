@@ -471,7 +471,9 @@ contract PixCashierRoot is
      * @param txId The off-chain transaction identifier of the operation.
      */
     function _shard(bytes32 txId) public view returns (IPixCashierShard) {
-        return _shards[uint256(txId) % _shards.length];
+        uint256 i = uint256(keccak256(abi.encodePacked(txId)));
+        i %= _shards.length;
+        return _shards[i];
     }
 
     /**

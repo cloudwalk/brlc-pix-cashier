@@ -445,16 +445,22 @@ contract PixCashierRoot is
     /**
      * @inheritdoc IPixCashierRoot
      */
-    function getShardRange(uint256 startIndex, uint256 endIndex) external view returns (address[] memory) {
-        if (startIndex >= endIndex || endIndex > _shards.length) {
-            revert InvalidShardRange();
+    function getShardRange(uint256 index, uint256 limit) external view returns (address[] memory) {
+        uint256 len = _shards.length;
+        address[] memory shards;
+        if (len <= index || limit == 0) {
+            shards = new address[](0);
+        } else {
+            len -= index;
+            if (len > limit) {
+                len = limit;
+            }
+            shards = new address[](len);
+            for (uint256 i = 0; i < len; i++) {
+                shards[i] = address(_shards[index]);
+                index++;
+            }
         }
-
-        address[] memory shards = new address[](endIndex - startIndex);
-        for (uint256 i = startIndex; i < endIndex; i++) {
-            shards[i - startIndex] = address(_shards[i]);
-        }
-
         return shards;
     }
 

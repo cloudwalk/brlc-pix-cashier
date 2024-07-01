@@ -50,7 +50,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         uint256 amount,
         bytes32 txId,
         CashInStatus targetStatus
-    ) external returns (Error) {
+    ) external onlyOwner returns (Error) {
         if (account == address(0)) {
             return Error.ZeroAccount;
         }
@@ -80,7 +80,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function revokeCashIn(bytes32 txId) external returns (address, uint256, Error) {
+    function revokeCashIn(bytes32 txId) external onlyOwner returns (address, uint256, Error) {
         if (txId == 0) {
             return (address(0), 0, Error.ZeroTxId);
         }
@@ -104,7 +104,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function registerCashOut(address account, uint256 amount, bytes32 txId) external returns (Error) {
+    function registerCashOut(address account, uint256 amount, bytes32 txId) external onlyOwner returns (Error) {
         if (account == address(0)) {
             return Error.ZeroAccount;
         }
@@ -137,7 +137,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function processCashOut(bytes32 txId, CashOutStatus targetStatus) public returns (address, uint256, Error) {
+    function processCashOut(bytes32 txId, CashOutStatus targetStatus) external onlyOwner returns (address, uint256, Error) {
         if (txId == 0) {
             return (address(0), 0, Error.ZeroTxId);
         }

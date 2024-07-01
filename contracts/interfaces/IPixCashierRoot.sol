@@ -235,9 +235,9 @@ interface IPixCashierRoot is IPixCashierTypes {
     function getShardByTxId(bytes32 txId) external view returns (address);
 
     /**
-     * @dev Returns the array of shard addresses by the range of indexes.
-     * @param startIndex The start index of the range.
-     * @param endIndex The end index of the range.
+     * @dev Returns the shard address by the start index in the internal array.
+     * @param index The start index of the shard in the internal array.
+     * @param limit The maximum number of returned shards.
      */
-    function getShardRange(uint256 startIndex, uint256 endIndex) external view returns (address[] memory);
+    function getShardRange(uint256 index, uint256 limit) external view returns (address[] memory);
 }

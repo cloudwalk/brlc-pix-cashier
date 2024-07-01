@@ -341,8 +341,12 @@ contract PixCashierRoot is
      * @dev Requirements:
      *
      * - The caller must have the {OWNER_ROLE} role.
+     * - The maximum number of shards if limited by 1000.
      */
-    function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
+    function setShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
+        if(_shards.length + shards.length > 1000) {
+            revert InvalidShardRange();
+        }
         for (uint256 i; i < shards.length; i++) {
             _shards.push(IPixCashierShard(shards[i]));
         }

@@ -154,10 +154,10 @@ interface IPixCashierRoot is IPixCashierTypes {
     function reverseCashOut(bytes32 txId) external;
 
     /**
-     * @dev Adds a new shards to the proxy.
+     * @dev Sets the shards that are allowed to process cash-out operations.
      * @param shards The array of shard addresses to add.
      */
-    function addShards(address[] memory shards) external;
+    function setShards(address[] memory shards) external;
 
     // ------------------ View functions -------------------------- //
 

@@ -180,6 +180,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const EVENT_NAME_MOCK_PREMINT_INCREASING = "MockPremintIncreasing";
   const EVENT_NAME_MOCK_PREMINT_DECREASING = "MockPremintDecreasing";
   const EVENT_NAME_MOCK_PREMINT_PREMINT_RESCHEDULING = "MockPremintReleaseRescheduling";
+  const EVENT_NAME_SHARD_ADDED = "ShardAdded";
 
   let pixCashierRootFactory: ContractFactory;
   let pixCashierShardFactory: ContractFactory;
@@ -524,10 +525,14 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployContracts);
       const shardAddresses = users.map(user => user.address);
 
-      await proveTx(pixCashierRoot.addShards([shardAddresses[0]]));
+      const tx1 = pixCashierRoot.addShards([shardAddresses[0]]);
+      await expect(tx1).to.emit(pixCashierRoot, EVENT_NAME_SHARD_ADDED).withArgs(shardAddresses[0]);
       expect(await pixCashierRoot.getShardCount()).to.eq(1);
 
-      await proveTx(pixCashierRoot.addShards(shardAddresses));
+      const tx2 = pixCashierRoot.addShards(shardAddresses)
+      for(const shardAddress of shardAddresses) {
+        await expect(tx2).to.emit(pixCashierRoot, EVENT_NAME_SHARD_ADDED).withArgs(shardAddress);
+      }
       expect(await pixCashierRoot.getShardCount()).to.eq(1 + shardAddresses.length);
     });
 

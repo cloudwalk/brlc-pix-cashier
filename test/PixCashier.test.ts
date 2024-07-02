@@ -642,7 +642,7 @@ describe("Contract 'PixCashier'", async () => {
       const { pixCashier } = await setUpFixture(deployAndConfigureContracts);
       const amount = BigInt("0x10000000000000000");
       await expect(
-        connect(pixCashier, cashier).cashIn(user.address, amount, TRANSACTION_ID1)
+        connect(pixCashier, cashier).cashInPremint(user.address, amount, TRANSACTION_ID1, RELEASE_TIMESTAMP)
       ).to.be.revertedWithCustomError(pixCashier, REVERT_ERROR_IF_AMOUNT_EXCESS);
     });
 

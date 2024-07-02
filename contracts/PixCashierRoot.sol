@@ -498,8 +498,8 @@ contract PixCashierRoot is
     /**
      * @dev Upgrades the range of the underlying shard contracts to the a implementation.
      * @param newImplementation The address of the new shard implementation.
-     * @param fromIndex The start index of the range.
-     * @param toIndex The end index of the range.
+     * @param fromIndex The start index of the range (inclusive).
+     * @param toIndex The end index of the range (inclusive).
      */
     function upgradeShardsTo(
         address newImplementation,
@@ -509,7 +509,7 @@ contract PixCashierRoot is
         /**
          * TODO: make this function more secure and reliable.
          */
-        for (uint256 i = fromIndex; i < toIndex; i++) {
+        for (uint256 i = fromIndex; i <= toIndex; i++) {
             _shards[i].upgradeTo(newImplementation);
         }
     }

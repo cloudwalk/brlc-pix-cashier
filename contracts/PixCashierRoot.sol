@@ -79,8 +79,8 @@ contract PixCashierRoot is
     /// @dev Throws if the shard contract returns an error.
     error ShardError(IPixCashierShard.Error err);
 
-    /// @dev Throws if the provided range of shards is invalid.
-    error InvalidShardRange();
+    /// @dev Throws if the maximum number of shards is exceeded.
+    error ShardCountExcess();
 
     // ------------------ Initializers ---------------------------- //
 
@@ -341,14 +341,16 @@ contract PixCashierRoot is
      * @dev Requirements:
      *
      * - The caller must have the {OWNER_ROLE} role.
-     * - The maximum number of shards if limited by 1000.
+     * - The maximum number of shards if limited by 1100.
      */
-    function setShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
-        if(_shards.length + shards.length > 1000) {
-            revert InvalidShardRange();
+    function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
+        if(_shards.length + shards.length > 1100) {
+            revert ShardCountExcess();
         }
+
         for (uint256 i; i < shards.length; i++) {
             _shards.push(IPixCashierShard(shards[i]));
+            emit ShardAdded(shards[i]);
         }
     }
 

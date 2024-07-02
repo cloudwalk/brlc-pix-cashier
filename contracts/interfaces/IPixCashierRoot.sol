@@ -52,6 +52,9 @@ interface IPixCashierRoot is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
+    /// @dev Emitted when a new shard is added to the contract.
+    event ShardAdded(address shard);
+
     // ------------------ Functions ------------------------------- //
 
     /**
@@ -157,7 +160,7 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @dev Sets the shards that are allowed to process cash-out operations.
      * @param shards The array of shard addresses to add.
      */
-    function setShards(address[] memory shards) external;
+    function addShards(address[] memory shards) external;
 
     // ------------------ View functions -------------------------- //
 

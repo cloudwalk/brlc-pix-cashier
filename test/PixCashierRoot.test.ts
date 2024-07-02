@@ -213,7 +213,7 @@ describe("Contract 'PixCashier'", async () => {
     await pixCashierShard.waitForDeployment();
     pixCashierShard = connect(pixCashierShard, deployer); // Explicitly specifying the initial account
 
-    await proveTx(pixCashier.setShards([getAddress(pixCashierShard)]));
+    await proveTx(pixCashier.addShards([getAddress(pixCashierShard)]));
 
     return { pixCashier, tokenMock };
   }

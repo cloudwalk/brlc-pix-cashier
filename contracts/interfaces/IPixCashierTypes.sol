@@ -78,22 +78,59 @@ interface IPixCashierTypes {
         Confirmed    // 3
     }
 
+    /**
+     * @dev Indexes of bit flags that are used to process cash-in operations:
+     *
+     * - SomeHookRegistered - The flag that indicates whether a hook function is registered for the operation.
+     *
+     * Notes:
+     * - 1. This enum is not used in the current implementation.
+     * - 2. An example of the code to convert a `CashInFlagIndex` value to a bit flag:
+     *
+     *    ```solidity
+     *    uint256 flag = 1 << uint256(CashInFlagIndex.SomeHookRegistered);
+     *    ```
+     */
+    enum CashInFlagIndex {
+        SomeHookRegistered // 0
+    }
+
+    /**
+     * @dev Indexes of bit flags that are used to process cash-out operations:
+     *
+     * - SomeHookRegistered - The flag that indicates whether a hook function is registered for the operation.
+     *
+     * Note: an example of the code to convert a `CashInFlagIndex` value to a bit flag:
+     *
+     *    ```solidity
+     *    uint256 flag = 1 << uint256(CashOutFlagIndex.SomeHookRegistered);
+     *    ```
+     */
+    enum CashOutFlagIndex {
+        SomeHookRegistered // 0
+    }
+
     /// @dev Structure with data of a single cash-in operation.
     struct CashInOperation {
-        CashInStatus status; // The status of the cash-in operation according to the {CashInStatus} enum.
-        address account;     // The owner of tokens to cash-in.
-        uint64 amount;       // The amount of tokens to cash-in.
+        CashInStatus status;  // The status of the cash-in operation according to the {CashInStatus} enum.
+        address account;      // The owner of tokens to cash-in.
+        uint64 amount;        // The amount of tokens to cash-in.
+        uint8 flags;          // The bit field of flags for the operation. See {CashInFlagIndex}.
+        // uint16 __reserved; // Reserved for future use until the end of the storage slot.
     }
 
     /// @dev Structure with data of a batch cash-in operation.
     struct CashInBatchOperation {
         CashInBatchStatus status; // The status of the cash-in batch operation according to the {CashInBatchStatus}.
+        // uint248 __reserved;    // Reserved for future use until the end of the storage slot.
     }
 
     /// @dev Structure with data of a single cash-out operation.
     struct CashOutOperation {
-        CashOutStatus status; // The status of the cash-out operation according to the {CashOutStatus} enum.
-        address account;      // The owner of tokens to cash-out.
-        uint64 amount;        // The amount of tokens to cash-out.
+        CashOutStatus status;  // The status of the cash-out operation according to the {CashOutStatus} enum.
+        address account;       // The owner of tokens to cash-out.
+        uint64 amount;         // The amount of tokens to cash-out.
+        uint8 flags;           // The bit field of flags for the operation. See {CashOutFlagIndex}.
+        // uint16 __reserved;  // Reserved for future use until the end of the storage slot.
     }
 }

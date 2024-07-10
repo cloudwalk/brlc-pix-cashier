@@ -50,11 +50,11 @@ interface IPixCashierShard is IPixCashierTypes {
     /**
      * @dev Revokes a cash-in operation.
      * @param txId The off-chain identifier of the cash-in operation.
+     * @return err The error code if the operation fails, otherwise None.
      * @return account The address of the account of the cash-in operation.
      * @return amount The amount of the cash-in operation.
-     * @return err The error code if the operation fails, otherwise None.
      */
-    function revokeCashIn(bytes32 txId) external returns (address account, uint256 amount, Error err);
+    function revokeCashIn(bytes32 txId) external returns (Error err, address account, uint256 amount);
 
     /**
      * @dev Registers a cash-out operation.
@@ -62,24 +62,37 @@ interface IPixCashierShard is IPixCashierTypes {
      * @param amount The amount of the cash-out operation.
      * @param txId The off-chain identifier of the cash-out operation.
      * @return err The error code if the operation fails, otherwise None.
+     * @return flags The flags field of the stored cash-out operation structure.
      */
     function registerCashOut(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external returns (Error err);
+    ) external returns (Error err, uint8 flags);
 
     /**
      * @dev Processes a cash-out operation.
      * @param txId The off-chain identifier of the cash-out operation.
+     * @return err The error code if the operation fails, otherwise None.
      * @return account The address of the account of the cash-out operation.
      * @return amount The amount of the cash-out operation.
-     * @return err The error code if the operation fails, otherwise None.
+     * @return flags The flags field of the stored cash-out operation structure.
      */
     function processCashOut(
         bytes32 txId,
         CashOutStatus status
-    ) external returns (address account, uint256 amount, Error err);
+    ) external returns (Error err, address account, uint256 amount, uint8 flags);
+
+    /**
+     * @dev Sets the bit flags of a cash-in operation.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param flags The flags to set.
+     * @return err The error code if the operation fails, otherwise None.
+     */
+    function setCashOutFlags(
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 flags
+    ) external returns (Error err);
 
     /**
      * @dev Returns the data of a single cash-in operation.

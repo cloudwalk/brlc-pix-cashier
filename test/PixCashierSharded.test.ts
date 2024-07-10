@@ -2061,7 +2061,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
   });
 
-  describe("Complex scenarios", async () => {
+  describe("Complex scenarios without hooks", async () => {
     it("Scenario 1 with cash-out reversing executes successfully", async () => {
       const { pixCashierRoot, tokenMock } = await setUpFixture(deployAndConfigureContracts);
       const [cashOut] = defineTestCashOuts();
@@ -2102,6 +2102,27 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       await expect(connect(pixCashierRoot, cashier).confirmCashOut(cashOut.txId))
         .to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
 
+      expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
+    });
+
+    it("Scenario 3 with internal cash-out after reversing the previous one with the same ID", async () => {
+      const fixture = await setUpFixture(deployAndConfigureContracts);
+      const { pixCashierRoot, tokenMock } = fixture;
+      const [cashOut] = defineTestCashOuts();
+      await requestCashOuts(pixCashierRoot, [cashOut]);
+      await proveTx(connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId));
+      cashOut.status = CashOutStatus.Reversed;
+      await checkPixCashierState(fixture, [cashOut]);
+
+      // After reversing a cash-out with the same txId can be requested again for an internal cash-out.
+      await proveTx(connect(pixCashierRoot, cashier).makeInternalCashOut(
+        cashOut.account.address,
+        receiver.address,
+        cashOut.amount,
+        cashOut.txId
+      ));
+      cashOut.status = CashOutStatus.Internal;
+      await checkPixCashierState(fixture, [cashOut]);
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
     });
   });

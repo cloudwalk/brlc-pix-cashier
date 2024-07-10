@@ -136,22 +136,18 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
             return (Error.AmountExcess, 0);
         }
 
-        CashOutOperation storage operation = _cashOutOperations[txId];
-        CashOutStatus oldStatus = operation.status;
+        return _registerCashOut(account, amount, txId, CashOutStatus.Pending);
+    }
 
-        Error err;
-        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
-            err = Error.InappropriateCashOutStatus;
-        } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
-            err = Error.InappropriateCashOutAccount;
-        } else {
-            err = Error.None;
-            operation.account = account;
-            operation.amount = uint64(amount);
-            operation.status = CashOutStatus.Pending;
-        }
-
-        return (err, operation.flags);
+    /**
+     * @inheritdoc IPixCashierShard
+     */
+    function registerInternalCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external onlyOwner returns (Error, uint8) {
+        return _registerCashOut(account, amount, txId, CashOutStatus.Internal);
     }
 
     /**
@@ -249,6 +245,52 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     }
 
     // ------------------ Internal functions ---------------------- //
+
+    /**
+     * @dev Registers a cash-out operation internally with the provided status.
+     * @param account The address of the tokens recipient.
+     * @param amount The amount of tokens to be received.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param newStatus The new status of the operation to set.
+     * @return err The error code if the operation fails, otherwise None.
+     * @return flags The flags field of the stored cash-out operation structure.
+     */
+    function _registerCashOut(
+        address account, // Tools: this comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId,
+        CashOutStatus newStatus
+    ) internal returns (Error, uint8) {
+        if (account == address(0)) {
+            return (Error.ZeroAccount, 0);
+        }
+        if (amount == 0) {
+            return (Error.ZeroAmount, 0);
+        }
+        if (txId == 0) {
+            return (Error.ZeroTxId, 0);
+        }
+        if (amount > type(uint64).max) {
+            return (Error.AmountExcess, 0);
+        }
+
+        CashOutOperation storage operation = _cashOutOperations[txId];
+        CashOutStatus oldStatus = operation.status;
+
+        Error err;
+        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
+            err = Error.InappropriateCashOutStatus;
+        } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
+            err = Error.InappropriateCashOutAccount;
+        } else {
+            err = Error.None;
+            operation.account = account;
+            operation.amount = uint64(amount);
+            operation.status = newStatus;
+        }
+
+        return (err, operation.flags);
+    }
 
     /**
      * @dev The upgrade authorization function for UUPSProxy.

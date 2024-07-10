@@ -53,6 +53,14 @@ interface IPixCashierRoot is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
+    /// @dev Emitted when an internal cash-out operation is executed.
+    event InternalCashOut(
+        address indexed from, // The account that owns the tokens to cash-out.
+        bytes32 indexed txId, // The off-chain transaction identifier.
+        address indexed to,   // The account that received the tokens through the internal cash-out.
+        uint256 amount        // The amount of tokens to cash-out.
+    );
+
     /// @dev Emitted when a new shard is added to the contract.
     event ShardAdded(address shard);
 
@@ -170,6 +178,27 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param txId The off-chain transaction identifier of the operation.
      */
     function reverseCashOut(bytes32 txId) external;
+
+    /**
+     * @dev Executes an internal cash-out operation.
+     *
+     * Transfers tokens from the contract to the recipient account.
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to process cash-out operations.
+     *
+     * Emits an {InternalCashOut} event.
+     *
+     * @param from The account that owns the tokens to cash-out.
+     * @param to The account that will receive the tokens.
+     * @param amount The amount of tokens to be cash-outed.
+     * @param txId The unique off-chain transaction identifier of the operation.
+     */
+    function makeInternalCashOut(
+        address from, // Tools: this comment prevents Prettier from formatting into a single line.
+        address to,
+        uint256 amount,
+        bytes32 txId
+    ) external;
 
     /**
      * @dev Sets the shards that are allowed to process cash-out operations.

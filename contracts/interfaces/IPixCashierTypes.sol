@@ -70,12 +70,14 @@ interface IPixCashierTypes {
      * - Pending ----- The status immediately after the operation requesting.
      * - Reversed ---- The operation was reversed.
      * - Confirmed --- The operation was confirmed.
+     * - Internal ---- The operation executed internally
      */
     enum CashOutStatus {
         Nonexistent, // 0
         Pending,     // 1
         Reversed,    // 2
-        Confirmed    // 3
+        Confirmed,   // 3
+        Internal     // 4
     }
 
     /**

@@ -288,8 +288,8 @@ contract PixCashierRoot is
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
      * - The `account` and `txId` values must not be zero.
-     * - The `amount` value must not be zero and less or equal to uint64.max.
-     * - The cash-out operation with the provided `txId` must not be already pending.
+     * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
+     * - If the cash-out operation has the `Reversed` status its `account` field must equal the `account` argument.
      */
     function requestCashOutFrom(
         address account,
@@ -391,6 +391,49 @@ contract PixCashierRoot is
             _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutReversalAfter));
         } else {
             IERC20(_token).safeTransfer(account, amount);
+        }
+    }
+
+    /**
+     * @inheritdoc IPixCashierRoot
+     *
+     * @dev Requirements:
+     *
+     * - The contract must not be paused.
+     * - The caller must have the {CASHIER_ROLE} role.
+     * - The `from`, `to`, `amount` and `txId` values must not be zero.
+     * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
+     * - If the cash-out operation has the `Reversed` status its account address must equal the `from` argument.
+     */
+    function makeInternalCashOut(
+        address from, // Tools: this comment prevents Prettier from formatting into a single line.
+        address to,
+        uint256 amount,
+        bytes32 txId
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (to == address(0)) {
+            revert ZeroAccount();
+        }
+        (IPixCashierShard.Error err, uint8 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
+        if (err != IPixCashierShard.Error.None) {
+            if (err == IPixCashierShard.Error.ZeroAccount) revert ZeroAccount();
+            if (err == IPixCashierShard.Error.ZeroAmount) revert ZeroAmount();
+            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
+            if (err == IPixCashierShard.Error.AmountExcess) revert AmountExcess();
+            if (err == IPixCashierShard.Error.InappropriateCashOutStatus) revert InappropriateCashOutStatus();
+            if (err == IPixCashierShard.Error.InappropriateCashOutAccount) revert InappropriateCashOutAccount();
+            revert ShardError(err);
+        }
+
+        emit InternalCashOut(from, txId, to, amount);
+
+        if (flags & CASH_OUT_FLAG_SOME_HOOK_CONFIGURED != 0) {
+            _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutRequestBefore));
+            _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutConfirmationBefore));
+            IERC20(_token).safeTransferFrom(from, to, amount);
+            _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutConfirmationAfter));
+        } else {
+            IERC20(_token).safeTransferFrom(from, to, amount);
         }
     }
 

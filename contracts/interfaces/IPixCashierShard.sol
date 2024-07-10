@@ -71,6 +71,20 @@ interface IPixCashierShard is IPixCashierTypes {
     ) external returns (Error err, uint8 flags);
 
     /**
+     * @dev Registers an internal cash-out operation.
+     * @param account The address of the account.
+     * @param amount The amount of the cash-out operation.
+     * @param txId The off-chain identifier of the cash-out operation.
+     * @return err The error code if the operation fails, otherwise None.
+     * @return flags The flags field of the stored cash-out operation structure.
+     */
+    function registerInternalCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external returns (Error err, uint8 flags);
+
+    /**
      * @dev Processes a cash-out operation.
      * @param txId The off-chain identifier of the cash-out operation.
      * @return err The error code if the operation fails, otherwise None.

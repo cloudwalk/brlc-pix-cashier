@@ -148,7 +148,11 @@ contract PixCashierRoot is
      * - The provided `amount` value must not be zero and less or equal to uint64.max.
      * - The cash-in operation with the provided `txId` must not be already executed.
      */
-    function cashIn(address account, uint256 amount, bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    function cashIn(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         IPixCashierShard.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.Executed);
         if (err != IPixCashierShard.Error.None) {
             if (err == IPixCashierShard.Error.ZeroAccount) revert ZeroAccount();
@@ -211,7 +215,10 @@ contract PixCashierRoot is
      * - The caller must have the {CASHIER_ROLE} role.
      * - The provided `account`, `txId` and `releaseTime` values must not be zero.
      */
-    function cashInPremintRevoke(bytes32 txId, uint256 releaseTime) external whenNotPaused onlyRole(CASHIER_ROLE) {
+    function cashInPremintRevoke(
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 releaseTime
+    ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         if (releaseTime == 0) {
             revert InappropriatePremintReleaseTime();
         }
@@ -350,7 +357,7 @@ contract PixCashierRoot is
      * - The maximum number of shards if limited by 1100.
      */
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
-        if(_shards.length + shards.length > 1100) {
+        if (_shards.length + shards.length > 1100) {
             revert ShardCountExcess();
         }
 

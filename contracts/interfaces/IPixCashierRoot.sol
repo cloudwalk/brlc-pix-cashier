@@ -72,7 +72,11 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function cashIn(address account, uint256 amount, bytes32 txId) external;
+    function cashIn(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external;
 
     /**
      * @dev Executes a cash-in operation as a premint with some predetermined release time.
@@ -88,7 +92,7 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param releaseTime The timestamp when the minted tokens will become available for usage.
      */
     function cashInPremint(
-        address account,
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId,
         uint256 releaseTime
@@ -106,7 +110,7 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param releaseTime The timestamp of the premint that will be revoked.
      */
     function cashInPremintRevoke(
-        bytes32 txId,
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 releaseTime
     ) external;
 
@@ -116,7 +120,10 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param originalRelease The timestamp of the original premint release to be rescheduled.
      * @param targetRelease The new timestamp of the premint release to set during the rescheduling.
      */
-    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external;
+    function reschedulePremintRelease(
+        uint256 originalRelease, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 targetRelease
+    ) external;
 
     /**
      * @dev Initiates a cash-out operation from some other account.
@@ -131,7 +138,11 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param amount The amount of tokens to be cash-outed.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function requestCashOutFrom(address account, uint256 amount, bytes32 txId) external;
+    function requestCashOutFrom(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external;
 
     /**
      * @dev Confirms a single cash-out operation.

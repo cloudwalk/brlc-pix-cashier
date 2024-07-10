@@ -118,7 +118,11 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function registerCashOut(address account, uint256 amount, bytes32 txId) external onlyOwnerOrAdmin returns (Error) {
+    function registerCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external onlyOwnerOrAdmin returns (Error) {
         if (account == address(0)) {
             return Error.ZeroAccount;
         }

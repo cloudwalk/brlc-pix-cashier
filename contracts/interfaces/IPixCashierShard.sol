@@ -61,7 +61,11 @@ interface IPixCashierShard is IPixCashierTypes {
      * @param txId The off-chain identifier of the cash-out operation.
      * @return err The error code if the operation fails, otherwise None.
      */
-    function registerCashOut(address account, uint256 amount, bytes32 txId) external returns (Error err);
+    function registerCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external returns (Error err);
 
     /**
      * @dev Processes a cash-out operation.

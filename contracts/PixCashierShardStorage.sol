@@ -6,6 +6,7 @@ import { IPixCashierTypes } from "./interfaces/IPixCashierTypes.sol";
 
 /**
  * @title PixCashierShard storage version 1
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
  */
 abstract contract PixCashierShardStorageV1 is IPixCashierTypes {
     /// @dev The mapping of a cash-in operation structure for a given off-chain transaction identifier.
@@ -25,6 +26,7 @@ abstract contract PixCashierShardStorageV2 is IPixCashierTypes {
 
 /**
  * @title PixCashierShard storage
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
  * @dev Contains storage variables of the {PixCashierShard} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.

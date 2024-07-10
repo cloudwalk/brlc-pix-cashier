@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title IERC20Mintable interface
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
  * @dev The interface of a token that supports mint, premint, burn operations.
  */
 interface IERC20Mintable {

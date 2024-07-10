@@ -7,6 +7,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title PixCashierRoot storage version 1
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
  */
 abstract contract PixCashierRootStorageV1 {
     /// @dev The address of the underlying token.
@@ -24,7 +25,8 @@ abstract contract PixCashierRootStorageV1 {
 
 /**
  * @title PixCashierRoot storage
- * @dev Contains storage variables of the {PixCashierShard} contract.
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @dev Contains storage variables of the {PixCashierRoot} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.
  * See https://github.com/compound-finance/compound-protocol.

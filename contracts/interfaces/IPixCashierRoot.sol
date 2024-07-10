@@ -6,6 +6,7 @@ import { IPixCashierTypes } from "./IPixCashierTypes.sol";
 
 /**
  * @title PixCashier interface
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
 interface IPixCashierRoot is IPixCashierTypes {

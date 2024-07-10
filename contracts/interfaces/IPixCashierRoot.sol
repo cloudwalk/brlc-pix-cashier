@@ -244,6 +244,12 @@ interface IPixCashierRoot is IPixCashierTypes {
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory operations);
 
     /**
+     * @dev Returns the account and amount of a single cash-out operation.
+     * @param txId The off-chain transaction identifier of the operation.
+     */
+    function getCashOutAccountAndAmount(bytes32 txId) external view returns (address account, uint256 amount);
+
+    /**
      * @dev Returns the off-chain transaction identifiers of pending cash-out operations.
      *
      * No guarantees are made on the ordering of the identifiers in the returned array.

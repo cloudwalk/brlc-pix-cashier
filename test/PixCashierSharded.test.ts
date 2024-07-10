@@ -1850,6 +1850,24 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
   });
 
+  describe("Function 'getCashOutAccountAndAmount()'", async () => {
+    it("Returns expected values for both existent and non-existent cash-out operations ", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const [cashOut] = defineTestCashOuts();
+
+      // Non-existent
+      const result1 = await pixCashierRoot.getCashOutAccountAndAmount(cashOut.txId);
+      expect(result1[0]).to.equal(ADDRESS_ZERO);
+      expect(result1[1]).to.equal(TOKEN_AMOUNT_ZERO);
+
+      // Existent
+      await requestCashOuts(pixCashierRoot, [cashOut]);
+      const result2 = await pixCashierRoot.getCashOutAccountAndAmount(cashOut.txId);
+      expect(result2[0]).to.equal(cashOut.account.address);
+      expect(result2[1]).to.equal(cashOut.amount);
+    });
+  });
+
   describe("Scenarios with configured hooks", async () => {
     async function checkHookEvents(fixture: Fixture, props: {
       tx: TransactionResponse;

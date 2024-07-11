@@ -163,6 +163,13 @@ contract PixCashierRoot is
         _grantRole(OWNER_ROLE, _msgSender());
     }
 
+    /**
+     * @dev Sets {OWNER_ROLE} role as the admin role for the {HOOK_ADMIN_ROLE} role.
+     */
+    function initHookAdminRoke() external onlyRole(OWNER_ROLE) {
+        _setRoleAdmin(HOOK_ADMIN_ROLE, OWNER_ROLE);
+    }
+
     // ------------------ Functions ------------------------------- //
 
     /**

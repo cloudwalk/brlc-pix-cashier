@@ -44,7 +44,7 @@ contract PixCashierRoot is
     /// @dev The role of cashier that is allowed to execute the cash-in operations.
     bytes32 public constant CASHIER_ROLE = keccak256("CASHIER_ROLE");
 
-    /// @dev The role of cashier that is allowed to configure hook functions for operations.
+    /// @dev The role of hook admin that is allowed to configure hooks for operations.
     bytes32 public constant HOOK_ADMIN_ROLE = keccak256("HOOK_ADMIN_ROLE");
 
     /// @dev The bit flag that indicates that at least one hook function is configured for a cash-out operation.
@@ -506,6 +506,7 @@ contract PixCashierRoot is
             if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
             revert ShardError(err);
         }
+
         HookConfig storage hooksConfig = _cashOutHookConfigs[txId];
         _configureHooks(txId, newCallableContract, newHookFlags, hooksConfig);
     }
@@ -708,7 +709,7 @@ contract PixCashierRoot is
     function _callHookIfConfigured(bytes32 txId, uint256 hookIndex, HookConfig storage hooksConfig) internal {
         if ((hooksConfig.hookFlags & (1 << hookIndex)) != 0) {
             IPixHook callableContract = IPixHook(hooksConfig.callableContract);
-            callableContract.pixHook(hookIndex, txId);
+            callableContract.onPixHook(hookIndex, txId);
             emit HookInvoked(
                 txId, // Tools: This comment prevents Prettier from formatting into a single line.
                 hookIndex,

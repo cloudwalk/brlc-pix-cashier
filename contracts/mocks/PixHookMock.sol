@@ -23,7 +23,7 @@ contract PixHookMock {
     // ------------------ Functions ------------------------------- //
 
     /// @dev Imitates the same-name function of the {IPixHook} interface.
-    function pixHook(uint256 hookIndex, bytes32 txId) external {
+    function onPixHook(uint256 hookIndex, bytes32 txId) external {
         hookCallCounter += 1;
         emit MockPixHookCalled(txId, hookIndex, hookCallCounter);
     }

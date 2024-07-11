@@ -13,5 +13,5 @@ interface IPixHook {
      * @param hookIndex The index of the related hook. The possible values are defined in the PIX cashier contract.
      * @param txId The unique off-chain transaction identifier of the related PIX operation.
      */
-    function pixHook(uint256 hookIndex, bytes32 txId) external;
+    function onPixHook(uint256 hookIndex, bytes32 txId) external;
 }

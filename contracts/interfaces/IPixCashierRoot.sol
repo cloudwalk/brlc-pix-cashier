@@ -65,7 +65,7 @@ interface IPixCashierRoot is IPixCashierTypes {
     event ShardAdded(address shard);
 
     /// @dev Emitted when an existing shard is replaced with a new one.
-    event ShardReplaced(address oldShard, address newShard);
+    event ShardReplaced(address newShard, address oldShard);
 
     /// @dev Emitted when a shard admin status of an account is configured.
     event ShardAdminConfigured(address account, bool status);

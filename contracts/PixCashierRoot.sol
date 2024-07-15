@@ -477,7 +477,7 @@ contract PixCashierRoot is
             address oldShard = address(_shards[k]);
             address newShard = shards[i];
             _shards[k] = IPixCashierShard(newShard);
-            emit ShardReplaced(oldShard, newShard);
+            emit ShardReplaced(newShard, oldShard);
         }
     }
 

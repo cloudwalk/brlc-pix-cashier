@@ -64,6 +64,9 @@ interface IPixCashierRoot is IPixCashierTypes {
     /// @dev Emitted when a new shard is added to the contract.
     event ShardAdded(address shard);
 
+    /// @dev Emitted when an existing shard is replaced with a new one.
+    event ShardReplaced(address oldShard, address newShard);
+
     /// @dev Emitted when a shard admin status of an account is configured.
     event ShardAdminConfigured(address account, bool status);
 
@@ -205,6 +208,13 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param shards The array of shard addresses to add.
      */
     function addShards(address[] memory shards) external;
+
+    /**
+     * @dev Replaces the existing shards with a new set of shards.
+     * @param fromIndex The index in the internal array to start replacing from.
+     * @param shards The array of shard addresses to replace with.
+     */
+    function replaceShards(uint256 fromIndex, address[] memory shards) external;
 
     /**
      * @dev Configures the shard admin status of an account.

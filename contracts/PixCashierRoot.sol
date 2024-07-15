@@ -470,6 +470,22 @@ contract PixCashierRoot is
      *
      * - The caller must have the {OWNER_ROLE} role.
      */
+    function replaceShards(uint256 fromIndex, address[] memory shards) external onlyRole(OWNER_ROLE) {
+        for (uint256 i; i < shards.length; i++) {
+            address oldShard = address(_shards[fromIndex + i]);
+            _shards[i + shards.length] = IPixCashierShard(shards[i]);
+            emit ShardAdded(shards[i]);
+            emit ShardReplaced(oldShard, shards[i]);
+        }
+    }
+
+    /**
+     * @inheritdoc IPixCashierRoot
+     *
+     * @dev Requirements:
+     *
+     * - The caller must have the {OWNER_ROLE} role.
+     */
     function configureShardAdmin(address account, bool status) external onlyRole(OWNER_ROLE) {
         if (account == address(0)) {
             revert ZeroAccount();

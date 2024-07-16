@@ -516,14 +516,17 @@ contract PixCashierRoot is
         address newCallableContract,
         uint256 newHookFlags
     ) external whenNotPaused onlyRole(HOOK_ADMIN_ROLE) {
+        // Resets all the expected flags and checks whether any remains
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
             revert HookFlagsInvalid();
         }
         uint8 cashOutFlags = _shard(txId).getCashOut(txId).flags;
 
         if (newHookFlags != 0) {
+            // Sets only the needed flag, keeping other possible ones unchanged
             cashOutFlags |= uint8(CASH_OUT_FLAG_SOME_HOOK_CONFIGURED);
         } else {
+            // Resets only the needed flag, keeping other possible ones unchanged
             cashOutFlags &= uint8(~CASH_OUT_FLAG_SOME_HOOK_CONFIGURED);
         }
         IPixCashierShard.Error err = _shard(txId).setCashOutFlags(txId, cashOutFlags);
@@ -532,6 +535,8 @@ contract PixCashierRoot is
             revert ShardError(err);
         }
 
+        // Getting the hook configuration structure has been extracted from the function
+        // to keep it more generic for the future possible implementation of cash-in hooks.
         HookConfig storage hooksConfig = _cashOutHookConfigs[txId];
         _configureHooks(txId, newCallableContract, newHookFlags, hooksConfig);
     }

@@ -112,8 +112,11 @@ contract PixCashierRoot is
     /// @dev The same hooks for a PIX operation are already configured.
     error HooksAlreadyRegistered();
 
-    /// @dev The provided address of the callable contract with the PIX hook function is zero.
+    /// @dev The provided address of the callable contract with the PIX hook function is zero but must not be
     error HookCallableContractAddressZero();
+
+    /// @dev The provided address of the callable contract with the PIX hook function is non-zero but must be
+    error HookCallableContractAddressNonZero();
 
     // ------------------ Initializers ---------------------------- //
 
@@ -708,6 +711,9 @@ contract PixCashierRoot is
         }
         if (newHookFlags != 0 && newCallableContract == address(0)) {
             revert HookCallableContractAddressZero();
+        }
+        if (newHookFlags == 0 && newCallableContract != address(0)) {
+            revert HookCallableContractAddressNonZero();
         }
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);

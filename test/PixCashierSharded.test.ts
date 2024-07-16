@@ -216,6 +216,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "InappropriatePremintReleaseTime";
   const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "InappropriateCashInStatus";
   const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "HookCallableContractAddressZero";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "HookCallableContractAddressNonZero";
   const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "HookFlagsInvalid";
   const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "HooksAlreadyRegistered";
   const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "ShardCountExcess";
@@ -1765,6 +1766,24 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
         )
       ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO);
+    });
+
+    it("Is reverted if zero hook flags are configured for a not-zero callable contract address", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await proveTx(connect(pixCashierRoot, hookAdmin).configureCashOutHooks(
+        TRANSACTION_ID1,
+        user.address, // newCallableContract
+        ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
+      ));
+
+      // Try the default callable contract address and hook flags
+      await expect(
+        connect(pixCashierRoot, hookAdmin).configureCashOutHooks(
+          TRANSACTION_ID1,
+          user.address, // newCallableContract
+          0 // newHookFlags
+        )
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO);
     });
   });
 

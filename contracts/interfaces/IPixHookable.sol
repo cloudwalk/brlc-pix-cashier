@@ -33,7 +33,7 @@ interface IPixHookableTypes {
      * Notes:
      *
      * - 1. Hooks with indexes from 0 to 5 including are not used in the current implementation.
-     * - 2. The hook with index `CashOutConfirmationAfter` is not called during internal cash-out operations.
+     * - 2. The hook with index `CashOutRequestAfter` is not called during internal cash-out operations.
      * - 3. An example of the code to convert a `HookIndex` value to bit flags:
      *
      *    ```solidity

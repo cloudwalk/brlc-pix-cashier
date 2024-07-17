@@ -512,7 +512,8 @@ contract PixCashierRoot is
      * - The caller must have the {HOOK_ADMIN_ROLE} role.
      * - The provided `txId` value must not be zero.
      * - The new hook flags or the callable contract address must differ from the previously set one.
-     * - The new callable contract address must not bу zero if the new hook flags are not zero.
+     * - The new callable contract address must not be zero if the new hook flags are not zero.
+     * - The new callable contract address must be zero if the new hook flags are zero.
      */
     function configureCashOutHooks(
         bytes32 txId,

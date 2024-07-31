@@ -43,6 +43,12 @@ contract PixCashierRoot is
 
     // ------------------ Errors ---------------------------------- //
 
+    /// @dev Throws if the provided root address is zero.
+    error ZeroRootAddress();
+
+    /// @dev Throws if the provided shard address is zero.
+    error ZeroShardAddress();
+
     /// @dev Throws if the provided token address is zero.
     error ZeroTokenAddress();
 
@@ -496,29 +502,44 @@ contract PixCashierRoot is
     // ------------------ Service functions ----------------------- //
 
     /**
-     * @dev Upgrades the range of the underlying shard contracts to the a implementation.
-     * @param newImplementation The address of the new shard implementation.
-     * @param fromIndex The start index of the range (inclusive).
-     * @param toIndex The end index of the range (inclusive).
-     */
-    function upgradeShardsTo(
-        address newImplementation,
-        uint256 fromIndex,
-        uint256 toIndex
-    ) external onlyRole(OWNER_ROLE) {
-        /**
-         * TODO: make this function more secure and reliable.
-         */
-        for (uint256 i = fromIndex; i <= toIndex; i++) {
-            _shards[i].upgradeTo(newImplementation);
-        }
-    }
-
-    /**
      * @dev The version of the standard upgrade function without the second parameter for backward compatibility.
      * @custom:oz-upgrades-unsafe-allow-reachable delegatecall
      */
     function upgradeTo(address newImplementation) external {
         upgradeToAndCall(newImplementation, "");
+    }
+
+    /**
+     * @dev Upgrades the range of the underlying shard contracts to the a implementation.
+     * @param newImplementation The address of the new shard implementation.
+     */
+    function upgradeShardsTo(address newImplementation) external onlyRole(OWNER_ROLE) {
+        if (newImplementation == address(0)) {
+            revert ZeroShardAddress();
+        }
+
+        for (uint256 i = 0; i < _shards.length; i++) {
+            _shards[i].upgradeTo(newImplementation);
+        }
+    }
+
+    /**
+     * @dev Upgrades the root and shard contracts to the new implementations.
+     * @param newRootImplementation The address of the new root implementation.
+     * @param newShardImplementation The address of the new shard implementation.
+     */
+    function upgradeRootAndShardsTo(address newRootImplementation, address newShardImplementation) external {
+        if (newRootImplementation == address(0)) {
+            revert ZeroRootAddress();
+        }
+        if (newShardImplementation == address(0)) {
+            revert ZeroShardAddress();
+        }
+
+        upgradeToAndCall(newRootImplementation, "");
+
+        for (uint256 i = 0; i < _shards.length; i++) {
+            _shards[i].upgradeTo(newShardImplementation);
+        }
     }
 }

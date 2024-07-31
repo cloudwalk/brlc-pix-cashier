@@ -159,6 +159,8 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_OWNABLE_UNAUTHORIZED_ACCOUNT = "OwnableUnauthorizedAccount";
   const REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
 
+  const REVERT_ERROR_IF_ROOT_ADDRESS_IZ_ZERO = "ZeroRootAddress";
+  const REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO = "ZeroShardAddress";
   const REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO = "ZeroTokenAddress";
   const REVERT_ERROR_IF_ACCOUNT_IS_ZERO = "ZeroAccount";
   const REVERT_ERROR_IF_AMOUNT_EXCESS = "AmountExcess";
@@ -536,7 +538,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       expect(await pixCashierRoot.getShardCount()).to.eq(1 + shardAddresses.length);
     });
 
-    it("Is reverted if the caller does not have the owner role", async () => {
+    it("Is reverted if the caller is not the owner", async () => {
       const { pixCashierRoot } = await setUpFixture(deployContracts);
       const fakeShardAddress = user.address;
       await expect(
@@ -572,37 +574,16 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const targetShardImplementationAddress = getAddress(targetShardImplementation);
 
       const oldImplementationAddresses: string[] = await getImplementationAddresses(pixCashierShards);
-
-      // Check upgrade for some shards in the middle of the array
-      const lastShardIndex = pixCashierShards.length - 1;
-      let fromShardIndex = 1;
-      let toShardIndex = lastShardIndex - 1;
-      await proveTx(pixCashierRoot.upgradeShardsTo(
-        targetShardImplementationAddress,
-        fromShardIndex,
-        toShardIndex
-      ));
-
-      let newImplementationAddresses: string[] = await getImplementationAddresses(pixCashierShards);
-      expect(newImplementationAddresses[0]).to.eq(oldImplementationAddresses[0]);
-      expect(newImplementationAddresses[lastShardIndex]).to.eq(oldImplementationAddresses[0]);
-      for (let i = fromShardIndex; i < lastShardIndex; ++i) {
-        expect(newImplementationAddresses[i]).to.eq(
+      oldImplementationAddresses.forEach((_, i) => {
+        expect(oldImplementationAddresses[i]).to.not.eq(
           targetShardImplementationAddress,
-          `newImplementationAddresses[${i}] is wrong`
+          `oldImplementationAddresses[${i}] is wrong`
         );
-      }
+      });
 
-      // Check upgrade for all shards in the array
-      fromShardIndex = 0;
-      toShardIndex = lastShardIndex;
-      await proveTx(pixCashierRoot.upgradeShardsTo(
-        targetShardImplementationAddress,
-        fromShardIndex,
-        toShardIndex
-      ));
+      await proveTx(pixCashierRoot.upgradeShardsTo(targetShardImplementationAddress));
 
-      newImplementationAddresses = await getImplementationAddresses(pixCashierShards);
+      const newImplementationAddresses: string[] = await getImplementationAddresses(pixCashierShards);
       newImplementationAddresses.forEach((_, i) => {
         expect(newImplementationAddresses[i]).to.eq(
           targetShardImplementationAddress,
@@ -611,18 +592,103 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       });
     });
 
-    it("Is reverted if the caller does not have the cashier role", async () => {
+    it("Is reverted if the caller is not the owner", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
-        connect(pixCashierRoot, cashier).upgradeShardsTo(
+        connect(pixCashierRoot, user).upgradeShardsTo(user.address)
+      ).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(user.address, ownerRole);
+    });
+
+    it("Is reverted if the shard implementation address is zero", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashierRoot.upgradeShardsTo(ADDRESS_ZERO)
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO);
+    });
+  });
+
+  describe("Function 'upgradeRootAndShardsTo()'", async () => {
+    it("Executes as expected", async () => {
+      const { pixCashierRoot, pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+
+      const targetRootImplementation: Contract = await pixCashierRootFactory.deploy() as Contract;
+      await targetRootImplementation.waitForDeployment();
+      const targetRootImplementationAddress = getAddress(targetRootImplementation);
+
+      const targetShardImplementation: Contract = await pixCashierShardFactory.deploy() as Contract;
+      await targetShardImplementation.waitForDeployment();
+      const targetShardImplementationAddress = getAddress(targetShardImplementation);
+
+      const oldRootImplementationAddress = await upgrades.erc1967.getImplementationAddress(getAddress(pixCashierRoot));
+      expect(oldRootImplementationAddress).to.not.eq(targetRootImplementationAddress);
+
+      const oldShardImplementationAddresses: string[] = await getImplementationAddresses(pixCashierShards);
+      oldShardImplementationAddresses.forEach((_, i) => {
+        expect(oldShardImplementationAddresses[i]).to.not.eq(
+          targetShardImplementationAddress,
+          `oldShardImplementationAddresses[${i}] is wrong`
+        );
+      });
+
+      await proveTx(pixCashierRoot.upgradeRootAndShardsTo(
+        targetRootImplementationAddress,
+        targetShardImplementationAddress
+      ));
+
+      const newRootImplementationAddress = await upgrades.erc1967.getImplementationAddress(getAddress(pixCashierRoot));
+      expect(newRootImplementationAddress).to.eq(targetRootImplementationAddress);
+
+      const newShardImplementationAddresses: string[] = await getImplementationAddresses(pixCashierShards);
+      newShardImplementationAddresses.forEach((_, i) => {
+        expect(newShardImplementationAddresses[i]).to.eq(
+          targetShardImplementationAddress,
+          `newShardImplementationAddresses[${i}] is wrong`
+        );
+      });
+    });
+
+    it("Is reverted if the caller is not the owner", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(pixCashierRoot, user).upgradeRootAndShardsTo(
           user.address,
-          0, // fromIndex
-          0  // toIndex
+          user.address
         )
       ).to.be.revertedWithCustomError(
         pixCashierRoot,
         REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
-      ).withArgs(cashier.address, ownerRole);
+      ).withArgs(user.address, ownerRole);
+    });
+
+    it("Is reverted if the root implementation address is zero", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const targetShardImplementation: Contract = await pixCashierShardFactory.deploy() as Contract;
+      await targetShardImplementation.waitForDeployment();
+      const targetShardImplementationAddress = getAddress(targetShardImplementation);
+
+      await expect(
+        pixCashierRoot.upgradeRootAndShardsTo(
+          ADDRESS_ZERO,
+          targetShardImplementationAddress
+        )
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ROOT_ADDRESS_IZ_ZERO);
+    });
+
+    it("Is reverted if the shard implementation address is zero", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const targetRootImplementation: Contract = await pixCashierRootFactory.deploy() as Contract;
+      await targetRootImplementation.waitForDeployment();
+      const targetRootImplementationAddress = getAddress(targetRootImplementation);
+
+      await expect(
+        pixCashierRoot.upgradeRootAndShardsTo(
+          targetRootImplementationAddress,
+          ADDRESS_ZERO
+        )
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO);
     });
   });
 

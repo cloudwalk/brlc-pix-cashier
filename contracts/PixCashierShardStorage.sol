@@ -16,6 +16,14 @@ abstract contract PixCashierShardStorageV1 is IPixCashierTypes {
 }
 
 /**
+ * @title PixCashierShard storage version 2
+ */
+abstract contract PixCashierShardStorageV2 is IPixCashierTypes {
+    /// @dev The mapping of an account to its admin status (True if admin, False otherwise).
+    mapping(address => bool) internal _admins;
+}
+
+/**
  * @title PixCashierShard storage
  * @dev Contains storage variables of the {PixCashierShard} contract.
  *
@@ -25,10 +33,10 @@ abstract contract PixCashierShardStorageV1 is IPixCashierTypes {
  * e.g. PixCashierShardStorage<versionNumber>, so finally it would look like
  * "contract PixCashierShardStorage is PixCashierShardStorageV1, PixCashierShardStorageV2".
  */
-abstract contract PixCashierShardStorage is PixCashierShardStorageV1 {
+abstract contract PixCashierShardStorage is PixCashierShardStorageV1, PixCashierShardStorageV2 {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      */
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 }

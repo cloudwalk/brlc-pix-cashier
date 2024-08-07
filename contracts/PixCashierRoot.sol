@@ -360,6 +360,25 @@ contract PixCashierRoot is
         }
     }
 
+    /**
+     * @inheritdoc IPixCashierRoot
+     *
+     * @dev Requirements:
+     *
+     * - The caller must have the {OWNER_ROLE} role.
+     */
+    function configureShardAdmin(address account, bool status) external onlyRole(OWNER_ROLE) {
+        if (account == address(0)) {
+            revert ZeroAccount();
+        }
+
+        for (uint256 i; i < _shards.length; i++) {
+            _shards[i].setAdmin(account, status);
+        }
+
+        emit ShardAdminConfigured(account, status);
+    }
+
     // ------------------ View functions -------------------------- //
 
     /**

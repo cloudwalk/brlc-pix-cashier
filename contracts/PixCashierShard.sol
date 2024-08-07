@@ -14,6 +14,11 @@ import { PixCashierShardStorage } from "./PixCashierShardStorage.sol";
  * @dev The contract responsible for storing sharded cash-in and cash-out operations.
  */
 contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgradeable, IPixCashierShard {
+    // ------------------ Errors ---------------------------------- //
+
+    /// @dev Throws if the caller is not the owner or admin.
+    error Unauthorized();
+
     // ------------------ Initializers ---------------------------- //
 
     /**
@@ -35,6 +40,15 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         __PixCashierShard_init_unchained();
     }
 
+    // ----------------------- Modifiers -------------------------- //
+
+    modifier onlyOwnerOrAdmin() {
+        if (msg.sender != owner() && !_admins[msg.sender]) {
+            revert Unauthorized();
+        }
+        _;
+    }
+
     /**
      * @dev Unchained internal initializer of the upgradable contract.
      */
@@ -50,7 +64,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         uint256 amount,
         bytes32 txId,
         CashInStatus targetStatus
-    ) external onlyOwner returns (Error) {
+    ) external onlyOwnerOrAdmin returns (Error) {
         if (account == address(0)) {
             return Error.ZeroAccount;
         }
@@ -80,7 +94,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function revokeCashIn(bytes32 txId) external onlyOwner returns (address, uint256, Error) {
+    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (address, uint256, Error) {
         if (txId == 0) {
             return (address(0), 0, Error.ZeroTxId);
         }
@@ -104,7 +118,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function registerCashOut(address account, uint256 amount, bytes32 txId) external onlyOwner returns (Error) {
+    function registerCashOut(address account, uint256 amount, bytes32 txId) external onlyOwnerOrAdmin returns (Error) {
         if (account == address(0)) {
             return Error.ZeroAccount;
         }
@@ -140,7 +154,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     function processCashOut(
         bytes32 txId,
         CashOutStatus targetStatus
-    ) external onlyOwner returns (address, uint256, Error) {
+    ) external onlyOwnerOrAdmin returns (address, uint256, Error) {
         if (txId == 0) {
             return (address(0), 0, Error.ZeroTxId);
         }
@@ -156,7 +170,21 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         return (operation.account, operation.amount, Error.None);
     }
 
+    /**
+     * @inheritdoc IPixCashierShard
+     */
+    function setAdmin(address account, bool status) external onlyOwnerOrAdmin {
+        _admins[account] = status;
+    }
+
     // ------------------ View functions -------------------------- //
+
+    /**
+     * @inheritdoc IPixCashierShard
+     */
+    function isAdmin(address account) external view returns (bool) {
+        return _admins[account];
+    }
 
     /**
      * @inheritdoc IPixCashierShard
@@ -201,7 +229,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @dev The upgrade authorization function for UUPSProxy.
      */
-    function _authorizeUpgrade(address newImplementation) internal view override onlyOwner {
+    function _authorizeUpgrade(address newImplementation) internal view override onlyOwnerOrAdmin {
         newImplementation; // Suppresses a compiler warning about the unused variable
     }
 

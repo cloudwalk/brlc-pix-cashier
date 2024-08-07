@@ -24,6 +24,13 @@ interface IPixCashierShard is IPixCashierTypes {
     }
 
     /**
+     * @dev Sets the admin status of an account.
+     * @param account The address of the account to configure.
+     * @param status The admin status of the account.
+     */
+    function setAdmin(address account, bool status) external;
+
+    /**
      * @dev Registers a cash-in operation.
      * @param account The address of the account.
      * @param amount The amount of the cash-in operation.
@@ -95,6 +102,13 @@ interface IPixCashierShard is IPixCashierTypes {
      * @return operations The data of the cash-out operations in the form of a structure.
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory operations);
+
+    /**
+     * @dev Checks if an account is an admin.
+     * @param account The address of the account to check.
+     * @return isAdmin The admin status of the account.
+     */
+    function isAdmin(address account) external view returns (bool);
 
     /**
      * @dev Upgrades the implementation of the contract.

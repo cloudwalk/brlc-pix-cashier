@@ -132,19 +132,6 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         uint256 amount,
         bytes32 txId
     ) external onlyOwnerOrAdmin returns (Error, uint8) {
-        if (account == address(0)) {
-            return (Error.ZeroAccount, 0);
-        }
-        if (amount == 0) {
-            return (Error.ZeroAmount, 0);
-        }
-        if (txId == 0) {
-            return (Error.ZeroTxId, 0);
-        }
-        if (amount > type(uint64).max) {
-            return (Error.AmountExcess, 0);
-        }
-
         return _registerCashOut(account, amount, txId, CashOutStatus.Pending);
     }
 

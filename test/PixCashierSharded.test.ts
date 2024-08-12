@@ -221,6 +221,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "HooksAlreadyRegistered";
   const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "ShardCountExcess";
 
+  // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
   const EVENT_NAME_CASH_IN_PREMINT = "CashInPremint";
   const EVENT_NAME_CASH_OUT_CONFIRMATION = "ConfirmCashOut";
@@ -891,10 +892,22 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       });
     });
 
-    it("Is reverted if the caller is not the owner", async () => {
+    it("Is reverted if the caller is not the owner or admin", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+
+      const targetRootImplementation: Contract = await pixCashierRootFactory.deploy() as Contract;
+      await targetRootImplementation.waitForDeployment();
+      const targetRootImplementationAddress = getAddress(targetRootImplementation);
+
+      const targetShardImplementation: Contract = await pixCashierShardFactory.deploy() as Contract;
+      await targetShardImplementation.waitForDeployment();
+      const targetShardImplementationAddress = getAddress(targetShardImplementation);
+
       await expect(
-        connect(pixCashierRoot, user).upgradeRootAndShardsTo(user.address)
+        connect(pixCashierRoot, user).upgradeRootAndShardsTo(
+          targetRootImplementationAddress,
+          targetShardImplementationAddress
+        )
       ).to.be.revertedWithCustomError(
         pixCashierRoot,
         REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
@@ -903,6 +916,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
     it("Is reverted if the root implementation address is zero", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+
       const targetShardImplementation: Contract = await pixCashierShardFactory.deploy() as Contract;
       await targetShardImplementation.waitForDeployment();
       const targetShardImplementationAddress = getAddress(targetShardImplementation);
@@ -917,6 +931,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
     it("Is reverted if the shard implementation address is zero", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+
       const targetRootImplementation: Contract = await pixCashierRootFactory.deploy() as Contract;
       await targetRootImplementation.waitForDeployment();
       const targetRootImplementationAddress = getAddress(targetRootImplementation);
@@ -1405,12 +1420,11 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
   describe("Function 'makeInternalCashOut()'", async () => {
     it("Executes as expected", async () => {
-      const fixture: Fixture = await setUpFixture(deployAndConfigureContracts);
-      const { pixCashierRoot, tokenMock } = fixture;
+      const { pixCashierRoot, tokenMock } = await setUpFixture(deployAndConfigureContracts);
 
       const [cashOut] = defineTestCashOuts();
 
-      await checkPixCashierState(fixture, [cashOut]);
+      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
       const tx = connect(pixCashierRoot, cashier).makeInternalCashOut(
         cashOut.account.address,
         receiver.address,
@@ -1429,7 +1443,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
         cashOut.amount
       );
       cashOut.status = CashOutStatus.Internal;
-      await checkPixCashierState(fixture, [cashOut]);
+      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
     });
 
     it("Is reverted if the contract is paused", async () => {
@@ -2107,13 +2121,12 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
 
     it("Scenario 3 with internal cash-out after reversing the previous one with the same ID", async () => {
-      const fixture = await setUpFixture(deployAndConfigureContracts);
-      const { pixCashierRoot, tokenMock } = fixture;
+      const { pixCashierRoot, tokenMock } = await setUpFixture(deployAndConfigureContracts);
       const [cashOut] = defineTestCashOuts();
       await requestCashOuts(pixCashierRoot, [cashOut]);
       await proveTx(connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId));
       cashOut.status = CashOutStatus.Reversed;
-      await checkPixCashierState(fixture, [cashOut]);
+      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
 
       // After reversing a cash-out with the same txId can be requested again for an internal cash-out.
       await proveTx(connect(pixCashierRoot, cashier).makeInternalCashOut(
@@ -2123,7 +2136,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
         cashOut.txId
       ));
       cashOut.status = CashOutStatus.Internal;
-      await checkPixCashierState(fixture, [cashOut]);
+      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
     });
   });

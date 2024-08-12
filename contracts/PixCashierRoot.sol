@@ -597,15 +597,6 @@ contract PixCashierRoot is
     /**
      * @inheritdoc IPixCashierRoot
      */
-    function getCashOutAccountAndAmount(bytes32 txId) external view returns (address account, uint256 amount) {
-        CashOutOperation memory operation = _shard(txId).getCashOut(txId);
-        account = operation.account;
-        amount = operation.amount;
-    }
-
-    /**
-     * @inheritdoc IPixCashierRoot
-     */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
         bytes32[] memory txIds;

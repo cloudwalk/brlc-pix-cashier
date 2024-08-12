@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title IPixHook interface
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Defines the hook function that can be called by the PIX cashier contract during some operations.
  */
 interface IPixHook {

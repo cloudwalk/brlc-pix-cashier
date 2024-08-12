@@ -6,7 +6,7 @@ import { IPixCashierTypes } from "./IPixCashierTypes.sol";
 
 /**
  * @title PixCashier shard interface
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of the contract that responsible for storing sharded PIX cash-in and cash-out operations.
  */
 interface IPixCashierShard is IPixCashierTypes {

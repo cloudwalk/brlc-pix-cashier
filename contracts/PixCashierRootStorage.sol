@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
 import { IPixHookableTypes } from "./interfaces/IPixHookable.sol";
 
@@ -8,7 +9,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title PixCashierRoot storage version 1
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
 abstract contract PixCashierRootStorageV1 {
     /// @dev The address of the underlying token.
@@ -26,18 +27,19 @@ abstract contract PixCashierRootStorageV1 {
 
 /**
  * @title PixCashierRoot storage version 2
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
 abstract contract PixCashierStorageV2 is IPixHookableTypes {
     /// @dev The mapping of the hook configurations for the cash-in operations. Is not used in the current version.
     mapping(bytes32 => HookConfig) internal _cashInHookConfigs;
+
     /// @dev The mapping of the hook configurations for the cash-out operations.
     mapping(bytes32 => HookConfig) internal _cashOutHookConfigs;
 }
 
 /**
  * @title PixCashierRoot storage
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Contains storage variables of the {PixCashierRoot} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.

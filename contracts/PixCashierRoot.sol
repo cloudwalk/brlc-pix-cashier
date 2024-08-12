@@ -122,6 +122,9 @@ contract PixCashierRoot is
 
     /**
      * @dev Initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * @param token_ The address of the token to set as the underlying one.
      */
     function initialize(address token_) external initializer {
@@ -130,6 +133,9 @@ contract PixCashierRoot is
 
     /**
      * @dev Internal initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * @param token_ The address of the token to set as the underlying one.
      */
     function __PixCashierRoot_init(address token_) internal onlyInitializing {
@@ -141,17 +147,20 @@ contract PixCashierRoot is
         __PausableExt_init_unchained(OWNER_ROLE);
         __Rescuable_init_unchained(OWNER_ROLE);
         __UUPSUpgradeable_init_unchained();
+
         __PixCashierRoot_init_unchained(token_);
     }
 
     /**
      * @dev Unchained internal initializer of the upgradable contract.
      *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * Requirements:
      *
      * - The passed address of the underlying token must not be zero.
      *
-     * @param token_ The address of the token to set as the underlying one
+     * @param token_ The address of the token to set as the underlying one.
      */
     function __PixCashierRoot_init_unchained(address token_) internal onlyInitializing {
         if (token_ == address(0)) {

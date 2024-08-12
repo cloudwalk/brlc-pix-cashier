@@ -23,6 +23,9 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev Initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * @param owner_ The address of the contract owner.
      */
     function initialize(address owner_) external initializer {
@@ -31,12 +34,16 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev Internal initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * @param owner_ The address of the contract owner.
      */
     function __PixCashierShard_init(address owner_) internal onlyInitializing {
         __Context_init_unchained();
         __Ownable_init_unchained(owner_);
         __UUPSUpgradeable_init_unchained();
+
         __PixCashierShard_init_unchained();
     }
 
@@ -51,6 +58,8 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev Unchained internal initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
     function __PixCashierShard_init_unchained() internal onlyInitializing {}
 
@@ -294,9 +303,10 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev The upgrade authorization function for UUPSProxy.
+     * @param newImplementation The address of the new implementation.
      */
     function _authorizeUpgrade(address newImplementation) internal view override onlyOwnerOrAdmin {
-        newImplementation; // Suppresses a compiler warning about the unused variable
+        newImplementation; // Suppresses a compiler warning about the unused variable.
     }
 
     // ------------------ Service functions ----------------------- //

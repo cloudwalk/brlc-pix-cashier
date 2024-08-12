@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title PixCashier types interface
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Defines the types used in the PIX cashier contract.
  */
 interface IPixCashierTypes {

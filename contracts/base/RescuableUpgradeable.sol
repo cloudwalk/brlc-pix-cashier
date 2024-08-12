@@ -9,7 +9,7 @@ import { AccessControlExtUpgradeable } from "./AccessControlExtUpgradeable.sol";
 
 /**
  * @title RescuableUpgradeable base contract
- * @author CloudWalk Inc.
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Allows to rescue ERC20 tokens locked up in the contract using the {RESCUER_ROLE} role.
  *
  * This contract is used through inheritance. It introduces the {RESCUER_ROLE} role that is allowed to
@@ -24,7 +24,7 @@ abstract contract RescuableUpgradeable is AccessControlExtUpgradeable {
     // ------------------ Initializers ---------------------------- //
 
     /**
-     * @dev The internal initializer of the upgradable contract.
+     * @dev Internal initializer of the upgradable contract.
      *
      * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
@@ -38,9 +38,9 @@ abstract contract RescuableUpgradeable is AccessControlExtUpgradeable {
     }
 
     /**
-     * @dev The unchained internal initializer of the upgradable contract.
+     * @dev Unchained internal initializer of the upgradable contract.
      *
-     * See {RescuableUpgradeable-__Rescuable_init}.
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
     function __Rescuable_init_unchained(bytes32 rescuerRoleAdmin) internal onlyInitializing {
         _setRoleAdmin(RESCUER_ROLE, rescuerRoleAdmin);

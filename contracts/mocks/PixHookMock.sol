@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title PixHookMock contract
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev A simplified version of a PIX hook contract to use in tests for other contracts.
  */
 contract PixHookMock {

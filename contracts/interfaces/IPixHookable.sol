@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 /**
  * @title PixHookable types interface
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Defines the types used in the PixHookable contract.
  */
 interface IPixHookableTypes {
@@ -72,7 +72,7 @@ interface IPixHookableTypes {
 
 /**
  * @title PixHookable interface
- * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of an addition to the PixCashier contract that allows to call a hook function during some actions.
  */
 interface IPixHookable is IPixHookableTypes {

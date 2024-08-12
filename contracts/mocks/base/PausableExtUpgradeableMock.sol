@@ -8,7 +8,7 @@ import { PausableExtUpgradeable } from "../../base/PausableExtUpgradeable.sol";
 
 /**
  * @title PausableExtUpgradeableMock contract
- * @author CloudWalk Inc.
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev An implementation of the {PausableExtUpgradeable} contract for test purposes.
  */
 contract PausableExtUpgradeableMock is PausableExtUpgradeable, UUPSUpgradeable {
@@ -50,8 +50,11 @@ contract PausableExtUpgradeableMock is PausableExtUpgradeable, UUPSUpgradeable {
 
     // ------------------ Internal functions ---------------------- //
 
-    /// @dev The upgrade authorization function for UUPSProxy.
+    /**
+     * @dev The upgrade authorization function for UUPSProxy.
+     * @param newImplementation The address of the new implementation.
+     */
     function _authorizeUpgrade(address newImplementation) internal pure override {
-        newImplementation; // Suppresses a compiler warning about the unused variable
+        newImplementation; // Suppresses a compiler warning about the unused variable.
     }
 }

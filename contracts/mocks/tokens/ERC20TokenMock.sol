@@ -8,7 +8,8 @@ import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
 
 /**
  * @title ERC20TokenMock contract
- * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
+ * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes.
  */
 contract ERC20TokenMock is ERC20, IERC20Mintable {
     /// @dev The result of minting function.
@@ -18,21 +19,21 @@ contract ERC20TokenMock is ERC20, IERC20Mintable {
 
     /// @dev A mock premint event with the parameters that were passed to the `premintIncrease()` function.
     event MockPremintIncreasing(
-        address account,
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         uint256 releaseTime
     );
 
     /// @dev A mock premint event with the parameters that were passed to the `premintDecrease()` function.
     event MockPremintDecreasing(
-        address account,
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         uint256 releaseTime
     );
 
     /// @dev A mock premint event with the parameters that were passed to the `reschedulePremintRelease()` function.
     event MockPremintReleaseRescheduling(
-        uint256 originalRelease,
+        uint256 originalRelease, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 targetRelease
     );
 
@@ -66,7 +67,7 @@ contract ERC20TokenMock is ERC20, IERC20Mintable {
      * @param release The timestamp when the tokens will be released.
      */
     function premintIncrease(
-        address account,
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         uint256 release
     ) external {
@@ -80,7 +81,7 @@ contract ERC20TokenMock is ERC20, IERC20Mintable {
      * @param release The timestamp when the tokens will be released.
      */
     function premintDecrease(
-        address account,
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         uint256 release
     ) external {

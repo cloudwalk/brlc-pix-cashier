@@ -6,6 +6,7 @@ import { IPixCashierTypes } from "./IPixCashierTypes.sol";
 
 /**
  * @title PixCashier interface
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
  */
 interface IPixCashierRoot is IPixCashierTypes {
@@ -52,8 +53,19 @@ interface IPixCashierRoot is IPixCashierTypes {
         bytes32 indexed txId     // The off-chain transaction identifier.
     );
 
+    /// @dev Emitted when an internal cash-out operation is executed.
+    event InternalCashOut(
+        address indexed from, // The account that owns the tokens to cash-out.
+        bytes32 indexed txId, // The off-chain transaction identifier.
+        address indexed to,   // The account that received the tokens through the internal cash-out.
+        uint256 amount        // The amount of tokens to cash-out.
+    );
+
     /// @dev Emitted when a new shard is added to the contract.
     event ShardAdded(address shard);
+
+    /// @dev Emitted when an existing shard is replaced with a new one.
+    event ShardReplaced(address newShard, address oldShard);
 
     /// @dev Emitted when a shard admin status of an account is configured.
     event ShardAdminConfigured(address account, bool status);
@@ -72,7 +84,11 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function cashIn(address account, uint256 amount, bytes32 txId) external;
+    function cashIn(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external;
 
     /**
      * @dev Executes a cash-in operation as a premint with some predetermined release time.
@@ -88,7 +104,7 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param releaseTime The timestamp when the minted tokens will become available for usage.
      */
     function cashInPremint(
-        address account,
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId,
         uint256 releaseTime
@@ -106,7 +122,7 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param releaseTime The timestamp of the premint that will be revoked.
      */
     function cashInPremintRevoke(
-        bytes32 txId,
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 releaseTime
     ) external;
 
@@ -116,7 +132,10 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param originalRelease The timestamp of the original premint release to be rescheduled.
      * @param targetRelease The new timestamp of the premint release to set during the rescheduling.
      */
-    function reschedulePremintRelease(uint256 originalRelease, uint256 targetRelease) external;
+    function reschedulePremintRelease(
+        uint256 originalRelease, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 targetRelease
+    ) external;
 
     /**
      * @dev Initiates a cash-out operation from some other account.
@@ -131,7 +150,11 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @param amount The amount of tokens to be cash-outed.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function requestCashOutFrom(address account, uint256 amount, bytes32 txId) external;
+    function requestCashOutFrom(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external;
 
     /**
      * @dev Confirms a single cash-out operation.
@@ -160,10 +183,38 @@ interface IPixCashierRoot is IPixCashierTypes {
     function reverseCashOut(bytes32 txId) external;
 
     /**
+     * @dev Executes an internal cash-out operation.
+     *
+     * Transfers tokens from the contract to the recipient account.
+     * This function is expected to be called by a limited number of accounts
+     * that are allowed to process cash-out operations.
+     *
+     * Emits an {InternalCashOut} event.
+     *
+     * @param from The account that owns the tokens to cash-out.
+     * @param to The account that will receive the tokens.
+     * @param amount The amount of tokens to be cash-outed.
+     * @param txId The unique off-chain transaction identifier of the operation.
+     */
+    function makeInternalCashOut(
+        address from, // Tools: this comment prevents Prettier from formatting into a single line.
+        address to,
+        uint256 amount,
+        bytes32 txId
+    ) external;
+
+    /**
      * @dev Sets the shards that are allowed to process cash-out operations.
      * @param shards The array of shard addresses to add.
      */
     function addShards(address[] memory shards) external;
+
+    /**
+     * @dev Replaces the existing shards with a new set of shards.
+     * @param fromIndex The index in the internal array to start replacing from.
+     * @param shards The array of shard addresses to replace with.
+     */
+    function replaceShards(uint256 fromIndex, address[] memory shards) external;
 
     /**
      * @dev Configures the shard admin status of an account.

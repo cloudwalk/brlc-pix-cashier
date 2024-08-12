@@ -23,6 +23,9 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev Initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * @param owner_ The address of the contract owner.
      */
     function initialize(address owner_) external initializer {
@@ -31,12 +34,16 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev Internal initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
+     *
      * @param owner_ The address of the contract owner.
      */
     function __PixCashierShard_init(address owner_) internal onlyInitializing {
         __Context_init_unchained();
         __Ownable_init_unchained(owner_);
         __UUPSUpgradeable_init_unchained();
+
         __PixCashierShard_init_unchained();
     }
 
@@ -51,6 +58,8 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     /**
      * @dev Unchained internal initializer of the upgradable contract.
+     *
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
     function __PixCashierShard_init_unchained() internal onlyInitializing {}
 
@@ -94,15 +103,15 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShard
      */
-    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (address, uint256, Error) {
+    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (Error, address, uint256) {
         if (txId == 0) {
-            return (address(0), 0, Error.ZeroTxId);
+            return (Error.ZeroTxId, address(0), 0);
         }
 
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.PremintExecuted) {
-            return (address(0), 0, Error.InappropriateCashInStatus);
+            return (Error.InappropriateCashInStatus, address(0), 0);
         }
 
         address oldAccount = operation.account;
@@ -112,40 +121,29 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         operation.amount = 0;
         operation.status = CashInStatus.Nonexistent;
 
-        return (oldAccount, oldAmount, Error.None);
+        return (Error.None, oldAccount, oldAmount);
     }
 
     /**
      * @inheritdoc IPixCashierShard
      */
-    function registerCashOut(address account, uint256 amount, bytes32 txId) external onlyOwnerOrAdmin returns (Error) {
-        if (account == address(0)) {
-            return Error.ZeroAccount;
-        }
-        if (amount == 0) {
-            return Error.ZeroAmount;
-        }
-        if (txId == 0) {
-            return Error.ZeroTxId;
-        }
-        if (amount > type(uint64).max) {
-            return Error.AmountExcess;
-        }
+    function registerCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external onlyOwnerOrAdmin returns (Error, uint8) {
+        return _registerCashOut(account, amount, txId, CashOutStatus.Pending);
+    }
 
-        CashOutOperation storage operation = _cashOutOperations[txId];
-        CashOutStatus oldStatus = operation.status;
-
-        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
-            return Error.InappropriateCashOutStatus;
-        } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
-            return Error.InappropriateCashOutAccount;
-        }
-
-        operation.account = account;
-        operation.amount = uint64(amount);
-        operation.status = CashOutStatus.Pending;
-
-        return Error.None;
+    /**
+     * @inheritdoc IPixCashierShard
+     */
+    function registerInternalCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external onlyOwnerOrAdmin returns (Error, uint8) {
+        return _registerCashOut(account, amount, txId, CashOutStatus.Internal);
     }
 
     /**
@@ -154,20 +152,38 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     function processCashOut(
         bytes32 txId,
         CashOutStatus targetStatus
-    ) external onlyOwnerOrAdmin returns (address, uint256, Error) {
+    ) external onlyOwnerOrAdmin returns (Error, address, uint256, uint8) {
         if (txId == 0) {
-            return (address(0), 0, Error.ZeroTxId);
+            return (Error.ZeroTxId, address(0), 0, 0);
         }
 
         CashOutOperation storage operation = _cashOutOperations[txId];
 
+        Error err;
         if (operation.status != CashOutStatus.Pending) {
-            return (address(0), 0, Error.InappropriateCashOutStatus);
+            err = Error.InappropriateCashOutStatus;
+        } else {
+            err = Error.None;
+            operation.status = targetStatus;
         }
 
-        operation.status = targetStatus;
+        return (err, operation.account, operation.amount, operation.flags);
+    }
 
-        return (operation.account, operation.amount, Error.None);
+    /**
+     * @inheritdoc IPixCashierShard
+     */
+    function setCashOutFlags(
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 flags
+    ) external onlyOwnerOrAdmin returns (Error) {
+        if (txId == 0) {
+            return Error.ZeroTxId;
+        }
+
+        _cashOutOperations[txId].flags = uint8(flags);
+
+        return Error.None;
     }
 
     /**
@@ -227,10 +243,57 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     // ------------------ Internal functions ---------------------- //
 
     /**
+     * @dev Registers a cash-out operation internally with the provided status.
+     * @param account The address of the tokens recipient.
+     * @param amount The amount of tokens to be received.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param newStatus The new status of the operation to set.
+     * @return err The error code if the operation fails, otherwise None.
+     * @return flags The flags field of the stored cash-out operation structure.
+     */
+    function _registerCashOut(
+        address account, // Tools: this comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId,
+        CashOutStatus newStatus
+    ) internal returns (Error, uint8) {
+        if (account == address(0)) {
+            return (Error.ZeroAccount, 0);
+        }
+        if (amount == 0) {
+            return (Error.ZeroAmount, 0);
+        }
+        if (txId == 0) {
+            return (Error.ZeroTxId, 0);
+        }
+        if (amount > type(uint64).max) {
+            return (Error.AmountExcess, 0);
+        }
+
+        CashOutOperation storage operation = _cashOutOperations[txId];
+        CashOutStatus oldStatus = operation.status;
+
+        Error err;
+        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
+            err = Error.InappropriateCashOutStatus;
+        } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
+            err = Error.InappropriateCashOutAccount;
+        } else {
+            err = Error.None;
+            operation.account = account;
+            operation.amount = uint64(amount);
+            operation.status = newStatus;
+        }
+
+        return (err, operation.flags);
+    }
+
+    /**
      * @dev The upgrade authorization function for UUPSProxy.
+     * @param newImplementation The address of the new implementation.
      */
     function _authorizeUpgrade(address newImplementation) internal view override onlyOwnerOrAdmin {
-        newImplementation; // Suppresses a compiler warning about the unused variable
+        newImplementation; // Suppresses a compiler warning about the unused variable.
     }
 
     // ------------------ Service functions ----------------------- //

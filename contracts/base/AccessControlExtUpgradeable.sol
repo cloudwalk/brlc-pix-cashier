@@ -6,9 +6,9 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 
 /**
  * @title AccessControlExtUpgradeable base contract
- * @author CloudWalk Inc.
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Extends the OpenZeppelin's {AccessControlUpgradeable} contract by adding the `grantRoleBatch` and
- * `revokeRoleBatch` function.
+ * `revokeRoleBatch` functions for granting and revoking roles in batch.
  *
  * This contract is used through inheritance. It introduces the `grantRoleBatch` and `revokeRoleBatch` functions
  * that is allowed to grant and revoke roles in batch.
@@ -17,7 +17,7 @@ abstract contract AccessControlExtUpgradeable is AccessControlUpgradeable {
     // ------------------ Initializers ---------------------------- //
 
     /**
-     * @dev The internal initializer of the upgradable contract.
+     * @dev Internal initializer of the upgradable contract.
      *
      * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
@@ -30,9 +30,9 @@ abstract contract AccessControlExtUpgradeable is AccessControlUpgradeable {
     }
 
     /**
-     * @dev The unchained internal initializer of the upgradable contract.
+     * @dev Unchained internal initializer of the upgradable contract.
      *
-     * See {AccessControlExtUpgradeable-__AccessControlExt_init}.
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
     function __AccessControlExt_init_unchained() internal onlyInitializing {}
 
@@ -41,8 +41,7 @@ abstract contract AccessControlExtUpgradeable is AccessControlUpgradeable {
     /**
      * @dev Grants `role` to `account` in batch.
      *
-     * If `accounts` had not been already granted `role`, emits a {RoleGranted}
-     * event.
+     * If `accounts` had not been already granted `role`, emits a {RoleGranted} event.
      *
      * Requirements:
      *

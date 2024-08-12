@@ -8,7 +8,7 @@ import { AccessControlExtUpgradeable } from "./AccessControlExtUpgradeable.sol";
 
 /**
  * @title PausableExtUpgradeable base contract
- * @author CloudWalk Inc.
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Extends the OpenZeppelin's {PausableUpgradeable} contract by adding the {PAUSER_ROLE} role.
  *
  * This contract is used through inheritance. It introduces the {PAUSER_ROLE} role that is allowed to
@@ -21,7 +21,7 @@ abstract contract PausableExtUpgradeable is AccessControlExtUpgradeable, Pausabl
     // ------------------ Initializers ---------------------------- //
 
     /**
-     * @dev The internal initializer of the upgradable contract.
+     * @dev Internal initializer of the upgradable contract.
      *
      * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
@@ -36,9 +36,9 @@ abstract contract PausableExtUpgradeable is AccessControlExtUpgradeable, Pausabl
     }
 
     /**
-     * @dev The unchained internal initializer of the upgradable contract.
+     * @dev Unchained internal initializer of the upgradable contract.
      *
-     * See {PausableExtUpgradeable-__PausableExt_init}.
+     * See details https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable.
      */
     function __PausableExt_init_unchained(bytes32 pauserRoleAdmin) internal onlyInitializing {
         _setRoleAdmin(PAUSER_ROLE, pauserRoleAdmin);

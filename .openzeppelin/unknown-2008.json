@@ -12,6 +12,11 @@
       "kind": "uups"
     },
     {
+      "address": "0x27868AA4b98Eda8e1C13A294e36606d01Bba6332",
+      "txHash": "0x5a19ab1b70f8ba7041253511c1a713d5350a6d2f9d9ba68aab2bce72bea43206",
+      "kind": "uups"
+    },
+    {
       "address": "0x7333398733b9F3Ff6640999bCBd50B01b0b9902D",
       "txHash": "0x6bcdfc54870c9eda6a0cc5a39f2e36ae7361d21cdc9e016846e2552386effb82",
       "kind": "uups"
@@ -11010,6 +11015,11 @@
       "address": "0x6201965437a7F1B2449b423Ae24E2E6Fe1ca1a7B",
       "txHash": "0x6cf852ee2d28a9b703ecb37e1b3b9f0c39fc7c74d522d02c21b4037cecc3318d",
       "kind": "uups"
+    },
+    {
+      "address": "0x1490cdB56F3d36DAc3A4D957349F03D9FDD5e66C",
+      "txHash": "0xe07d0a23c41d6916ce636440e13de82af1d0ce5682e3c09c49bd201ff5587fa6",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -11256,7 +11266,7 @@
             "label": "_cashInOperations",
             "offset": 0,
             "slot": "0",
-            "type": "t_mapping(t_bytes32,t_struct(CashInOperation)7930_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperation)8896_storage)",
             "contract": "PixCashierShardStorageV1",
             "src": "contracts\\PixCashierShardStorage.sol:12"
           },
@@ -11264,7 +11274,7 @@
             "label": "_cashOutOperations",
             "offset": 0,
             "slot": "1",
-            "type": "t_mapping(t_bytes32,t_struct(CashOutOperation)7944_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(CashOutOperation)8910_storage)",
             "contract": "PixCashierShardStorageV1",
             "src": "contracts\\PixCashierShardStorage.sol:15"
           },
@@ -11328,7 +11338,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_enum(CashInStatus)7901": {
+          "t_enum(CashInStatus)8867": {
             "label": "enum IPixCashierTypes.CashInStatus",
             "members": [
               "Nonexistent",
@@ -11337,7 +11347,7 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(CashOutStatus)7921": {
+          "t_enum(CashOutStatus)8887": {
             "label": "enum IPixCashierTypes.CashOutStatus",
             "members": [
               "Nonexistent",
@@ -11347,20 +11357,20 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_mapping(t_bytes32,t_struct(CashInOperation)7930_storage)": {
+          "t_mapping(t_bytes32,t_struct(CashInOperation)8896_storage)": {
             "label": "mapping(bytes32 => struct IPixCashierTypes.CashInOperation)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(CashOutOperation)7944_storage)": {
+          "t_mapping(t_bytes32,t_struct(CashOutOperation)8910_storage)": {
             "label": "mapping(bytes32 => struct IPixCashierTypes.CashOutOperation)",
             "numberOfBytes": "32"
           },
-          "t_struct(CashInOperation)7930_storage": {
+          "t_struct(CashInOperation)8896_storage": {
             "label": "struct IPixCashierTypes.CashInOperation",
             "members": [
               {
                 "label": "status",
-                "type": "t_enum(CashInStatus)7901",
+                "type": "t_enum(CashInStatus)8867",
                 "offset": 0,
                 "slot": "0"
               },
@@ -11379,12 +11389,12 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CashOutOperation)7944_storage": {
+          "t_struct(CashOutOperation)8910_storage": {
             "label": "struct IPixCashierTypes.CashOutOperation",
             "members": [
               {
                 "label": "status",
-                "type": "t_enum(CashOutStatus)7921",
+                "type": "t_enum(CashOutStatus)8887",
                 "offset": 0,
                 "slot": "0"
               },
@@ -11648,6 +11658,492 @@
               "label": "_roles",
               "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
               "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "d1cc8f0e902110c73589d94d31d61b85ad93f1f76a6e86f754fdfce221b89516": {
+      "address": "0x308C847236C060f168c71174B15C3567F73e119F",
+      "txHash": "0xfb72330fb1a4bdf9a622b3d41f1035554317b8c69746277c01720821c0e78c6c",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "_token",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "PixCashierRootStorageV1",
+            "src": "contracts\\PixCashierRootStorage.sol:15"
+          },
+          {
+            "label": "_shards",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_contract(IPixCashierShard)10433)dyn_storage",
+            "contract": "PixCashierRootStorageV1",
+            "src": "contracts\\PixCashierRootStorage.sol:18"
+          },
+          {
+            "label": "_cashOutBalances",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PixCashierRootStorageV1",
+            "src": "contracts\\PixCashierRootStorage.sol:21"
+          },
+          {
+            "label": "_pendingCashOutTxIds",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_struct(Bytes32Set)3353_storage",
+            "contract": "PixCashierRootStorageV1",
+            "src": "contracts\\PixCashierRootStorage.sol:24"
+          },
+          {
+            "label": "_cashInHookConfigs",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_bytes32,t_struct(HookConfig)10531_storage)",
+            "contract": "PixCashierStorageV2",
+            "src": "contracts\\PixCashierRootStorage.sol:33"
+          },
+          {
+            "label": "_cashOutHookConfigs",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_bytes32,t_struct(HookConfig)10531_storage)",
+            "contract": "PixCashierStorageV2",
+            "src": "contracts\\PixCashierRootStorage.sol:35"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_array(t_uint256)43_storage",
+            "contract": "PixCashierRootStorage",
+            "src": "contracts\\PixCashierRootStorage.sol:54"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)35_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)150_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(PausableStorage)278_storage": {
+            "label": "struct PausableUpgradeable.PausableStorage",
+            "members": [
+              {
+                "label": "_paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_contract(IPixCashierShard)10433)dyn_storage": {
+            "label": "contract IPixCashierShard[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)43_storage": {
+            "label": "uint256[43]",
+            "numberOfBytes": "1376"
+          },
+          "t_contract(IPixCashierShard)10433": {
+            "label": "contract IPixCashierShard",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(HookConfig)10531_storage)": {
+            "label": "mapping(bytes32 => struct IPixHookableTypes.HookConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Bytes32Set)3353_storage": {
+            "label": "struct EnumerableSet.Bytes32Set",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3159_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(HookConfig)10531_storage": {
+            "label": "struct IPixHookableTypes.HookConfig",
+            "members": [
+              {
+                "label": "callableContract",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hookFlags",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Set)3159_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Pausable": [
+            {
+              "contract": "PausableUpgradeable",
+              "label": "_paused",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:21",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "8456111816d69ee1a5fd347f7de8bf50e9ab12150acb7b6ae723ae0fc158a125": {
+      "address": "0xBc7CBBC9b54e49794752D027F2d8D30587f847B4",
+      "txHash": "0x0382e170df091e45e44cd2f923f46a9d9bc0f5116b928e55f02707d120465894",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "_cashInOperations",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(CashInOperation)10479_storage)",
+            "contract": "PixCashierShardStorageV1",
+            "src": "contracts\\PixCashierShardStorage.sol:13"
+          },
+          {
+            "label": "_cashOutOperations",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(CashOutOperation)10495_storage)",
+            "contract": "PixCashierShardStorageV1",
+            "src": "contracts\\PixCashierShardStorage.sol:16"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)48_storage",
+            "contract": "PixCashierShardStorage",
+            "src": "contracts\\PixCashierShardStorage.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)150_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)99_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_enum(CashInStatus)10441": {
+            "label": "enum IPixCashierTypes.CashInStatus",
+            "members": [
+              "Nonexistent",
+              "Executed",
+              "PremintExecuted"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(CashOutStatus)10462": {
+            "label": "enum IPixCashierTypes.CashOutStatus",
+            "members": [
+              "Nonexistent",
+              "Pending",
+              "Reversed",
+              "Confirmed",
+              "Internal"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_struct(CashInOperation)10479_storage)": {
+            "label": "mapping(bytes32 => struct IPixCashierTypes.CashInOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(CashOutOperation)10495_storage)": {
+            "label": "mapping(bytes32 => struct IPixCashierTypes.CashOutOperation)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashInOperation)10479_storage": {
+            "label": "struct IPixCashierTypes.CashInOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashInStatus)10441",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "flags",
+                "type": "t_uint8",
+                "offset": 29,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CashOutOperation)10495_storage": {
+            "label": "struct IPixCashierTypes.CashOutOperation",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(CashOutStatus)10462",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint64",
+                "offset": 21,
+                "slot": "0"
+              },
+              {
+                "label": "flags",
+                "type": "t_uint8",
+                "offset": 29,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
               "offset": 0,
               "slot": "0"
             }

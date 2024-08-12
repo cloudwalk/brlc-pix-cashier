@@ -155,7 +155,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external onlyOwner returns (Error, uint8) {
+    ) external onlyOwnerOrAdmin returns (Error, uint8) {
         return _registerCashOut(account, amount, txId, CashOutStatus.Internal);
     }
 
@@ -189,7 +189,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     function setCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 flags
-    ) external onlyOwner returns (Error) {
+    ) external onlyOwnerOrAdmin returns (Error) {
         if (txId == 0) {
             return Error.ZeroTxId;
         }

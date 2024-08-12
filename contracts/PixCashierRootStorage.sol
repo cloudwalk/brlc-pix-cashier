@@ -29,7 +29,7 @@ abstract contract PixCashierRootStorageV1 {
  * @title PixCashierRoot storage version 2
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
-abstract contract PixCashierStorageV2 is IPixHookableTypes {
+abstract contract PixCashierRootStorageV2 is IPixHookableTypes {
     /// @dev The mapping of the hook configurations for the cash-in operations. Is not used in the current version.
     mapping(bytes32 => HookConfig) internal _cashInHookConfigs;
 
@@ -48,7 +48,7 @@ abstract contract PixCashierStorageV2 is IPixHookableTypes {
  * e.g. PixCashierRootStorage<versionNumber>, so finally it would look like
  * "contract PixCashierRootStorage is PixCashierRootStorageV1, PixCashierRootStorageV2".
  */
-abstract contract PixCashierRootStorage is PixCashierRootStorageV1, PixCashierStorageV2 {
+abstract contract PixCashierRootStorage is PixCashierRootStorageV1, PixCashierRootStorageV2 {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

@@ -23,20 +23,6 @@ interface IPixCashierTypes {
     }
 
     /**
-     * @dev Possible statuses of a cash-in batch operation as an enum.
-     *
-     * The possible values:
-     * - Nonexistent ----- The operation does not exist (the default value).
-     * - Executed -------- The operation was executed as common mints.
-     * - PremintExecuted - The operation was executed as premints or related to them.
-     */
-    enum CashInBatchStatus {
-        Nonexistent,    // 0
-        Executed,       // 1
-        PremintExecuted // 2
-    }
-
-    /**
      * @dev Possible result statuses of a cash-in operation as an enum.
      *
      * The possible values:
@@ -119,12 +105,6 @@ interface IPixCashierTypes {
         uint64 amount;        // The amount of tokens to cash-in.
         uint8 flags;          // The bit field of flags for the operation. See {CashInFlagIndex}.
         // uint16 __reserved; // Reserved for future use until the end of the storage slot.
-    }
-
-    /// @dev Structure with data of a batch cash-in operation.
-    struct CashInBatchOperation {
-        CashInBatchStatus status; // The status of the cash-in batch operation according to the {CashInBatchStatus}.
-        // uint248 __reserved;    // Reserved for future use until the end of the storage slot.
     }
 
     /// @dev Structure with data of a single cash-out operation.

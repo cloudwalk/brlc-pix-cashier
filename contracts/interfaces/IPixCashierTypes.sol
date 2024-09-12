@@ -12,64 +12,64 @@ interface IPixCashierTypes {
      * @dev Possible statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Nonexistent ----- The operation does not exist (the default value).
-     * - Executed -------- The operation was executed as a common mint.
-     * - PremintExecuted - The operation was executed as a premint with some predetermined release time.
+     * - Nonexistent = 0 ------ The operation does not exist (the default value).
+     * - Executed = 1 --------- The operation was executed as a common mint.
+     * - PremintExecuted = 2 -- The operation was executed as a premint with some predetermined release time.
      */
     enum CashInStatus {
-        Nonexistent,    // 0
-        Executed,       // 1
-        PremintExecuted // 2
+        Nonexistent,
+        Executed,
+        PremintExecuted
     }
 
     /**
      * @dev Possible result statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Success ------------- The operation was executed successfully.
-     * - AlreadyExecuted ----- The operation was already executed.
-     * - InappropriateStatus - The operation has inappropriate status and cannot be modified.
+     * - Success = 0 -------------- The operation was executed successfully.
+     * - AlreadyExecuted = 1 ------ The operation was already executed.
+     * - InappropriateStatus = 2 -- The operation has inappropriate status and cannot be modified.
      */
     enum CashInExecutionResult {
-        Success,            // 0
-        AlreadyExecuted,    // 1
-        InappropriateStatus // 2
+        Success,
+        AlreadyExecuted,
+        InappropriateStatus
     }
 
     /**
      * @dev Possible execution policies of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Revert - In case of failure the operation will be reverted.
-     * - Skip --- In case of failure the operation will be skipped.
+     * - Revert = 0 -- In case of failure the operation will be reverted.
+     * - Skip = 1 ---- In case of failure the operation will be skipped.
      */
     enum CashInExecutionPolicy {
-        Revert, // 0
-        Skip    // 1
+        Revert,
+        Skip
     }
 
     /**
      * @dev Possible statuses of a cash-out operation as an enum.
      *
      * The possible values:
-     * - Nonexistent - The operation does not exist (the default value).
-     * - Pending ----- The status immediately after the operation requesting.
-     * - Reversed ---- The operation was reversed.
-     * - Confirmed --- The operation was confirmed.
-     * - Internal ---- The operation executed internally
+     * - Nonexistent = 0 -- The operation does not exist (the default value).
+     * - Pending = 1 ------ The status immediately after the operation requesting.
+     * - Reversed = 2 ----- The operation was reversed.
+     * - Confirmed = 3 ---- The operation was confirmed.
+     * - Internal = 4 ----- The operation executed internally
      */
     enum CashOutStatus {
-        Nonexistent, // 0
-        Pending,     // 1
-        Reversed,    // 2
-        Confirmed,   // 3
-        Internal     // 4
+        Nonexistent,
+        Pending,
+        Reversed,
+        Confirmed,
+        Internal
     }
 
     /**
      * @dev Indexes of bit flags that are used to process cash-in operations:
      *
-     * - SomeHookRegistered - The flag that indicates whether a hook function is registered for the operation.
+     * - SomeHookRegistered = 0 -- The flag that indicates whether a hook function is registered for the operation.
      *
      * Notes:
      * - 1. This enum is not used in the current implementation.
@@ -80,13 +80,13 @@ interface IPixCashierTypes {
      *    ```
      */
     enum CashInFlagIndex {
-        SomeHookRegistered // 0
+        SomeHookRegistered
     }
 
     /**
      * @dev Indexes of bit flags that are used to process cash-out operations:
      *
-     * - SomeHookRegistered - The flag that indicates whether a hook function is registered for the operation.
+     * - SomeHookRegistered = 0 -- The flag that indicates whether a hook function is registered for the operation.
      *
      * Note: an example of the code to convert a `CashInFlagIndex` value to a bit flag:
      *
@@ -95,7 +95,7 @@ interface IPixCashierTypes {
      *    ```
      */
     enum CashOutFlagIndex {
-        SomeHookRegistered // 0
+        SomeHookRegistered
     }
 
     /// @dev Structure with data of a single cash-in operation.

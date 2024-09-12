@@ -202,24 +202,24 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
 
   // Errors of the contracts under test
-  const REVERT_ERROR_IF_ROOT_ADDRESS_IZ_ZERO = "ZeroRootAddress";
-  const REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO = "ZeroShardAddress";
-  const REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO = "ZeroTokenAddress";
-  const REVERT_ERROR_IF_ACCOUNT_IS_ZERO = "ZeroAccount";
-  const REVERT_ERROR_IF_AMOUNT_EXCESS = "AmountExcess";
-  const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "ZeroAmount";
-  const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "CashInAlreadyExecuted";
-  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "ZeroTxId";
-  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "TokenMintingFailure";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "InappropriateCashOutAccount";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "InappropriateCashOutStatus";
-  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "InappropriatePremintReleaseTime";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "InappropriateCashInStatus";
-  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "HookCallableContractAddressZero";
-  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "HookCallableContractAddressNonZero";
-  const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "HookFlagsInvalid";
-  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "HooksAlreadyRegistered";
-  const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "ShardCountExcess";
+  const REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO = "PixCashierRoot_RootAddressZero";
+  const REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO = "PixCashierRoot_ShardAddressZero";
+  const REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO = "PixCashierRoot_TokenAddressZero";
+  const REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO = "PixCashierRoot_AccountAddressZero";
+  const REVERT_ERROR_IF_AMOUNT_EXCESS = "PixCashierRoot_AmountExcess";
+  const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "PixCashierRoot_AmountZero";
+  const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "PixCashierRoot_CashInAlreadyExecuted";
+  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "PixCashierRoot_TxIdZero";
+  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "PixCashierRoot_TokenMintingFailure";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "PixCashierRoot_InappropriateCashOutAccount";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "PixCashierRoot_InappropriateCashOutStatus";
+  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "PixCashierRoot_InappropriatePremintReleaseTime";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "PixCashierRoot_InappropriateCashInStatus";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "PixCashierRoot_HookCallableContractAddressZero";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "PixCashierRoot_HookCallableContractAddressNonZero";
+  const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "PixCashierRoot_HookFlagsInvalid";
+  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "PixCashierRoot_HooksAlreadyRegistered";
+  const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "PixCashierRoot_ShardCountExcess";
 
   // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
@@ -708,7 +708,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
       await expect(
         anotherPixCashierRoot.initialize(ADDRESS_ZERO)
-      ).to.be.revertedWithCustomError(pixCashierRootFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRootFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the passed owner address is zero for the shard contract", async () => {
@@ -848,7 +848,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         pixCashierRoot.upgradeShardsTo(ADDRESS_ZERO)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO);
     });
   });
 
@@ -926,7 +926,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           ADDRESS_ZERO,
           targetShardImplementationAddress
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ROOT_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the shard implementation address is zero", async () => {
@@ -941,7 +941,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           targetRootImplementationAddress,
           ADDRESS_ZERO
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO);
     });
   });
 
@@ -1019,7 +1019,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(pixCashierRoot, cashier).cashIn(ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -1107,7 +1107,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           TRANSACTION_ID1,
           RELEASE_TIMESTAMP
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -1278,7 +1278,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(pixCashierRoot, cashier).requestCashOutFrom(ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -1478,7 +1478,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(pixCashierRoot, cashier).makeInternalCashOut(user.address, ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token sender address is zero", async () => {
@@ -1490,7 +1490,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           TOKEN_AMOUNT,
           TRANSACTION_ID1
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {

@@ -11,11 +11,14 @@ import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 
-import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { IPixCashierRoot } from "./interfaces/IPixCashierRoot.sol";
+import { IPixCashierRootPrimary } from "./interfaces/IPixCashierRoot.sol";
+import { IPixCashierRootConfiguration } from "./interfaces/IPixCashierRoot.sol";
 import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
+import { IPixCashierShardPrimary } from "./interfaces/IPixCashierShard.sol";
 import { IPixHook } from "./interfaces/IPixHook.sol";
 import { IPixHookable } from "./interfaces/IPixHookable.sol";
+import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 import { PixCashierRootStorage } from "./PixCashierRootStorage.sol";
 
@@ -58,65 +61,6 @@ contract PixCashierRoot is
         (1 << uint256(HookIndex.CashOutConfirmationAfter)) +
         (1 << uint256(HookIndex.CashOutReversalBefore)) +
         (1 << uint256(HookIndex.CashOutReversalAfter));
-
-    // ------------------ Errors ---------------------------------- //
-
-    /// @dev Throws if the provided root address is zero.
-    error ZeroRootAddress();
-
-    /// @dev Throws if the provided shard address is zero.
-    error ZeroShardAddress();
-
-    /// @dev Throws if the provided token address is zero.
-    error ZeroTokenAddress();
-
-    /// @dev Throws if the provided account address is zero.
-    error ZeroAccount();
-
-    /// @dev Thrown if the provided amount is zero.
-    error ZeroAmount();
-
-    /// @dev Throws if the provided off-chain transaction identifier is zero.
-    error ZeroTxId();
-
-    /// @dev Thrown if the provided amount exceeds the maximum allowed value.
-    error AmountExcess();
-
-    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
-    error TokenMintingFailure();
-
-    /// @dev Thrown if the cash-in operation with the provided txId is already executed.
-    error CashInAlreadyExecuted();
-
-    /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
-    error InappropriateCashInStatus();
-
-    /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
-    error InappropriateCashOutStatus();
-
-    /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
-    error InappropriateCashOutAccount();
-
-    /// @dev Thrown if the provided release time for the premint operation is inappropriate.
-    error InappropriatePremintReleaseTime();
-
-    /// @dev Throws if the shard contract returns an error.
-    error ShardError(IPixCashierShard.Error err);
-
-    /// @dev Throws if the maximum number of shards is exceeded.
-    error ShardCountExcess();
-
-    /// @dev The provided bit flags to configure the hook logic are invalid.
-    error HookFlagsInvalid();
-
-    /// @dev The same hooks for a PIX operation are already configured.
-    error HooksAlreadyRegistered();
-
-    /// @dev The provided address of the callable contract with the PIX hook function is zero but must not be
-    error HookCallableContractAddressZero();
-
-    /// @dev The provided address of the callable contract with the PIX hook function is non-zero but must be
-    error HookCallableContractAddressNonZero();
 
     // ------------------ Initializers ---------------------------- //
 
@@ -164,7 +108,7 @@ contract PixCashierRoot is
      */
     function __PixCashierRoot_init_unchained(address token_) internal onlyInitializing {
         if (token_ == address(0)) {
-            revert ZeroTokenAddress();
+            revert PixCashierRoot_TokenAddressZero();
         }
 
         _token = token_;
@@ -185,7 +129,7 @@ contract PixCashierRoot is
     // ------------------ Functions ------------------------------- //
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -200,25 +144,25 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        IPixCashierShard.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.Executed);
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroAccount) revert ZeroAccount();
-            if (err == IPixCashierShard.Error.ZeroAmount) revert ZeroAmount();
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.AmountExcess) revert AmountExcess();
-            if (err == IPixCashierShard.Error.CashInAlreadyExecuted) revert CashInAlreadyExecuted();
-            revert ShardError(err);
+        IPixCashierShardPrimary.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.Executed);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
+            if (err == IPixCashierShardPrimary.Error.CashInAlreadyExecuted) revert PixCashierRoot_CashInAlreadyExecuted();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         emit CashIn(account, amount, txId);
 
         if (!IERC20Mintable(_token).mint(account, amount)) {
-            revert TokenMintingFailure();
+            revert PixCashierRoot_TokenMintingFailure();
         }
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -235,17 +179,17 @@ contract PixCashierRoot is
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         if (releaseTime == 0) {
-            revert InappropriatePremintReleaseTime();
+            revert PixCashierRoot_InappropriatePremintReleaseTime();
         }
 
-        IPixCashierShard.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.PremintExecuted);
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroAccount) revert ZeroAccount();
-            if (err == IPixCashierShard.Error.ZeroAmount) revert ZeroAmount();
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.AmountExcess) revert AmountExcess();
-            if (err == IPixCashierShard.Error.CashInAlreadyExecuted) revert CashInAlreadyExecuted();
-            revert ShardError(err);
+        IPixCashierShardPrimary.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.PremintExecuted);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
+            if (err == IPixCashierShardPrimary.Error.CashInAlreadyExecuted) revert PixCashierRoot_CashInAlreadyExecuted();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         emit CashInPremint(account, amount, 0, txId, releaseTime);
@@ -267,14 +211,14 @@ contract PixCashierRoot is
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         if (releaseTime == 0) {
-            revert InappropriatePremintReleaseTime();
+            revert PixCashierRoot_InappropriatePremintReleaseTime();
         }
 
-        (IPixCashierShard.Error err, address account, uint256 amount) = _shard(txId).revokeCashIn(txId);
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.InappropriateCashInStatus) revert InappropriateCashInStatus();
-            revert ShardError(err);
+        (IPixCashierShardPrimary.Error err, address account, uint256 amount) = _shard(txId).revokeCashIn(txId);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashInStatus) revert PixCashierRoot_InappropriateCashInStatus();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         emit CashInPremint(account, 0, amount, txId, releaseTime);
@@ -283,7 +227,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -300,7 +244,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -315,15 +259,15 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        (IPixCashierShard.Error err, uint8 flags) = _shard(txId).registerCashOut(account, amount, txId);
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroAccount) revert ZeroAccount();
-            if (err == IPixCashierShard.Error.ZeroAmount) revert ZeroAmount();
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.AmountExcess) revert AmountExcess();
-            if (err == IPixCashierShard.Error.InappropriateCashOutStatus) revert InappropriateCashOutStatus();
-            if (err == IPixCashierShard.Error.InappropriateCashOutAccount) revert InappropriateCashOutAccount();
-            revert ShardError(err);
+        (IPixCashierShardPrimary.Error err, uint8 flags) = _shard(txId).registerCashOut(account, amount, txId);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashOutAccount) revert PixCashierRoot_InappropriateCashOutAccount();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         uint256 cashOutBalance = _cashOutBalances[account] + amount;
@@ -342,7 +286,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -352,14 +296,14 @@ contract PixCashierRoot is
      * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function confirmCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        (IPixCashierShard.Error err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
+        (IPixCashierShardPrimary.Error err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Confirmed
         );
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.InappropriateCashOutStatus) revert InappropriateCashOutStatus();
-            revert ShardError(err);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         uint256 cashOutBalance = _cashOutBalances[account] - amount;
@@ -378,7 +322,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -388,14 +332,14 @@ contract PixCashierRoot is
      * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function reverseCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        (IPixCashierShard.Error err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
+        (IPixCashierShardPrimary.Error err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Reversed
         );
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.InappropriateCashOutStatus) revert InappropriateCashOutStatus();
-            revert ShardError(err);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         uint256 cashOutBalance = _cashOutBalances[account] - amount;
@@ -414,7 +358,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      *
      * @dev Requirements:
      *
@@ -431,17 +375,17 @@ contract PixCashierRoot is
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         if (to == address(0)) {
-            revert ZeroAccount();
+            revert PixCashierRoot_AccountAddressZero();
         }
-        (IPixCashierShard.Error err, uint8 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroAccount) revert ZeroAccount();
-            if (err == IPixCashierShard.Error.ZeroAmount) revert ZeroAmount();
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            if (err == IPixCashierShard.Error.AmountExcess) revert AmountExcess();
-            if (err == IPixCashierShard.Error.InappropriateCashOutStatus) revert InappropriateCashOutStatus();
-            if (err == IPixCashierShard.Error.InappropriateCashOutAccount) revert InappropriateCashOutAccount();
-            revert ShardError(err);
+        (IPixCashierShardPrimary.Error err, uint8 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
+            if (err == IPixCashierShardPrimary.Error.InappropriateCashOutAccount) revert PixCashierRoot_InappropriateCashOutAccount();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         emit InternalCashOut(from, txId, to, amount);
@@ -457,7 +401,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootConfiguration
      *
      * @dev Requirements:
      *
@@ -466,7 +410,7 @@ contract PixCashierRoot is
      */
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
         if (_shards.length + shards.length > 1100) {
-            revert ShardCountExcess();
+            revert PixCashierRoot_ShardCountExcess();
         }
 
         for (uint256 i; i < shards.length; i++) {
@@ -476,7 +420,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootConfiguration
      *
      * @dev Requirements:
      *
@@ -494,7 +438,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootConfiguration
      *
      * @dev Requirements:
      *
@@ -502,7 +446,7 @@ contract PixCashierRoot is
      */
     function configureShardAdmin(address account, bool status) external onlyRole(OWNER_ROLE) {
         if (account == address(0)) {
-            revert ZeroAccount();
+            revert PixCashierRoot_AccountAddressZero();
         }
 
         for (uint256 i; i < _shards.length; i++) {
@@ -531,7 +475,7 @@ contract PixCashierRoot is
     ) external whenNotPaused onlyRole(HOOK_ADMIN_ROLE) {
         // Resets all the expected flags and checks whether any remains
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
-            revert HookFlagsInvalid();
+            revert PixCashierRoot_HookFlagsInvalid();
         }
         uint8 cashOutFlags = _shard(txId).getCashOut(txId).flags;
 
@@ -542,10 +486,10 @@ contract PixCashierRoot is
             // Resets only the needed flag, keeping other possible ones unchanged
             cashOutFlags &= uint8(~CASH_OUT_FLAG_SOME_HOOK_CONFIGURED);
         }
-        IPixCashierShard.Error err = _shard(txId).setCashOutFlags(txId, cashOutFlags);
-        if (err != IPixCashierShard.Error.None) {
-            if (err == IPixCashierShard.Error.ZeroTxId) revert ZeroTxId();
-            revert ShardError(err);
+        IPixCashierShardPrimary.Error err = _shard(txId).setCashOutFlags(txId, cashOutFlags);
+        if (err != IPixCashierShardPrimary.Error.None) {
+            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
+            revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 
         // Getting the hook configuration structure has been extracted from the function
@@ -557,14 +501,14 @@ contract PixCashierRoot is
     // ------------------ View functions -------------------------- //
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _shard(txId).getCashIn(txId);
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -576,14 +520,14 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory) {
         return _shard(txId).getCashOut(txId);
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -595,7 +539,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
@@ -617,42 +561,42 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function cashOutBalanceOf(address account) external view returns (uint256) {
         return _cashOutBalances[account];
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function pendingCashOutCounter() external view returns (uint256) {
         return _pendingCashOutTxIds.length();
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootPrimary
      */
     function underlyingToken() external view returns (address) {
         return _token;
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootConfiguration
      */
     function getShardCount() external view returns (uint256) {
         return _shards.length;
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootConfiguration
      */
     function getShardByTxId(bytes32 txId) external view returns (address) {
         return address(_shard(txId));
     }
 
     /**
-     * @inheritdoc IPixCashierRoot
+     * @inheritdoc IPixCashierRootConfiguration
      */
     function getShardRange(uint256 index, uint256 limit) external view returns (address[] memory) {
         uint256 len = _shards.length;
@@ -686,7 +630,7 @@ contract PixCashierRoot is
      * @dev Returns the shard contract by the off-chain transaction identifier.
      * @param txId The off-chain transaction identifier of the operation.
      */
-    function _shard(bytes32 txId) internal view returns (IPixCashierShard) {
+    function _shard(bytes32 txId) internal view returns (IPixCashierShardPrimary) {
         uint256 i = uint256(keccak256(abi.encodePacked(txId)));
         i %= _shards.length;
         return _shards[i];
@@ -708,13 +652,13 @@ contract PixCashierRoot is
         address oldCallableContract = hooksConfig.callableContract;
         uint256 oldHookFlags = hooksConfig.hookFlags;
         if (oldCallableContract == newCallableContract && oldHookFlags == newHookFlags) {
-            revert HooksAlreadyRegistered();
+            revert PixCashierRoot_HooksAlreadyRegistered();
         }
         if (newHookFlags != 0 && newCallableContract == address(0)) {
-            revert HookCallableContractAddressZero();
+            revert PixCashierRoot_HookCallableContractAddressZero();
         }
         if (newHookFlags == 0 && newCallableContract != address(0)) {
-            revert HookCallableContractAddressNonZero();
+            revert PixCashierRoot_HookCallableContractAddressNonZero();
         }
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);
@@ -779,7 +723,7 @@ contract PixCashierRoot is
      */
     function upgradeShardsTo(address newImplementation) external onlyRole(OWNER_ROLE) {
         if (newImplementation == address(0)) {
-            revert ZeroShardAddress();
+            revert PixCashierRoot_ShardAddressZero();
         }
 
         for (uint256 i = 0; i < _shards.length; i++) {
@@ -794,10 +738,10 @@ contract PixCashierRoot is
      */
     function upgradeRootAndShardsTo(address newRootImplementation, address newShardImplementation) external {
         if (newRootImplementation == address(0)) {
-            revert ZeroRootAddress();
+            revert PixCashierRoot_RootAddressZero();
         }
         if (newShardImplementation == address(0)) {
-            revert ZeroShardAddress();
+            revert PixCashierRoot_ShardAddressZero();
         }
 
         upgradeToAndCall(newRootImplementation, "");

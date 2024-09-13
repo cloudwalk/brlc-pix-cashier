@@ -177,6 +177,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const TRANSACTION_ID2 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID2");
   const TRANSACTION_ID3 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID3");
   const TRANSACTIONS_ARRAY: string[] = [TRANSACTION_ID1, TRANSACTION_ID2, TRANSACTION_ID3];
+  const MAX_SHARD_COUNT = 1100;
   const INITIAL_USER_BALANCE = 1_000_000;
   const TOKEN_AMOUNT = 100;
   const TOKEN_AMOUNTS: number[] = [TOKEN_AMOUNT, 200, 300];
@@ -676,6 +677,10 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       // The initial values of counters and pending cash-outs
       expect(await pixCashierRoot.pendingCashOutCounter()).to.equal(0);
       expect(await pixCashierRoot.getPendingCashOutTxIds(0, 1)).to.be.empty;
+
+      // Other parameters and constants
+      expect(await pixCashierRoot.MAX_SHARD_COUNT()).to.equal(MAX_SHARD_COUNT);
+      expect(await pixCashierRoot.getShardCount()).to.equal(0);
     });
 
     it("Configures the shard contract as expected", async () => {
@@ -808,6 +813,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const shardMaxNumber = 1100;
       const fakeShardAddress: string[] = Array.from(
         { length: shardMaxNumber },
+        { length: MAX_SHARD_COUNT },
         (_v, i) => "0x" + ((i + 1).toString().padStart(40, "0"))
       );
       const additionalFakeShardAddress = user.address;

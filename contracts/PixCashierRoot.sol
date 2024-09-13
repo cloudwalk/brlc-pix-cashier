@@ -41,6 +41,9 @@ contract PixCashierRoot is
 
     // ------------------ Constants ------------------------------- //
 
+    /// @dev The maximum number of shards.
+    uint256 public constant MAX_SHARD_COUNT = 1100;
+
     /// @dev The role of this contract owner.
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
@@ -407,9 +410,11 @@ contract PixCashierRoot is
      *
      * - The caller must have the {OWNER_ROLE} role.
      * - The maximum number of shards if limited by 1100.
+     * - The maximum number of shards if limited by {MAX_SHARD_COUNT}.
      */
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
         if (_shards.length + shards.length > 1100) {
+        if (_shards.length + shards.length > MAX_SHARD_COUNT) {
             revert PixCashierRoot_ShardCountExcess();
         }
 

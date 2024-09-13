@@ -221,6 +221,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "PixCashierRoot_HookFlagsInvalid";
   const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "PixCashierRoot_HooksAlreadyRegistered";
   const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "PixCashierRoot_ShardCountExcess";
+  const REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS = "PixCashierRoot_ShardReplacementCountExcess";
 
   // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
@@ -237,6 +238,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const EVENT_NAME_MOCK_PREMINT_PREMINT_RESCHEDULING = "MockPremintReleaseRescheduling";
   const EVENT_NAME_SHARD_ADDED = "ShardAdded";
   const EVENT_NAME_SHARD_ADMIN_CONFIGURED = "ShardAdminConfigured";
+  const EVENT_NAME_SHARD_REPLACED = "ShardReplaced";
 
   let pixCashierRootFactory: ContractFactory;
   let pixCashierShardFactory: ContractFactory;
@@ -810,9 +812,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
     it("Is reverted if the number of shard exceeds the allowed maximum", async () => {
       const { pixCashierRoot } = await setUpFixture(deployContracts);
-      const shardMaxNumber = 1100;
       const fakeShardAddress: string[] = Array.from(
-        { length: shardMaxNumber },
         { length: MAX_SHARD_COUNT },
         (_v, i) => "0x" + ((i + 1).toString().padStart(40, "0"))
       );
@@ -822,6 +822,91 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       await expect(
         pixCashierRoot.addShards([additionalFakeShardAddress])
       ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_COUNT_EXCESS);
+    });
+  });
+
+  describe("Function 'replaceShards()'", async () => {
+    it("Executes as expected", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployContracts);
+      const shardCount = 5;
+      const oldShardAddresses = Array.from(
+        { length: shardCount },
+        (_v, i) => "0x" + (i + 1).toString(16).padStart(40, "0")
+      );
+      const newShardAddresses = Array.from(
+        { length: shardCount },
+        (_v, i) => "0x" + (i + 16).toString(16).padStart(40, "0")
+      );
+
+      await proveTx(pixCashierRoot.addShards(oldShardAddresses));
+
+      // The empty array of addresses to replace
+      const tx1 = pixCashierRoot.replaceShards(0, []);
+      await expect(tx1).not.to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED);
+
+      // The start index is outside the array of existing shards
+      const tx2 = pixCashierRoot.replaceShards(oldShardAddresses.length, newShardAddresses);
+      await expect(tx2).not.to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED);
+
+      // Replacing the first shard address
+      const tx3 = pixCashierRoot.replaceShards(0, [newShardAddresses[0]]);
+      await expect(tx3).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+        newShardAddresses[0],
+        oldShardAddresses[0]
+      );
+      oldShardAddresses[0] = newShardAddresses[0];
+      expect(await pixCashierRoot.getShardRange(0, oldShardAddresses.length)).to.deep.eq(oldShardAddresses);
+
+      // Replacing two shards in the middle
+      const tx4 = pixCashierRoot.replaceShards(1, [newShardAddresses[1], newShardAddresses[2]]);
+      await expect(tx4).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+        newShardAddresses[1],
+        oldShardAddresses[1]
+      );
+      await expect(tx4).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+        newShardAddresses[2],
+        oldShardAddresses[2]
+      );
+      oldShardAddresses[1] = newShardAddresses[1];
+      oldShardAddresses[2] = newShardAddresses[2];
+      expect(await pixCashierRoot.getShardRange(0, oldShardAddresses.length)).to.deep.eq(oldShardAddresses);
+
+      // Replacing all shards except the first one.
+      // One address is duplicated in the result shard array.
+      newShardAddresses.pop();
+      const tx5 = pixCashierRoot.replaceShards(1, newShardAddresses);
+      for (let i = 1; i < oldShardAddresses.length; ++i) {
+        await expect(tx5).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+          newShardAddresses[i - 1],
+          oldShardAddresses[i]
+        );
+        oldShardAddresses[i] = newShardAddresses[i - 1];
+      }
+      expect(await pixCashierRoot.getShardRange(0, oldShardAddresses.length)).to.deep.eq(oldShardAddresses);
+    });
+
+    it("Is reverted if the caller is not the owner", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployContracts);
+      const fakeShardAddress = user.address;
+      await expect(
+        connect(pixCashierRoot, user).replaceShards(0, [fakeShardAddress])
+      ).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(user.address, ownerRole);
+    });
+
+    it("Is reverted if the number of shards to replacement is greater than expected", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployContracts);
+      const fakeShardAddresses = Array.from(
+        { length: 3 },
+        (_v, i) => "0x" + (i + 1).toString(16).padStart(40, "0")
+      );
+      await proveTx(pixCashierRoot.addShards(fakeShardAddresses));
+
+      await expect(
+        pixCashierRoot.replaceShards(1, fakeShardAddresses)
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS);
     });
   });
 

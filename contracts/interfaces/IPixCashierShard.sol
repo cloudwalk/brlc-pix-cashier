@@ -57,7 +57,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         uint256 amount,
         bytes32 txId,
         CashInStatus status
-    ) external returns (Error err);
+    ) external returns (uint256 err);
 
     /**
      * @dev Revokes a cash-in operation.
@@ -66,7 +66,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
      * @return account The address of the account of the cash-in operation.
      * @return amount The amount of the cash-in operation.
      */
-    function revokeCashIn(bytes32 txId) external returns (Error err, address account, uint256 amount);
+    function revokeCashIn(bytes32 txId) external returns (uint256 err, address account, uint256 amount);
 
     /**
      * @dev Registers a cash-out operation.
@@ -80,7 +80,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external returns (Error err, uint8 flags);
+    ) external returns (uint256 err, uint8 flags);
 
     /**
      * @dev Registers an internal cash-out operation.
@@ -94,7 +94,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external returns (Error err, uint8 flags);
+    ) external returns (uint256 err, uint8 flags);
 
     /**
      * @dev Processes a cash-out operation.
@@ -107,7 +107,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
     function processCashOut(
         bytes32 txId,
         CashOutStatus status
-    ) external returns (Error err, address account, uint256 amount, uint8 flags);
+    ) external returns (uint256 err, address account, uint256 amount, uint8 flags);
 
     /**
      * @dev Sets the bit flags of a cash-in operation.
@@ -118,7 +118,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
     function setCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 flags
-    ) external returns (Error err);
+    ) external returns (uint256 err);
 
     /**
      * @dev Returns the data of a single cash-in operation.

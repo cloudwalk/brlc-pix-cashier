@@ -70,28 +70,28 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         uint256 amount,
         bytes32 txId,
         CashInStatus targetStatus
-    ) external onlyOwnerOrAdmin returns (Error) {
+    ) external onlyOwnerOrAdmin returns (uint256) {
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.Nonexistent) {
-            return Error.CashInAlreadyExecuted;
+            return uint256(Error.CashInAlreadyExecuted);
         }
 
         operation.account = account;
         operation.amount = uint64(amount);
         operation.status = targetStatus;
 
-        return Error.None;
+        return uint256(Error.None);
     }
 
     /**
      * @inheritdoc IPixCashierShardPrimary
      */
-    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (Error, address, uint256) {
+    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (uint256, address, uint256) {
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.PremintExecuted) {
-            return (Error.InappropriateCashInStatus, address(0), 0);
+            return (uint256(Error.InappropriateCashInStatus), address(0), 0);
         }
 
         address oldAccount = operation.account;
@@ -101,7 +101,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         operation.amount = 0;
         operation.status = CashInStatus.Nonexistent;
 
-        return (Error.None, oldAccount, oldAmount);
+        return (uint256(Error.None), oldAccount, oldAmount);
     }
 
     /**
@@ -111,7 +111,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external onlyOwnerOrAdmin returns (Error, uint8) {
+    ) external onlyOwnerOrAdmin returns (uint256, uint8) {
         return _registerCashOut(account, amount, txId, CashOutStatus.Pending);
     }
 
@@ -122,7 +122,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external onlyOwnerOrAdmin returns (Error, uint8) {
+    ) external onlyOwnerOrAdmin returns (uint256, uint8) {
         return _registerCashOut(account, amount, txId, CashOutStatus.Internal);
     }
 
@@ -132,14 +132,14 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     function processCashOut(
         bytes32 txId,
         CashOutStatus targetStatus
-    ) external onlyOwnerOrAdmin returns (Error, address, uint256, uint8) {
+    ) external onlyOwnerOrAdmin returns (uint256, address, uint256, uint8) {
         CashOutOperation storage operation = _cashOutOperations[txId];
 
-        Error err;
+        uint256 err;
         if (operation.status != CashOutStatus.Pending) {
-            err = Error.InappropriateCashOutStatus;
+            err = uint256(Error.InappropriateCashOutStatus);
         } else {
-            err = Error.None;
+            err = uint256(Error.None);
             operation.status = targetStatus;
         }
 
@@ -152,10 +152,10 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     function setCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 flags
-    ) external onlyOwnerOrAdmin returns (Error) {
+    ) external onlyOwnerOrAdmin returns (uint256) {
         _cashOutOperations[txId].flags = uint8(flags);
 
-        return Error.None;
+        return uint256(Error.None);
     }
 
     /**
@@ -228,17 +228,17 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         uint256 amount,
         bytes32 txId,
         CashOutStatus newStatus
-    ) internal returns (Error, uint8) {
+    ) internal returns (uint256, uint8) {
         CashOutOperation storage operation = _cashOutOperations[txId];
         CashOutStatus oldStatus = operation.status;
 
-        Error err;
+        uint256 err;
         if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
-            err = Error.InappropriateCashOutStatus;
+            err = uint256(Error.InappropriateCashOutStatus);
         } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
-            err = Error.InappropriateCashOutAccount;
+            err = uint256(Error.InappropriateCashOutAccount);
         } else {
-            err = Error.None;
+            err = uint256(Error.None);
             operation.account = account;
             operation.amount = uint64(amount);
             operation.status = newStatus;

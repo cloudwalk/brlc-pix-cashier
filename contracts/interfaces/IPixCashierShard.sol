@@ -2,24 +2,24 @@
 
 pragma solidity ^0.8.0;
 
-import { IPixCashierTypes } from "./IPixCashierTypes.sol";
+import { ICashierTypes } from "./ICashierTypes.sol";
 
 /**
- * @title IPixCashierShardErrors interface
+ * @title ICashierShardErrors interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Defines the custom errors used in the pix-cashier shard contract.
  */
-interface IPixCashierShardErrors {
+interface ICashierShardErrors {
     /// @dev Thrown if the caller is not an admin.
-    error PixCashierShard_Unauthorized();
+    error CashierShard_Unauthorized();
 }
 
 /**
- * @title IPixCashierShardPrimary interface
+ * @title ICashierShardPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The primary interface of the contract responsible for sharded storage of data about pix-cashier operations.
  */
-interface IPixCashierShardPrimary is IPixCashierTypes {
+interface ICashierShardPrimary is ICashierTypes {
     /**
      * @dev Possible function errors of the shard contract.
      *
@@ -155,11 +155,11 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
 }
 
 /**
- * @title IPixCashierShardConfiguration interface
+ * @title ICashierShardConfiguration interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The configuration interface of the contract responsible for sharded storage of data about pix-cashier operations.
  */
-interface IPixCashierShardConfiguration {
+interface ICashierShardConfiguration {
     /**
      * @dev Sets the admin status of an account.
      * @param account The address of the account to configure.
@@ -182,12 +182,12 @@ interface IPixCashierShardConfiguration {
 }
 
 /**
- * @title IPixCashierShard interface
+ * @title ICashierShard interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of the contract responsible for sharded storage of data about pix-cashier operations.
  */
-interface IPixCashierShard is
-    IPixCashierShardErrors,
-    IPixCashierShardPrimary,
-    IPixCashierShardConfiguration
+interface ICashierShard is
+    ICashierShardErrors,
+    ICashierShardPrimary,
+    ICashierShardConfiguration
 {}

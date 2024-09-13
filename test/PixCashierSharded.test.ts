@@ -48,7 +48,7 @@ interface TestCashOut {
   status: CashOutStatus;
 }
 
-interface PixCashierState {
+interface CashierState {
   tokenBalance: number;
   pendingCashOutCounter: number;
   pendingCashOutTxIds: string[];
@@ -172,7 +172,7 @@ async function setUpFixture<T>(func: () => Promise<T>): Promise<T> {
   }
 }
 
-describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
+describe("Contracts 'CashierRoot' and `CashierShard`", async () => {
   const TRANSACTION_ID1 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID1");
   const TRANSACTION_ID2 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID2");
   const TRANSACTION_ID3 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID3");
@@ -199,30 +199,30 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_CONTRACT_IS_PAUSED = "EnforcedPause";
   const REVERT_ERROR_IF_ERC20_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE = "ERC20InsufficientBalance";
   const REVERT_ERROR_IF_OWNABLE_INVALID_OWNER = "OwnableInvalidOwner";
-  const REVERT_ERROR_IF_UNAUTHORIZED = "PixCashierShard_Unauthorized";
+  const REVERT_ERROR_IF_UNAUTHORIZED = "CashierShard_Unauthorized";
   const REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
 
   // Errors of the contracts under test
-  const REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO = "PixCashierRoot_RootAddressZero";
-  const REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO = "PixCashierRoot_ShardAddressZero";
-  const REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO = "PixCashierRoot_TokenAddressZero";
-  const REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO = "PixCashierRoot_AccountAddressZero";
-  const REVERT_ERROR_IF_AMOUNT_EXCESS = "PixCashierRoot_AmountExcess";
-  const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "PixCashierRoot_AmountZero";
-  const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "PixCashierRoot_CashInAlreadyExecuted";
-  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "PixCashierRoot_TxIdZero";
-  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "PixCashierRoot_TokenMintingFailure";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "PixCashierRoot_InappropriateCashOutAccount";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "PixCashierRoot_InappropriateCashOutStatus";
-  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "PixCashierRoot_InappropriatePremintReleaseTime";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "PixCashierRoot_InappropriateCashInStatus";
-  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "PixCashierRoot_HookCallableContractAddressZero";
-  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "PixCashierRoot_HookCallableContractAddressNonZero";
-  const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "PixCashierRoot_HookFlagsInvalid";
-  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "PixCashierRoot_HooksAlreadyRegistered";
-  const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "PixCashierRoot_ShardCountExcess";
-  const REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS = "PixCashierRoot_ShardReplacementCountExcess";
-  const REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR = "PixCashierRoot_UnexpectedShardError";
+  const REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO = "CashierRoot_RootAddressZero";
+  const REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO = "CashierRoot_ShardAddressZero";
+  const REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO = "CashierRoot_TokenAddressZero";
+  const REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO = "CashierRoot_AccountAddressZero";
+  const REVERT_ERROR_IF_AMOUNT_EXCESS = "CashierRoot_AmountExcess";
+  const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "CashierRoot_AmountZero";
+  const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "CashierRoot_CashInAlreadyExecuted";
+  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "CashierRoot_TxIdZero";
+  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "CashierRoot_TokenMintingFailure";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "CashierRoot_InappropriateCashOutAccount";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "CashierRoot_InappropriateCashOutStatus";
+  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "CashierRoot_InappropriatePremintReleaseTime";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "CashierRoot_InappropriateCashInStatus";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "CashierRoot_HookCallableContractAddressZero";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "CashierRoot_HookCallableContractAddressNonZero";
+  const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "CashierRoot_HookFlagsInvalid";
+  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "CashierRoot_HooksAlreadyRegistered";
+  const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "CashierRoot_ShardCountExcess";
+  const REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS = "CashierRoot_ShardReplacementCountExcess";
+  const REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR = "CashierRoot_UnexpectedShardError";
 
   // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
@@ -233,7 +233,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const EVENT_NAME_CASH_OUT_REVERSING = "ReverseCashOut";
   const EVENT_NAME_HOOK_INVOKED = "HookInvoked";
   const EVENT_NAME_INTERNAL_CASH_OUT = "InternalCashOut";
-  const EVENT_NAME_MOCK_PIX_HOOK_CALLED = "MockPixHookCalled";
+  const EVENT_NAME_MOCK_PIX_HOOK_CALLED = "MockCashierHookCalled";
   const EVENT_NAME_MOCK_PREMINT_INCREASING = "MockPremintIncreasing";
   const EVENT_NAME_MOCK_PREMINT_DECREASING = "MockPremintDecreasing";
   const EVENT_NAME_MOCK_PREMINT_PREMINT_RESCHEDULING = "MockPremintReleaseRescheduling";
@@ -266,15 +266,15 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     users = [user, secondUser, thirdUser];
 
     // Contract factories with the explicitly specified deployer account
-    pixCashierRootFactory = await ethers.getContractFactory("PixCashierRoot");
+    pixCashierRootFactory = await ethers.getContractFactory("CashierRoot");
     pixCashierRootFactory = pixCashierRootFactory.connect(deployer);
-    pixCashierShardFactory = await ethers.getContractFactory("PixCashierShard");
+    pixCashierShardFactory = await ethers.getContractFactory("CashierShard");
     pixCashierShardFactory = pixCashierShardFactory.connect(deployer);
     tokenMockFactory = await ethers.getContractFactory("ERC20TokenMock");
     tokenMockFactory = tokenMockFactory.connect(deployer);
-    pixHookMockFactory = await ethers.getContractFactory("PixHookMock");
+    pixHookMockFactory = await ethers.getContractFactory("CashierHookMock");
     pixHookMockFactory = pixHookMockFactory.connect(deployer);
-    pixCashierShardMockFactory = await ethers.getContractFactory("PixCashierShardMock");
+    pixCashierShardMockFactory = await ethers.getContractFactory("CashierShardMock");
     pixCashierShardMockFactory = pixCashierShardMockFactory.connect(deployer);
   });
 
@@ -289,7 +289,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     return tokenMock;
   }
 
-  async function deployPixHookMock(): Promise<Contract> {
+  async function deployCashierHookMock(): Promise<Contract> {
     const pixHookMock: Contract = await pixHookMockFactory.deploy() as Contract;
     await pixHookMock.waitForDeployment();
 
@@ -298,7 +298,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
   async function deployContracts(): Promise<Fixture> {
     const tokenMock = await deployTokenMock();
-    const pixHookMock = await deployPixHookMock();
+    const pixHookMock = await deployCashierHookMock();
     let pixCashierRoot: Contract = await upgrades.deployProxy(pixCashierRootFactory, [getAddress(tokenMock)]);
     await pixCashierRoot.waitForDeployment();
     pixCashierRoot = connect(pixCashierRoot, deployer); // Explicitly specifying the initial account
@@ -380,7 +380,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     return Promise.all(txs);
   }
 
-  function defineExpectedPixCashierState(cashOuts: TestCashOut[]): PixCashierState {
+  function defineExpectedCashierState(cashOuts: TestCashOut[]): CashierState {
     let tokenBalance: number = 0;
     let pendingCashOutCounter: number = 0;
     const pendingCashOutTxIds: string[] = [];
@@ -427,12 +427,12 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     }
   }
 
-  async function checkPixCashierState(
+  async function checkCashierState(
     tokenMock: Contract,
     pixCashierRoot: Contract,
     cashOuts: TestCashOut[]
   ) {
-    const expectedState: PixCashierState = defineExpectedPixCashierState(cashOuts);
+    const expectedState: CashierState = defineExpectedCashierState(cashOuts);
     await checkCashOutStructuresOnBlockchain(pixCashierRoot, cashOuts);
 
     expect(await tokenMock.balanceOf(getAddress(pixCashierRoot))).to.equal(
@@ -568,7 +568,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   }
 
   async function executeRequestCashOut(pixCashierRoot: Contract, tokenMock: Contract, cashOut: TestCashOut): Promise<void> {
-    await checkPixCashierState(tokenMock, pixCashierRoot , [cashOut]);
+    await checkCashierState(tokenMock, pixCashierRoot , [cashOut]);
     const tx = connect(pixCashierRoot, cashier).requestCashOutFrom(
       cashOut.account.address,
       cashOut.amount,
@@ -587,12 +587,12 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       cashier.address
     );
     cashOut.status = CashOutStatus.Pending;
-    await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+    await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
   }
 
   async function executeCashOutConfirm (pixCashierRoot: Contract, tokenMock: Contract, cashOut: TestCashOut): Promise<void> {
     await requestCashOuts(pixCashierRoot, [cashOut]);
-    await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+    await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
     const tx = connect(pixCashierRoot, cashier).confirmCashOut(cashOut.txId);
 
     await expect(tx).to.changeTokenBalances(
@@ -607,12 +607,12 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       cashOut.txId
     );
     cashOut.status = CashOutStatus.Confirmed;
-    await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+    await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
   }
 
   async function executeReverseCashOut(pixCashierRoot: Contract, tokenMock: Contract, cashOut: TestCashOut): Promise<void> {
     await requestCashOuts(pixCashierRoot, [cashOut]);
-    await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+    await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
     const tx = connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId);
     await expect(tx).to.changeTokenBalances(
       tokenMock,
@@ -626,7 +626,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       cashOut.txId
     );
     cashOut.status = CashOutStatus.Reversed;
-    await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+    await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
   }
 
   async function executeUpgradeShardsTo(pixCashierRoot: Contract, pixCashierShards: Contract[], targetShardImplementationAddress: string) {
@@ -713,22 +713,22 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
 
     it("Is reverted if the passed token address is zero for the root contract", async () => {
-      const anotherPixCashierRoot: Contract = await upgrades.deployProxy(pixCashierRootFactory, [], {
+      const anotherCashierRoot: Contract = await upgrades.deployProxy(pixCashierRootFactory, [], {
         initializer: false
       });
 
       await expect(
-        anotherPixCashierRoot.initialize(ADDRESS_ZERO)
+        anotherCashierRoot.initialize(ADDRESS_ZERO)
       ).to.be.revertedWithCustomError(pixCashierRootFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the passed owner address is zero for the shard contract", async () => {
-      const anotherPixCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [], {
+      const anotherCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [], {
         initializer: false
       });
 
       await expect(
-        anotherPixCashierShard.initialize(ADDRESS_ZERO)
+        anotherCashierShard.initialize(ADDRESS_ZERO)
       ).to.be.revertedWithCustomError(pixCashierShardFactory, REVERT_ERROR_IF_OWNABLE_INVALID_OWNER);
     });
   });
@@ -740,8 +740,8 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
 
     it("Executes as expected for the shard contract", async () => {
-      const anotherPixCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
-      await checkContractUupsUpgrading(anotherPixCashierShard, pixCashierShardFactory);
+      const anotherCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
+      await checkContractUupsUpgrading(anotherCashierShard, pixCashierShardFactory);
     });
 
     it("Is reverted if the caller is not the owner for the root contract", async () => {
@@ -753,10 +753,10 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
 
     it("Is reverted if the caller is not the owner or admin for the shard contract", async () => {
-      const anotherPixCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
+      const anotherCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
 
-      await expect(connect(anotherPixCashierShard, user).upgradeToAndCall(user.address, "0x"))
-        .to.be.revertedWithCustomError(anotherPixCashierShard, REVERT_ERROR_IF_UNAUTHORIZED);
+      await expect(connect(anotherCashierShard, user).upgradeToAndCall(user.address, "0x"))
+        .to.be.revertedWithCustomError(anotherCashierShard, REVERT_ERROR_IF_UNAUTHORIZED);
     });
   });
 
@@ -767,8 +767,8 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
 
     it("Executes as expected for the shard contract", async () => {
-      const anotherPixCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
-      await checkContractUupsUpgrading(anotherPixCashierShard, pixCashierShardFactory, "upgradeTo(address)");
+      const anotherCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
+      await checkContractUupsUpgrading(anotherCashierShard, pixCashierShardFactory, "upgradeTo(address)");
     });
 
     it("Is reverted if the caller is not the owner", async () => {
@@ -780,10 +780,10 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     });
 
     it("Is reverted if the caller is not the owner or admin", async () => {
-      const anotherPixCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
+      const anotherCashierShard: Contract = await upgrades.deployProxy(pixCashierShardFactory, [deployer.address]);
 
-      await expect(connect(anotherPixCashierShard, user).upgradeTo(user.address))
-        .to.be.revertedWithCustomError(anotherPixCashierShard, REVERT_ERROR_IF_UNAUTHORIZED);
+      await expect(connect(anotherCashierShard, user).upgradeTo(user.address))
+        .to.be.revertedWithCustomError(anotherCashierShard, REVERT_ERROR_IF_UNAUTHORIZED);
     });
   });
 
@@ -1529,7 +1529,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
       const [cashOut] = defineTestCashOuts();
 
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
       const tx = connect(pixCashierRoot, cashier).makeInternalCashOut(
         cashOut.account.address,
         receiver.address,
@@ -1548,7 +1548,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
         cashOut.amount
       );
       cashOut.status = CashOutStatus.Internal;
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
     });
 
     it("Is reverted if the contract is paused", async () => {
@@ -2188,7 +2188,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       await requestCashOuts(pixCashierRoot, [cashOut]);
       await proveTx(connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId));
       cashOut.status = CashOutStatus.Reversed;
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
 
       // After reversing a cash-out with the same txId can't be reversed again.
       await expect(connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId))
@@ -2202,7 +2202,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
       // After reversing a cash-out with the same txId can be requested again.
       await requestCashOuts(pixCashierRoot, [cashOut]);
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
     });
 
@@ -2212,7 +2212,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       await requestCashOuts(pixCashierRoot, [cashOut]);
       await proveTx(connect(pixCashierRoot, cashier).confirmCashOut(cashOut.txId));
       cashOut.status = CashOutStatus.Confirmed;
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
 
       // After confirming a cash-out with the same txId can't be reversed again.
       await expect(connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId))
@@ -2231,7 +2231,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       await requestCashOuts(pixCashierRoot, [cashOut]);
       await proveTx(connect(pixCashierRoot, cashier).reverseCashOut(cashOut.txId));
       cashOut.status = CashOutStatus.Reversed;
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
 
       // After reversing a cash-out with the same txId can be requested again for an internal cash-out.
       await proveTx(connect(pixCashierRoot, cashier).makeInternalCashOut(
@@ -2241,7 +2241,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
         cashOut.txId
       ));
       cashOut.status = CashOutStatus.Internal;
-      await checkPixCashierState(tokenMock, pixCashierRoot, [cashOut]);
+      await checkCashierState(tokenMock, pixCashierRoot, [cashOut]);
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
     });
   });
@@ -2413,11 +2413,11 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     it("The root treats an unexpected error of the shard function properly", async () => {
       const { pixCashierRoot, pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
       const [operation] = defineTestCashIns();
-      const mockPixCashierShard = await pixCashierShardMockFactory.deploy() as Contract;
-      await mockPixCashierShard.waitForDeployment();
-      const unexpectedError = await mockPixCashierShard.REGISTER_OPERATION_UNEXPECTED_ERROR();
-      const mockPixCashierShardAddresses = Array(pixCashierShards.length).fill(getAddress(mockPixCashierShard));
-      await proveTx(pixCashierRoot.replaceShards(0, mockPixCashierShardAddresses));
+      const mockCashierShard = await pixCashierShardMockFactory.deploy() as Contract;
+      await mockCashierShard.waitForDeployment();
+      const unexpectedError = await mockCashierShard.REGISTER_OPERATION_UNEXPECTED_ERROR();
+      const mockCashierShardAddresses = Array(pixCashierShards.length).fill(getAddress(mockCashierShard));
+      await proveTx(pixCashierRoot.replaceShards(0, mockCashierShardAddresses));
       const pixCashierRootUnderCashier = connect(pixCashierRoot, cashier);
 
       await expect(pixCashierRootUnderCashier.cashIn(

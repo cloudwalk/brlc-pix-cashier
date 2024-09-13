@@ -3,16 +3,16 @@
 pragma solidity ^0.8.0;
 
 /**
- * @title PixHookable types interface
+ * @title CashierHookable types interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the types used in the PixHookable contract.
+ * @dev Defines the types used in the CashierHookable contract.
  */
-interface IPixHookableTypes {
+interface ICashierHookableTypes {
     /**
      * @dev Possible indexes of hooks that are used to apply additional external actions during some operation steps.
      *
      * Those actions are triggered through the hook function that are implemented in external contracts and
-     * called by the PixCashier contract at concrete moments.
+     * called by the Cashier contract at concrete moments.
      * The index of the hook is passed to the hook function to indicate when it was called.
      *
      * The possible values:
@@ -71,11 +71,11 @@ interface IPixHookableTypes {
 }
 
 /**
- * @title PixHookable interface
+ * @title CashierHookable interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of an addition to the PixCashier contract that allows to call a hook function during some actions.
+ * @dev The interface of an addition to the Cashier contract that allows to call a hook function during some actions.
  */
-interface IPixHookable is IPixHookableTypes {
+interface ICashierHookable is ICashierHookableTypes {
     // ------------------ Events ---------------------------------- //
 
     /// @dev Emitted when the hook configuration is changed for a PIX cash-out operation.

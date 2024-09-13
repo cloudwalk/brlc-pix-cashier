@@ -3,14 +3,14 @@
 
 pragma solidity ^0.8.0;
 
-import { IPixCashierTypes } from "../interfaces/IPixCashierTypes.sol";
+import { ICashierTypes } from "../interfaces/ICashierTypes.sol";
 
 /**
  * @title ERC20TokenMock contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev An implementation of a mock balance freezer shard contract for testing purposes.
  */
-contract PixCashierShardMock is IPixCashierTypes {
+contract CashierShardMock is ICashierTypes {
     uint8 public constant REGISTER_OPERATION_UNEXPECTED_ERROR = 0xFF;
 
     /**

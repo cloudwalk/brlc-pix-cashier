@@ -1,4 +1,4 @@
-# Pix Cashier
+# Cashier
 
 <p align="center">
   <img src="./docs/media/brlc-cover.png">

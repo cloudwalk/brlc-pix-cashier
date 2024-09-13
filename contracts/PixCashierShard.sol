@@ -16,11 +16,6 @@ import { PixCashierShardStorage } from "./PixCashierShardStorage.sol";
  * @dev The contract responsible for storing sharded cash-in and cash-out operations.
  */
 contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgradeable, IPixCashierShard {
-    // ------------------ Errors ---------------------------------- //
-
-    /// @dev Thrown if the caller is not the owner or admin.
-    error Unauthorized();
-
     // ------------------ Initializers ---------------------------- //
 
     /**
@@ -53,7 +48,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     modifier onlyOwnerOrAdmin() {
         if (msg.sender != owner() && !_admins[msg.sender]) {
-            revert Unauthorized();
+            revert PixCashierShard_Unauthorized();
         }
         _;
     }

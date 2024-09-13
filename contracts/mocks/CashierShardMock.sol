@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 import { ICashierTypes } from "../interfaces/ICashierTypes.sol";
 
 /**
- * @title ERC20TokenMock contract
+ * @title CashierShardMock contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev An implementation of a mock balance freezer shard contract for testing purposes.
  */

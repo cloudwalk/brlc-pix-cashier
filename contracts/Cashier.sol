@@ -25,7 +25,7 @@ import { CashierStorage } from "./CashierStorage.sol";
 /**
  * @title Cashier contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Entry point contract for PIX cash-in and cash-out operations.
+ * @dev Entry point contract for cash-in and cash-out operations.
  */
 contract Cashier is
     CashierStorage,
@@ -774,7 +774,7 @@ contract Cashier is
     }
 
     /**
-     * @dev Calls the hook function if it is configured for a PIX operation.
+     * @dev Calls the hook function if it is configured for an operation.
      * @param txId The off-chain transaction identifier of the operation.
      * @param hookIndex The index of the hook.
      * @param hooksConfig The storage reference to the hook configuration structure.

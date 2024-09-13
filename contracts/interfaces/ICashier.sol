@@ -7,7 +7,7 @@ import { ICashierTypes } from "./ICashierTypes.sol";
 /**
  * @title ICashierErrors interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev Defines the custom errors used in the pix-cashier contract.
+ * @dev Defines the custom errors used in the cashier contract.
  */
 interface ICashierErrors {
     /// @dev Thrown if the provided root address is zero.
@@ -61,20 +61,20 @@ interface ICashierErrors {
     /// @dev The provided bit flags to configure the hook logic are invalid.
     error Cashier_HookFlagsInvalid();
 
-    /// @dev The same hooks for a PIX operation are already configured.
+    /// @dev The same hooks for an operation are already configured.
     error Cashier_HooksAlreadyRegistered();
 
-    /// @dev The provided address of the callable contract with the PIX hook function is zero but must not be
+    /// @dev The provided address of the callable contract with the hook function is zero but must not be.
     error Cashier_HookCallableContractAddressZero();
 
-    /// @dev The provided address of the callable contract with the PIX hook function is non-zero but must be
+    /// @dev The provided address of the callable contract with the hook function is non-zero but must be.
     error Cashier_HookCallableContractAddressNonZero();
 }
 
 /**
- * @title Cashier interface
+ * @title ICashierPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary interface of the contract responsible for pix-cashier operations on the underlying token contract.
+ * @dev The primary interface of the contract responsible for cashier operations on the underlying token contract.
  */
 interface ICashierPrimary is ICashierTypes {
     // ------------------ Events ---------------------------------- //
@@ -327,9 +327,9 @@ interface ICashierPrimary is ICashierTypes {
 }
 
 /**
- * @title IBalanceFreezerConfiguration interface
+ * @title ICashierConfiguration interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev The configuration interface of the contract responsible for pix-cashier operations.
+ * @dev The configuration interface of the contract responsible for cashier operations.
  */
 interface ICashierConfiguration {
     // ------------------ Events ---------------------------------- //
@@ -396,9 +396,9 @@ interface ICashierConfiguration {
 }
 
 /**
- * @title IBalanceFreezer interface
+ * @title ICashier interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev The interface of the contract responsible for pix-cashier operations on the underlying token contract.
+ * @dev The interface of the contract responsible for cashier operations on the underlying token contract.
  */
 interface ICashier is
     ICashierErrors,

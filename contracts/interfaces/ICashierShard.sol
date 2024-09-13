@@ -7,7 +7,7 @@ import { ICashierTypes } from "./ICashierTypes.sol";
 /**
  * @title ICashierShardErrors interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the custom errors used in the pix-cashier shard contract.
+ * @dev Defines the custom errors used in the cashier shard contract.
  */
 interface ICashierShardErrors {
     /// @dev Thrown if the caller is not an admin.
@@ -17,7 +17,7 @@ interface ICashierShardErrors {
 /**
  * @title ICashierShardPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary interface of the contract responsible for sharded storage of data about pix-cashier operations.
+ * @dev The primary interface of the contract responsible for sharded storage of data about cashier operations.
  */
 interface ICashierShardPrimary is ICashierTypes {
     /**
@@ -157,7 +157,7 @@ interface ICashierShardPrimary is ICashierTypes {
 /**
  * @title ICashierShardConfiguration interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The configuration interface of the contract responsible for sharded storage of data about pix-cashier operations.
+ * @dev The configuration interface of the contract responsible for sharded storage of data about cashier operations.
  */
 interface ICashierShardConfiguration {
     /**
@@ -184,7 +184,7 @@ interface ICashierShardConfiguration {
 /**
  * @title ICashierShard interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of the contract responsible for sharded storage of data about pix-cashier operations.
+ * @dev The interface of the contract responsible for sharded storage of data about cashier operations.
  */
 interface ICashierShard is
     ICashierShardErrors,

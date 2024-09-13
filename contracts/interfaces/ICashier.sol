@@ -5,70 +5,70 @@ pragma solidity ^0.8.0;
 import { ICashierTypes } from "./ICashierTypes.sol";
 
 /**
- * @title ICashierRootErrors interface
+ * @title ICashierErrors interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
  * @dev Defines the custom errors used in the pix-cashier contract.
  */
-interface ICashierRootErrors {
+interface ICashierErrors {
     /// @dev Thrown if the provided root address is zero.
-    error CashierRoot_RootAddressZero();
+    error Cashier_RootAddressZero();
 
     /// @dev Thrown if the provided shard address is zero.
-    error CashierRoot_ShardAddressZero();
+    error Cashier_ShardAddressZero();
 
     /// @dev Thrown if the provided token address is zero.
-    error CashierRoot_TokenAddressZero();
+    error Cashier_TokenAddressZero();
 
     /// @dev Thrown if the provided account address is zero.
-    error CashierRoot_AccountAddressZero();
+    error Cashier_AccountAddressZero();
 
     /// @dev Thrown if the provided amount is zero.
-    error CashierRoot_AmountZero();
+    error Cashier_AmountZero();
 
     /// @dev Thrown if the provided off-chain transaction identifier is zero.
-    error CashierRoot_TxIdZero();
+    error Cashier_TxIdZero();
 
     /// @dev Thrown if the provided amount exceeds the maximum allowed value.
-    error CashierRoot_AmountExcess();
+    error Cashier_AmountExcess();
 
     /// @dev Thrown if the minting of tokens failed during a cash-in operation.
-    error CashierRoot_TokenMintingFailure();
+    error Cashier_TokenMintingFailure();
 
     /// @dev Thrown if the cash-in operation with the provided txId is already executed.
-    error CashierRoot_CashInAlreadyExecuted();
+    error Cashier_CashInAlreadyExecuted();
 
     /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
-    error CashierRoot_InappropriateCashInStatus();
+    error Cashier_InappropriateCashInStatus();
 
     /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
-    error CashierRoot_InappropriateCashOutStatus();
+    error Cashier_InappropriateCashOutStatus();
 
     /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
-    error CashierRoot_InappropriateCashOutAccount();
+    error Cashier_InappropriateCashOutAccount();
 
     /// @dev Thrown if the provided release time for the premint operation is inappropriate.
-    error CashierRoot_InappropriatePremintReleaseTime();
+    error Cashier_InappropriatePremintReleaseTime();
 
     /// @dev Thrown if the number of shard contracts to replace is greater than expected.
-    error CashierRoot_ShardReplacementCountExcess();
+    error Cashier_ShardReplacementCountExcess();
 
     /// @dev Thrown if the shard contract returns an unexpected error.
-    error CashierRoot_UnexpectedShardError(uint256 err);
+    error Cashier_UnexpectedShardError(uint256 err);
 
     /// @dev Thrown if the maximum number of shards is exceeded.
-    error CashierRoot_ShardCountExcess();
+    error Cashier_ShardCountExcess();
 
     /// @dev The provided bit flags to configure the hook logic are invalid.
-    error CashierRoot_HookFlagsInvalid();
+    error Cashier_HookFlagsInvalid();
 
     /// @dev The same hooks for a PIX operation are already configured.
-    error CashierRoot_HooksAlreadyRegistered();
+    error Cashier_HooksAlreadyRegistered();
 
     /// @dev The provided address of the callable contract with the PIX hook function is zero but must not be
-    error CashierRoot_HookCallableContractAddressZero();
+    error Cashier_HookCallableContractAddressZero();
 
     /// @dev The provided address of the callable contract with the PIX hook function is non-zero but must be
-    error CashierRoot_HookCallableContractAddressNonZero();
+    error Cashier_HookCallableContractAddressNonZero();
 }
 
 /**
@@ -76,7 +76,7 @@ interface ICashierRootErrors {
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The primary interface of the contract responsible for pix-cashier operations on the underlying token contract.
  */
-interface ICashierRootPrimary is ICashierTypes {
+interface ICashierPrimary is ICashierTypes {
     // ------------------ Events ---------------------------------- //
 
     /// @dev Emitted when a new cash-in operation is executed.
@@ -331,7 +331,7 @@ interface ICashierRootPrimary is ICashierTypes {
  * @author CloudWalk Inc. (See https://cloudwalk.io)
  * @dev The configuration interface of the contract responsible for pix-cashier operations.
  */
-interface ICashierRootConfiguration {
+interface ICashierConfiguration {
     // ------------------ Events ---------------------------------- //
 
     /**
@@ -400,8 +400,8 @@ interface ICashierRootConfiguration {
  * @author CloudWalk Inc. (See https://cloudwalk.io)
  * @dev The interface of the contract responsible for pix-cashier operations on the underlying token contract.
  */
-interface ICashierRoot is
-    ICashierRootErrors,
-    ICashierRootPrimary,
-    ICashierRootConfiguration
+interface ICashier is
+    ICashierErrors,
+    ICashierPrimary,
+    ICashierConfiguration
 {}

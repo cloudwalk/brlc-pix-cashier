@@ -11,29 +11,29 @@ import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 
-import { ICashierRoot } from "./interfaces/ICashierRoot.sol";
-import { ICashierRootPrimary } from "./interfaces/ICashierRoot.sol";
-import { ICashierRootConfiguration } from "./interfaces/ICashierRoot.sol";
+import { ICashier } from "./interfaces/ICashier.sol";
+import { ICashierPrimary } from "./interfaces/ICashier.sol";
+import { ICashierConfiguration } from "./interfaces/ICashier.sol";
 import { ICashierShard } from "./interfaces/ICashierShard.sol";
 import { ICashierShardPrimary } from "./interfaces/ICashierShard.sol";
 import { ICashierHook } from "./interfaces/ICashierHook.sol";
 import { ICashierHookable } from "./interfaces/ICashierHookable.sol";
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
-import { CashierRootStorage } from "./CashierRootStorage.sol";
+import { CashierStorage } from "./CashierStorage.sol";
 
 /**
- * @title CashierRoot contract
+ * @title Cashier contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Entry point contract for PIX cash-in and cash-out operations.
  */
-contract CashierRoot is
-    CashierRootStorage,
+contract Cashier is
+    CashierStorage,
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
     UUPSUpgradeable,
-    ICashierRoot,
+    ICashier,
     ICashierHookable
 {
     using SafeERC20 for IERC20;
@@ -75,7 +75,7 @@ contract CashierRoot is
      * @param token_ The address of the token to set as the underlying one.
      */
     function initialize(address token_) external initializer {
-        __CashierRoot_init(token_);
+        __Cashier_init(token_);
     }
 
     /**
@@ -85,7 +85,7 @@ contract CashierRoot is
      *
      * @param token_ The address of the token to set as the underlying one.
      */
-    function __CashierRoot_init(address token_) internal onlyInitializing {
+    function __Cashier_init(address token_) internal onlyInitializing {
         __Context_init_unchained();
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
@@ -95,7 +95,7 @@ contract CashierRoot is
         __Rescuable_init_unchained(OWNER_ROLE);
         __UUPSUpgradeable_init_unchained();
 
-        __CashierRoot_init_unchained(token_);
+        __Cashier_init_unchained(token_);
     }
 
     /**
@@ -109,9 +109,9 @@ contract CashierRoot is
      *
      * @param token_ The address of the token to set as the underlying one.
      */
-    function __CashierRoot_init_unchained(address token_) internal onlyInitializing {
+    function __Cashier_init_unchained(address token_) internal onlyInitializing {
         if (token_ == address(0)) {
-            revert CashierRoot_TokenAddressZero();
+            revert Cashier_TokenAddressZero();
         }
 
         _token = token_;
@@ -132,7 +132,7 @@ contract CashierRoot is
     // ------------------ Functions ------------------------------- //
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -155,12 +155,12 @@ contract CashierRoot is
         emit CashIn(account, amount, txId);
 
         if (!IERC20Mintable(_token).mint(account, amount)) {
-            revert CashierRoot_TokenMintingFailure();
+            revert Cashier_TokenMintingFailure();
         }
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -210,7 +210,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -227,7 +227,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -263,7 +263,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -297,7 +297,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -331,7 +331,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -365,7 +365,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      *
      * @dev Requirements:
      *
@@ -374,7 +374,7 @@ contract CashierRoot is
      */
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
         if (_shards.length + shards.length > MAX_SHARD_COUNT) {
-            revert CashierRoot_ShardCountExcess();
+            revert Cashier_ShardCountExcess();
         }
 
         uint256 count = shards.length;
@@ -385,7 +385,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      *
      * @dev Requirements:
      *
@@ -398,7 +398,7 @@ contract CashierRoot is
         }
         count -= fromIndex;
         if (count < shards.length) {
-            revert CashierRoot_ShardReplacementCountExcess();
+            revert Cashier_ShardReplacementCountExcess();
         }
         if (count > shards.length) {
             count = shards.length;
@@ -413,7 +413,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      *
      * @dev Requirements:
      *
@@ -450,7 +450,7 @@ contract CashierRoot is
 
         // Resets all the expected flags and checks whether any remains
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
-            revert CashierRoot_HookFlagsInvalid();
+            revert Cashier_HookFlagsInvalid();
         }
 
         if (newHookFlags != 0) {
@@ -472,14 +472,14 @@ contract CashierRoot is
     // ------------------ View functions -------------------------- //
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _shard(txId).getCashIn(txId);
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -491,14 +491,14 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory) {
         return _shard(txId).getCashOut(txId);
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -510,7 +510,7 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
@@ -532,42 +532,42 @@ contract CashierRoot is
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function cashOutBalanceOf(address account) external view returns (uint256) {
         return _cashOutBalances[account];
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function pendingCashOutCounter() external view returns (uint256) {
         return _pendingCashOutTxIds.length();
     }
 
     /**
-     * @inheritdoc ICashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function underlyingToken() external view returns (address) {
         return _token;
     }
 
     /**
-     * @inheritdoc ICashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      */
     function getShardCount() external view returns (uint256) {
         return _shards.length;
     }
 
     /**
-     * @inheritdoc ICashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      */
     function getShardByTxId(bytes32 txId) external view returns (address) {
         return address(_shard(txId));
     }
 
     /**
-     * @inheritdoc ICashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      */
     function getShardRange(uint256 index, uint256 limit) external view returns (address[] memory) {
         uint256 len = _shards.length;
@@ -744,13 +744,13 @@ contract CashierRoot is
         address oldCallableContract = hooksConfig.callableContract;
         uint256 oldHookFlags = hooksConfig.hookFlags;
         if (oldCallableContract == newCallableContract && oldHookFlags == newHookFlags) {
-            revert CashierRoot_HooksAlreadyRegistered();
+            revert Cashier_HooksAlreadyRegistered();
         }
         if (newHookFlags != 0 && newCallableContract == address(0)) {
-            revert CashierRoot_HookCallableContractAddressZero();
+            revert Cashier_HookCallableContractAddressZero();
         }
         if (newHookFlags == 0 && newCallableContract != address(0)) {
-            revert CashierRoot_HookCallableContractAddressNonZero();
+            revert Cashier_HookCallableContractAddressNonZero();
         }
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);
@@ -815,7 +815,7 @@ contract CashierRoot is
      */
     function upgradeShardsTo(address newImplementation) external onlyRole(OWNER_ROLE) {
         if (newImplementation == address(0)) {
-            revert CashierRoot_ShardAddressZero();
+            revert Cashier_ShardAddressZero();
         }
 
         for (uint256 i = 0; i < _shards.length; i++) {
@@ -830,10 +830,10 @@ contract CashierRoot is
      */
     function upgradeRootAndShardsTo(address newRootImplementation, address newShardImplementation) external {
         if (newRootImplementation == address(0)) {
-            revert CashierRoot_RootAddressZero();
+            revert Cashier_RootAddressZero();
         }
         if (newShardImplementation == address(0)) {
-            revert CashierRoot_ShardAddressZero();
+            revert Cashier_ShardAddressZero();
         }
 
         upgradeToAndCall(newRootImplementation, "");

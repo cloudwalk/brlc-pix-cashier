@@ -8,10 +8,10 @@ import { ICashierHookableTypes } from "./interfaces/ICashierHookable.sol";
 pragma solidity ^0.8.0;
 
 /**
- * @title CashierRoot storage version 1
+ * @title Cashier storage version 1
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
-abstract contract CashierRootStorageV1 {
+abstract contract CashierStorageV1 {
     /// @dev The address of the underlying token.
     address internal _token;
 
@@ -26,10 +26,10 @@ abstract contract CashierRootStorageV1 {
 }
 
 /**
- * @title CashierRoot storage version 2
+ * @title Cashier storage version 2
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
-abstract contract CashierRootStorageV2 is ICashierHookableTypes {
+abstract contract CashierStorageV2 is ICashierHookableTypes {
     /// @dev The mapping of the hook configurations for the cash-in operations. Is not used in the current version.
     mapping(bytes32 => HookConfig) internal _cashInHookConfigs;
 
@@ -38,17 +38,17 @@ abstract contract CashierRootStorageV2 is ICashierHookableTypes {
 }
 
 /**
- * @title CashierRoot storage
+ * @title Cashier storage
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Contains storage variables of the {CashierRoot} contract.
+ * @dev Contains storage variables of the {Cashier} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.
  * See https://github.com/compound-finance/compound-protocol.
- * When we need to add new storage variables, we create a new version of CashierRootStorage
- * e.g. CashierRootStorage<versionNumber>, so finally it would look like
- * "contract CashierRootStorage is CashierRootStorageV1, CashierRootStorageV2".
+ * When we need to add new storage variables, we create a new version of CashierStorage
+ * e.g. CashierStorage<versionNumber>, so finally it would look like
+ * "contract CashierStorage is CashierStorageV1, CashierStorageV2".
  */
-abstract contract CashierRootStorage is CashierRootStorageV1, CashierRootStorageV2 {
+abstract contract CashierStorage is CashierStorageV1, CashierStorageV2 {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

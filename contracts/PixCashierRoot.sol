@@ -409,16 +409,15 @@ contract PixCashierRoot is
      * @dev Requirements:
      *
      * - The caller must have the {OWNER_ROLE} role.
-     * - The maximum number of shards if limited by 1100.
      * - The maximum number of shards if limited by {MAX_SHARD_COUNT}.
      */
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
-        if (_shards.length + shards.length > 1100) {
         if (_shards.length + shards.length > MAX_SHARD_COUNT) {
             revert PixCashierRoot_ShardCountExcess();
         }
 
-        for (uint256 i; i < shards.length; i++) {
+        uint256 count = shards.length;
+        for (uint256 i; i < count; i++) {
             _shards.push(IPixCashierShard(shards[i]));
             emit ShardAdded(shards[i]);
         }
@@ -432,8 +431,18 @@ contract PixCashierRoot is
      * - The caller must have the {OWNER_ROLE} role.
      */
     function replaceShards(uint256 fromIndex, address[] memory shards) external onlyRole(OWNER_ROLE) {
-        uint256 len = shards.length;
-        for (uint256 i = 0; i < len; i++) {
+        uint256 count = _shards.length;
+        if (fromIndex >= count) {
+            return;
+        }
+        count -= fromIndex;
+        if (count < shards.length) {
+            revert PixCashierRoot_ShardReplacementCountExcess();
+        }
+        if (count > shards.length) {
+            count = shards.length;
+        }
+        for (uint256 i = 0; i < count; i++) {
             uint256 k = fromIndex + i;
             address oldShard = address(_shards[k]);
             address newShard = shards[i];

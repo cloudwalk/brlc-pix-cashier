@@ -1078,6 +1078,16 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
         REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
       ).withArgs(user.address, ownerRole);
     });
+
+    it("Is reverted if the provide account address is zero", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashierRoot.configureShardAdmin(ADDRESS_ZERO, true)
+      ).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO
+      );
+    });
   });
 
   describe("Function 'cashIn()' accompanied by the 'registerCashIn()' one", async () => {

@@ -49,6 +49,9 @@ interface IPixCashierRootErrors {
     /// @dev Thrown if the provided release time for the premint operation is inappropriate.
     error PixCashierRoot_InappropriatePremintReleaseTime();
 
+    /// @dev Thrown if the number of shard contracts to replace is greater than expected.
+    error PixCashierRoot_ShardReplacementCountExcess();
+
     /// @dev Thrown if the shard contract returns an unexpected error.
     error PixCashierRoot_UnexpectedShardError(uint256 err);
 

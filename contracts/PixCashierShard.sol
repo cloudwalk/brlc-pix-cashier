@@ -71,19 +71,6 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         bytes32 txId,
         CashInStatus targetStatus
     ) external onlyOwnerOrAdmin returns (Error) {
-        if (account == address(0)) {
-            return Error.ZeroAccount;
-        }
-        if (amount == 0) {
-            return Error.ZeroAmount;
-        }
-        if (txId == 0) {
-            return Error.ZeroTxId;
-        }
-        if (amount > type(uint64).max) {
-            return Error.AmountExcess;
-        }
-
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.Nonexistent) {
@@ -101,10 +88,6 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
      * @inheritdoc IPixCashierShardPrimary
      */
     function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (Error, address, uint256) {
-        if (txId == 0) {
-            return (Error.ZeroTxId, address(0), 0);
-        }
-
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.PremintExecuted) {
@@ -150,10 +133,6 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         bytes32 txId,
         CashOutStatus targetStatus
     ) external onlyOwnerOrAdmin returns (Error, address, uint256, uint8) {
-        if (txId == 0) {
-            return (Error.ZeroTxId, address(0), 0, 0);
-        }
-
         CashOutOperation storage operation = _cashOutOperations[txId];
 
         Error err;
@@ -174,10 +153,6 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 flags
     ) external onlyOwnerOrAdmin returns (Error) {
-        if (txId == 0) {
-            return Error.ZeroTxId;
-        }
-
         _cashOutOperations[txId].flags = uint8(flags);
 
         return Error.None;
@@ -254,19 +229,6 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         bytes32 txId,
         CashOutStatus newStatus
     ) internal returns (Error, uint8) {
-        if (account == address(0)) {
-            return (Error.ZeroAccount, 0);
-        }
-        if (amount == 0) {
-            return (Error.ZeroAmount, 0);
-        }
-        if (txId == 0) {
-            return (Error.ZeroTxId, 0);
-        }
-        if (amount > type(uint64).max) {
-            return (Error.AmountExcess, 0);
-        }
-
         CashOutOperation storage operation = _cashOutOperations[txId];
         CashOutStatus oldStatus = operation.status;
 

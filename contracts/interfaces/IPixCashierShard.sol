@@ -36,10 +36,6 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
      */
     enum Error {
         None,
-        ZeroAccount,
-        ZeroAmount,
-        ZeroTxId,
-        AmountExcess,
         CashInAlreadyExecuted,
         InappropriateCashInStatus,
         InappropriateCashOutStatus,

@@ -147,12 +147,21 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (account == address(0)) {
+            revert PixCashierRoot_AccountAddressZero();
+        }
+        if (amount == 0) {
+            revert PixCashierRoot_AmountZero();
+        }
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+        if (amount > type(uint64).max) {
+            revert PixCashierRoot_AmountExcess();
+        }
+
         IPixCashierShardPrimary.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.Executed);
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
-            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
             if (err == IPixCashierShardPrimary.Error.CashInAlreadyExecuted) revert PixCashierRoot_CashInAlreadyExecuted();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
@@ -181,16 +190,24 @@ contract PixCashierRoot is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (account == address(0)) {
+            revert PixCashierRoot_AccountAddressZero();
+        }
+        if (amount == 0) {
+            revert PixCashierRoot_AmountZero();
+        }
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+        if (amount > type(uint64).max) {
+            revert PixCashierRoot_AmountExcess();
+        }
         if (releaseTime == 0) {
             revert PixCashierRoot_InappropriatePremintReleaseTime();
         }
 
         IPixCashierShardPrimary.Error err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.PremintExecuted);
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
-            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
             if (err == IPixCashierShardPrimary.Error.CashInAlreadyExecuted) revert PixCashierRoot_CashInAlreadyExecuted();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
@@ -213,13 +230,15 @@ contract PixCashierRoot is
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
         if (releaseTime == 0) {
             revert PixCashierRoot_InappropriatePremintReleaseTime();
         }
 
         (IPixCashierShardPrimary.Error err, address account, uint256 amount) = _shard(txId).revokeCashIn(txId);
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashInStatus) revert PixCashierRoot_InappropriateCashInStatus();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
@@ -262,12 +281,21 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (account == address(0)) {
+            revert PixCashierRoot_AccountAddressZero();
+        }
+        if (amount == 0) {
+            revert PixCashierRoot_AmountZero();
+        }
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+        if (amount > type(uint64).max) {
+            revert PixCashierRoot_AmountExcess();
+        }
+
         (IPixCashierShardPrimary.Error err, uint8 flags) = _shard(txId).registerCashOut(account, amount, txId);
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
-            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashOutAccount) revert PixCashierRoot_InappropriateCashOutAccount();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
@@ -299,12 +327,15 @@ contract PixCashierRoot is
      * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function confirmCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+
         (IPixCashierShardPrimary.Error err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Confirmed
         );
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
@@ -335,12 +366,15 @@ contract PixCashierRoot is
      * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function reverseCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+
         (IPixCashierShardPrimary.Error err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Reversed
         );
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
@@ -380,12 +414,21 @@ contract PixCashierRoot is
         if (to == address(0)) {
             revert PixCashierRoot_AccountAddressZero();
         }
+        if (from == address(0)) {
+            revert PixCashierRoot_AccountAddressZero();
+        }
+        if (amount == 0) {
+            revert PixCashierRoot_AmountZero();
+        }
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+        if (amount > type(uint64).max) {
+            revert PixCashierRoot_AmountExcess();
+        }
+
         (IPixCashierShardPrimary.Error err, uint8 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroAccount) revert PixCashierRoot_AccountAddressZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroAmount) revert PixCashierRoot_AmountZero();
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
-            if (err == IPixCashierShardPrimary.Error.AmountExcess) revert PixCashierRoot_AmountExcess();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashOutStatus) revert PixCashierRoot_InappropriateCashOutStatus();
             if (err == IPixCashierShardPrimary.Error.InappropriateCashOutAccount) revert PixCashierRoot_InappropriateCashOutAccount();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
@@ -487,6 +530,10 @@ contract PixCashierRoot is
         address newCallableContract,
         uint256 newHookFlags
     ) external whenNotPaused onlyRole(HOOK_ADMIN_ROLE) {
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+
         // Resets all the expected flags and checks whether any remains
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
             revert PixCashierRoot_HookFlagsInvalid();
@@ -502,7 +549,6 @@ contract PixCashierRoot is
         }
         IPixCashierShardPrimary.Error err = _shard(txId).setCashOutFlags(txId, cashOutFlags);
         if (err != IPixCashierShardPrimary.Error.None) {
-            if (err == IPixCashierShardPrimary.Error.ZeroTxId) revert PixCashierRoot_TxIdZero();
             revert PixCashierRoot_UnexpectedShardError(uint256(err));
         }
 

@@ -11,9 +11,9 @@ async function main() {
     { kind: "uups" }
   );
 
-  await proxy.deployed();
+  await proxy.waitForDeployment();
 
-  console.log("Proxy deployed to:", proxy.address);
+  console.log("Root proxy deployed to:", proxy.target);
 }
 
 main().then().catch(err => {

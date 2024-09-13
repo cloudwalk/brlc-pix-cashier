@@ -222,6 +222,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "PixCashierRoot_HooksAlreadyRegistered";
   const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "PixCashierRoot_ShardCountExcess";
   const REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS = "PixCashierRoot_ShardReplacementCountExcess";
+  const REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR = "PixCashierRoot_UnexpectedShardError";
 
   // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
@@ -244,6 +245,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   let pixCashierShardFactory: ContractFactory;
   let tokenMockFactory: ContractFactory;
   let pixHookMockFactory: ContractFactory;
+  let pixCashierShardMockFactory: ContractFactory;
   let deployer: HardhatEthersSigner;
   let cashier: HardhatEthersSigner;
   let hookAdmin: HardhatEthersSigner;
@@ -272,6 +274,8 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     tokenMockFactory = tokenMockFactory.connect(deployer);
     pixHookMockFactory = await ethers.getContractFactory("PixHookMock");
     pixHookMockFactory = pixHookMockFactory.connect(deployer);
+    pixCashierShardMockFactory = await ethers.getContractFactory("PixCashierShardMock");
+    pixCashierShardMockFactory = pixCashierShardMockFactory.connect(deployer);
   });
 
   async function deployTokenMock(): Promise<Contract> {
@@ -2394,6 +2398,28 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           0 // flags
         )
       ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+
+    it("The root treats an unexpected error of the shard function properly", async () => {
+      const { pixCashierRoot, pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+      const [operation] = defineTestCashIns();
+      const mockPixCashierShard = await pixCashierShardMockFactory.deploy() as Contract;
+      await mockPixCashierShard.waitForDeployment();
+      const unexpectedError = await mockPixCashierShard.REGISTER_OPERATION_UNEXPECTED_ERROR();
+      const mockPixCashierShardAddresses = Array(pixCashierShards.length).fill(getAddress(mockPixCashierShard));
+      await proveTx(pixCashierRoot.replaceShards(0, mockPixCashierShardAddresses));
+      const pixCashierRootUnderCashier = connect(pixCashierRoot, cashier);
+
+      await expect(pixCashierRootUnderCashier.cashIn(
+        operation.account,
+        operation.amount,
+        operation.txId
+      )).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR
+      ).withArgs(
+        unexpectedError
+      );
     });
   });
 });

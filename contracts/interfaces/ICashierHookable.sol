@@ -78,7 +78,14 @@ interface ICashierHookableTypes {
 interface ICashierHookable is ICashierHookableTypes {
     // ------------------ Events ---------------------------------- //
 
-    /// @dev Emitted when the hook configuration is changed for a cash-out operation.
+    /**
+     * @dev Emitted when the hook configuration is changed for a cash-out operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
+     * @param newCallableContract The new address of the callable contract on the hook configuration.
+     * @param oldCallableContract The old address of the callable contract on the hook configuration.
+     * @param newHookFlags The new bit flags of the hook configuration.
+     * @param oldHookFlags The old bit flags of the hook configuration.
+     */
     event CashOutHooksConfigured(
         bytes32 indexed txId, // Tools: this comment prevents Prettier from formatting into a single line.
         address newCallableContract,
@@ -87,7 +94,12 @@ interface ICashierHookable is ICashierHookableTypes {
         uint256 oldHookFlags
     );
 
-    /// @dev Emitted when a hook function is called.
+    /**
+     * @dev Emitted when a hook function is called.
+     * @param txId The unique off-chain transaction identifier of the related operation.
+     * @param hookIndex The index of the related hook.
+     * @param callableContract The address of the contract that implements the hook function.
+     */
     event HookInvoked(
         bytes32 indexed txId, // Tools: this comment prevents Prettier from formatting into a single line.
         uint256 indexed hookIndex,
@@ -107,7 +119,7 @@ interface ICashierHookable is ICashierHookableTypes {
 
     /**
      * @dev Returns the current hook configuration for a cash-out operation.
-     * @param txId The unique off-chain transaction identifier of the operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
      * @return The hook configuration structure.
      */
     function getCashOutHookConfig(bytes32 txId) external view returns (HookConfig memory);

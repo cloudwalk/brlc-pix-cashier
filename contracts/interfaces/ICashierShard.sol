@@ -107,7 +107,7 @@ interface ICashierShardPrimary is ICashierTypes {
 
    /**
      * @dev Sets a specific bit in the flags of a cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to set.
      */
     function setBitInCashOutFlags(
@@ -117,7 +117,7 @@ interface ICashierShardPrimary is ICashierTypes {
 
     /**
      * @dev Resets a specific bit in the flags of a cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to reset.
      */
     function resetBitInCashOutFlags(
@@ -127,7 +127,7 @@ interface ICashierShardPrimary is ICashierTypes {
 
     /**
      * @dev Returns the data of a single cash-in operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-in operation in the form of a structure.
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory operation);
@@ -141,7 +141,7 @@ interface ICashierShardPrimary is ICashierTypes {
 
     /**
      * @dev Returns the data of a single cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-out operation in the form of a structure.
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory operation);

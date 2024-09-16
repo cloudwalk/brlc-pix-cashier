@@ -52,7 +52,10 @@ interface ICashierErrors {
     /// @dev Thrown if the number of shard contracts to replace is greater than expected.
     error Cashier_ShardReplacementCountExcess();
 
-    /// @dev Thrown if the shard contract returns an unexpected error.
+    /**
+     * @dev Thrown if the shard contract returns an unexpected error.
+     * @param err The error code returned by the shard contract.
+     */
     error Cashier_UnexpectedShardError(uint256 err);
 
     /// @dev Thrown if the maximum number of shards is exceeded.
@@ -79,53 +82,90 @@ interface ICashierErrors {
 interface ICashierPrimary is ICashierTypes {
     // ------------------ Events ---------------------------------- //
 
-    /// @dev Emitted when a new cash-in operation is executed.
+    /**
+     * @dev Emitted when a new cash-in operation is executed.
+     * @param account The account that receives tokens.
+     * @param amount The amount of tokens to receive.
+     * @param txId The off-chain transaction identifier.
+     */
     event CashIn(
-        address indexed account, // The account that receives tokens.
-        uint256 amount,          // The amount of tokens to receive.
-        bytes32 indexed txId     // The off-chain transaction identifier.
+        address indexed account,
+        uint256 amount,
+        bytes32 indexed txId
     );
 
-    /// @dev Emitted when a cash-in premint operation is executed or changed.
+    /**
+     * @dev Emitted when a cash-in premint operation is executed or changed.
+     * @param account The account that will receive the preminted tokens.
+     * @param newAmount The new amount of preminted tokens.
+     * @param oldAmount The old amount of preminted tokens.
+     * @param txId The off-chain transaction identifier for the operation.
+     * @param releaseTime The timestamp when the preminted tokens will become available for usage.
+     */
     event CashInPremint(
-        address indexed account, // The account that will receive the preminted tokens.
-        uint256 newAmount,       // The new amount of preminted tokens.
-        uint256 oldAmount,       // The old amount of preminted tokens.
-        bytes32 indexed txId,    // The off-chain transaction identifier for the operation.
-        uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
+        address indexed account,
+        uint256 newAmount,
+        uint256 oldAmount,
+        bytes32 indexed txId,
+        uint256 releaseTime
     );
 
-    /// @dev Emitted when a new cash-out operation is initiated.
+    /**
+     * @dev Emitted when a new cash-out operation is initiated.
+     * @param account The account that owns the tokens to cash-out.
+     * @param amount The amount of tokens to cash-out.
+     * @param balance The new pending cash-out balance of the account.
+     * @param txId The off-chain transaction identifier.
+     * @param sender The account that initiated the cash-out.
+     */
     event RequestCashOut(
-        address indexed account, // The account that owns the tokens to cash-out.
-        uint256 amount,          // The amount of tokens to cash-out.
-        uint256 balance,         // The new pending cash-out balance of the account.
-        bytes32 indexed txId,    // The off-chain transaction identifier.
-        address indexed sender   // The account that initiated the cash-out.
+        address indexed account,
+        uint256 amount,
+        uint256 balance,
+        bytes32 indexed txId,
+        address indexed sender
     );
 
-    /// @dev Emitted when a cash-out operation is confirmed.
+    /**
+     * @dev Emitted when a cash-out operation is confirmed.
+     * @param account The account that owns the tokens to cash-out.
+     * @param amount The amount of tokens to cash-out.
+     * @param balance The new pending cash-out balance of the account.
+     * @param txId The off-chain transaction identifier.
+     */
     event ConfirmCashOut(
-        address indexed account, // The account that owns the tokens to cash-out.
-        uint256 amount,          // The amount of tokens to cash-out.
-        uint256 balance,         // The new pending cash-out balance of the account.
-        bytes32 indexed txId     // The off-chain transaction identifier.
+        address indexed account,
+        uint256 amount,
+        uint256 balance,
+        bytes32 indexed txId
     );
 
-    /// @dev Emitted when a cash-out operation is reversed.
+    /**
+     * @dev Emitted when a cash-out operation is reversed.
+     * @param account The account that owns the tokens to cash-out.
+     * @param amount The amount of tokens to cash-out.
+     * @param balance The new pending cash-out balance of the account.
+     * @param txId The off-chain transaction identifier.
+     */
     event ReverseCashOut(
-        address indexed account, // The account that owns the tokens to cash-out.
-        uint256 amount,          // The amount of tokens to cash-out.
-        uint256 balance,         // The new pending cash-out balance of the account.
-        bytes32 indexed txId     // The off-chain transaction identifier.
+        address indexed account,
+        uint256 amount,
+        uint256 balance,
+        bytes32 indexed txId
     );
 
-    /// @dev Emitted when an internal cash-out operation is executed.
+    /**
+     * @dev Emitted when an internal cash-out operation is executed.
+     * @param from The account that owns the tokens to cash-out.
+     * @param txId The off-chain transaction identifier.
+     * @param to The account that received the tokens through the internal cash-out.
+     * @param amount The amount of tokens to cash-out.
+     */
     event InternalCashOut(
-        address indexed from, // The account that owns the tokens to cash-out.
-        bytes32 indexed txId, // The off-chain transaction identifier.
-        address indexed to,   // The account that received the tokens through the internal cash-out.
-        uint256 amount        // The amount of tokens to cash-out.
+        address indexed from,
+        bytes32 indexed txId,
+        address indexed to,
+        uint256 amount
     );
 
     // ------------------ Functions ------------------------------- //
@@ -140,7 +180,7 @@ interface ICashierPrimary is ICashierTypes {
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function cashIn(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -158,7 +198,7 @@ interface ICashierPrimary is ICashierTypes {
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param releaseTime The timestamp when the minted tokens will become available for usage.
      */
     function cashInPremint(
@@ -176,7 +216,7 @@ interface ICashierPrimary is ICashierTypes {
      *
      * Emits a {CashInPremint} event.
      *
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param releaseTime The timestamp of the premint that will be revoked.
      */
     function cashInPremintRevoke(
@@ -206,7 +246,7 @@ interface ICashierPrimary is ICashierTypes {
      *
      * @param account The account on that behalf the operation is made.
      * @param amount The amount of tokens to be cash-outed.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function requestCashOutFrom(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -223,7 +263,7 @@ interface ICashierPrimary is ICashierTypes {
      *
      * Emits a {CashOutConfirm} event for the operation.
      *
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function confirmCashOut(bytes32 txId) external;
 
@@ -236,7 +276,7 @@ interface ICashierPrimary is ICashierTypes {
      *
      * Emits a {CashOutReverse} event for the operation.
      *
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function reverseCashOut(bytes32 txId) external;
 
@@ -252,7 +292,7 @@ interface ICashierPrimary is ICashierTypes {
      * @param from The account that owns the tokens to cash-out.
      * @param to The account that will receive the tokens.
      * @param amount The amount of tokens to be cash-outed.
-     * @param txId The unique off-chain transaction identifier of the operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
      */
     function makeInternalCashOut(
         address from, // Tools: this comment prevents Prettier from formatting into a single line.
@@ -265,7 +305,7 @@ interface ICashierPrimary is ICashierTypes {
 
     /**
      * @dev Returns the data of a single cash-in operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-in operation in the form of a structure.
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory operation);
@@ -279,7 +319,7 @@ interface ICashierPrimary is ICashierTypes {
 
     /**
      * @dev Returns the data of a single cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-out operation in the form of a structure.
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory operation);
@@ -383,7 +423,7 @@ interface ICashierConfiguration {
 
     /**
      * @dev Returns the shard address by the off-chain transaction identifier.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function getShardByTxId(bytes32 txId) external view returns (address);
 

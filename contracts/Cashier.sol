@@ -720,7 +720,7 @@ contract Cashier is
 
     /**
      * @dev Returns the shard contract by the off-chain transaction identifier.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function _shard(bytes32 txId) internal view returns (ICashierShardPrimary) {
         uint256 i = uint256(keccak256(abi.encodePacked(txId)));
@@ -730,7 +730,7 @@ contract Cashier is
 
     /**
      * @dev Configures the hook logic for a cash-out operation internally.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param newCallableContract The address of the contract that implements the hook function to be called.
      * @param newHookFlags The bit flags of the hook functions.
      * @param hooksConfig The storage reference to the hook configuration structure.
@@ -766,8 +766,8 @@ contract Cashier is
 
     /**
      * @dev Calls the hook function if it is configured for a cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @param hookIndex The index of the hook.
+     * @param txId The off-chain transaction identifier of the related operation.
+     * @param hookIndex The index of the related hook.
      */
     function _callCashOutHookIfConfigured(bytes32 txId, uint256 hookIndex) internal {
         _callHookIfConfigured(txId, hookIndex, _cashOutHookConfigs[txId]);
@@ -775,8 +775,8 @@ contract Cashier is
 
     /**
      * @dev Calls the hook function if it is configured for an operation.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @param hookIndex The index of the hook.
+     * @param txId The off-chain transaction identifier of the related operation.
+     * @param hookIndex The index of the related hook.
      * @param hooksConfig The storage reference to the hook configuration structure.
      */
     function _callHookIfConfigured(bytes32 txId, uint256 hookIndex, HookConfig storage hooksConfig) internal {

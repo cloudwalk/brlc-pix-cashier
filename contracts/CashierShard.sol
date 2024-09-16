@@ -230,7 +230,7 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
      * @dev Registers a cash-out operation internally with the provided status.
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param newStatus The new status of the operation to set.
      * @return err The error code if the operation fails, otherwise None.
      * @return flags The flags field of the stored cash-out operation structure.

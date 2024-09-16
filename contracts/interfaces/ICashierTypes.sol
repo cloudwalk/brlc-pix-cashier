@@ -100,19 +100,19 @@ interface ICashierTypes {
 
     /// @dev Structure with data of a single cash-in operation.
     struct CashInOperation {
-        CashInStatus status;  // The status of the cash-in operation according to the {CashInStatus} enum.
-        address account;      // The owner of tokens to cash-in.
-        uint64 amount;        // The amount of tokens to cash-in.
-        uint8 flags;          // The bit field of flags for the operation. See {CashInFlagIndex}.
-        // uint16 __reserved; // Reserved for future use until the end of the storage slot.
+        CashInStatus status; // -- The status of the cash-in operation according to the {CashInStatus} enum.
+        address account; // ------ The owner of tokens to cash-in.
+        uint64 amount; // -------- The amount of tokens to cash-in.
+        uint8 flags; // ---------- The bit field of flags for the operation. See {CashInFlagIndex}.
+        // uint16 __reserved; // - Reserved for future use until the end of the storage slot.
     }
 
     /// @dev Structure with data of a single cash-out operation.
     struct CashOutOperation {
-        CashOutStatus status;  // The status of the cash-out operation according to the {CashOutStatus} enum.
-        address account;       // The owner of tokens to cash-out.
-        uint64 amount;         // The amount of tokens to cash-out.
-        uint8 flags;           // The bit field of flags for the operation. See {CashOutFlagIndex}.
-        // uint16 __reserved;  // Reserved for future use until the end of the storage slot.
+        CashOutStatus status; // - The status of the cash-out operation according to the {CashOutStatus} enum.
+        address account; // ------ The owner of tokens to cash-out.
+        uint64 amount; // -------- The amount of tokens to cash-out.
+        uint8 flags; // ---------- The bit field of flags for the operation. See {CashOutFlagIndex}.
+        // uint16 __reserved; // - Reserved for future use until the end of the storage slot.
     }
 }

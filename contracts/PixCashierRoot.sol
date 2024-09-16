@@ -294,7 +294,7 @@ contract PixCashierRoot is
             revert PixCashierRoot_AmountExcess();
         }
 
-        (uint256 err, uint8 flags) = _shard(txId).registerCashOut(account, amount, txId);
+        (uint256 err, uint256 flags) = _shard(txId).registerCashOut(account, amount, txId);
         if (err != uint256(IPixCashierShardPrimary.Error.None)) {
             if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
             if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();
@@ -331,7 +331,7 @@ contract PixCashierRoot is
             revert PixCashierRoot_TxIdZero();
         }
 
-        (uint256 err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
+        (uint256 err, address account, uint256 amount, uint256 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Confirmed
         );
@@ -370,7 +370,7 @@ contract PixCashierRoot is
             revert PixCashierRoot_TxIdZero();
         }
 
-        (uint256 err, address account, uint256 amount, uint8 flags) = _shard(txId).processCashOut(
+        (uint256 err, address account, uint256 amount, uint256 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Reversed
         );
@@ -427,7 +427,7 @@ contract PixCashierRoot is
             revert PixCashierRoot_AmountExcess();
         }
 
-        (uint256 err, uint8 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
+        (uint256 err, uint256 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
         if (err != uint256(IPixCashierShardPrimary.Error.None)) {
             if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
             if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();

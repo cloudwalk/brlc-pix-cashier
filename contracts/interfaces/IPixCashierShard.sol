@@ -76,7 +76,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external returns (uint256 err, uint8 flags);
+    ) external returns (uint256 err, uint256 flags);
 
     /**
      * @dev Registers an internal cash-out operation.
@@ -90,7 +90,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external returns (uint256 err, uint8 flags);
+    ) external returns (uint256 err, uint256 flags);
 
     /**
      * @dev Processes a cash-out operation.
@@ -103,7 +103,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
     function processCashOut(
         bytes32 txId,
         CashOutStatus status
-    ) external returns (uint256 err, address account, uint256 amount, uint8 flags);
+    ) external returns (uint256 err, address account, uint256 amount, uint256 flags);
 
     /**
      * @dev Sets the bit flags of a cash-in operation.

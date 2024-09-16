@@ -25,14 +25,10 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
      *
      * The values:
      * - None = 0 ------------------------- There is no error. The function was executed successfully.
-     * - ZeroAccount = 1 ------------------ The account address is zero.
-     * - ZeroAmount = 2 ------------------- The amount is zero.
-     * - ZeroTxId = 3 --------------------- The transaction identifier is zero.
-     * - AmountExcess = 4 ----------------- The amount exceeds the maximum value.
-     * - CashInAlreadyExecuted = 5 -------- The cash-in operation has already been executed.
-     * - InappropriateCashInStatus = 6 ---- The cash-in operation status is inappropriate.
-     * - InappropriateCashOutStatus = 7 --- The cash-out operation status is inappropriate.
-     * - InappropriateCashOutAccount = 8 -- The cash-out operation account is inappropriate.
+     * - CashInAlreadyExecuted = 1 -------- The cash-in operation has already been executed.
+     * - InappropriateCashInStatus = 2 ---- The cash-in operation status is inappropriate.
+     * - InappropriateCashOutStatus = 3 --- The cash-out operation status is inappropriate.
+     * - InappropriateCashOutAccount = 4 -- The cash-out operation account is inappropriate.
      */
     enum Error {
         None,

@@ -89,7 +89,7 @@ interface ICashierPrimary is ICashierTypes {
      * @param txId The off-chain transaction identifier.
      */
     event CashIn(
-        address indexed account,
+        address indexed account, // Tools: this comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 indexed txId
     );
@@ -134,7 +134,7 @@ interface ICashierPrimary is ICashierTypes {
      * @param txId The off-chain transaction identifier.
      */
     event ConfirmCashOut(
-        address indexed account,
+        address indexed account, // Tools: this comment prevents Prettier from formatting into a single line.
         uint256 amount,
         uint256 balance,
         bytes32 indexed txId
@@ -148,7 +148,7 @@ interface ICashierPrimary is ICashierTypes {
      * @param txId The off-chain transaction identifier.
      */
     event ReverseCashOut(
-        address indexed account,
+        address indexed account, // Tools: this comment prevents Prettier from formatting into a single line.
         uint256 amount,
         uint256 balance,
         bytes32 indexed txId
@@ -162,7 +162,7 @@ interface ICashierPrimary is ICashierTypes {
      * @param amount The amount of tokens to cash-out.
      */
     event InternalCashOut(
-        address indexed from,
+        address indexed from, // Tools: this comment prevents Prettier from formatting into a single line.
         bytes32 indexed txId,
         address indexed to,
         uint256 amount
@@ -441,7 +441,7 @@ interface ICashierConfiguration {
  * @dev The interface of the contract responsible for cashier operations on the underlying token contract.
  */
 interface ICashier is
-    ICashierErrors,
+    ICashierErrors, // Tools: this comment prevents Prettier from formatting into a single line.
     ICashierPrimary,
     ICashierConfiguration
 {}

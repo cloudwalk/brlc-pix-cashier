@@ -105,7 +105,7 @@ interface ICashierShardPrimary is ICashierTypes {
         CashOutStatus status
     ) external returns (uint256 err, address account, uint256 amount, uint256 flags);
 
-   /**
+    /**
      * @dev Sets a specific bit in the flags of a cash-out operation.
      * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to set.
@@ -187,7 +187,7 @@ interface ICashierShardConfiguration {
  * @dev The interface of the contract responsible for sharded storage of data about cashier operations.
  */
 interface ICashierShard is
-    ICashierShardErrors,
+    ICashierShardErrors, // Tools: this comment prevents Prettier from formatting into a single line.
     ICashierShardPrimary,
     ICashierShardConfiguration
 {}

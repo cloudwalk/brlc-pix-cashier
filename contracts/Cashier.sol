@@ -710,10 +710,14 @@ contract Cashier is
      */
     function _checkShardError(uint256 err) internal pure {
         if (err != uint256(ICashierShardPrimary.Error.None)) {
-            if (err == uint256(ICashierShardPrimary.Error.CashInAlreadyExecuted)) revert Cashier_CashInAlreadyExecuted();
-            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashInStatus)) revert Cashier_InappropriateCashInStatus();
-            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutStatus)) revert Cashier_InappropriateCashOutStatus();
-            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutAccount)) revert Cashier_InappropriateCashOutAccount();
+            if (err == uint256(ICashierShardPrimary.Error.CashInAlreadyExecuted))
+                revert Cashier_CashInAlreadyExecuted();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashInStatus))
+                revert Cashier_InappropriateCashInStatus();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutStatus))
+                revert Cashier_InappropriateCashOutStatus();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutAccount))
+                revert Cashier_InappropriateCashOutAccount();
             revert Cashier_UnexpectedShardError(err);
         }
     }

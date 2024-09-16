@@ -159,7 +159,7 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
     }
 
     /**
-     * @inheritdoc IPixCashierShardPrimary
+     * @inheritdoc ICashierShardPrimary
      */
     function resetBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.

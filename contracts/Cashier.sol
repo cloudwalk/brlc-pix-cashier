@@ -603,7 +603,7 @@ contract Cashier is
      */
     function _validateTxId(bytes32 txId) internal pure {
         if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
+            revert Cashier_TxIdZero();
         }
     }
 
@@ -613,10 +613,10 @@ contract Cashier is
      */
     function _validateAmount(uint256 amount) internal pure {
         if (amount == 0) {
-            revert PixCashierRoot_AmountZero();
+            revert Cashier_AmountZero();
         }
         if (amount > type(uint64).max) {
-            revert PixCashierRoot_AmountExcess();
+            revert Cashier_AmountExcess();
         }
     }
 
@@ -626,7 +626,7 @@ contract Cashier is
      */
     function _validateAccount(address account) internal pure {
         if (account == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
+            revert Cashier_AccountAddressZero();
         }
     }
 
@@ -636,7 +636,7 @@ contract Cashier is
      */
     function _validateReleaseTime(uint256 releaseTime) internal pure {
         if (releaseTime == 0) {
-            revert PixCashierRoot_InappropriatePremintReleaseTime();
+            revert Cashier_InappropriatePremintReleaseTime();
         }
     }
 
@@ -709,12 +709,12 @@ contract Cashier is
      * @param err The error code returned by the shard contract.
      */
     function _checkShardError(uint256 err) internal pure {
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.CashInAlreadyExecuted)) revert PixCashierRoot_CashInAlreadyExecuted();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashInStatus)) revert PixCashierRoot_InappropriateCashInStatus();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();
-            revert PixCashierRoot_UnexpectedShardError(err);
+        if (err != uint256(ICashierShardPrimary.Error.None)) {
+            if (err == uint256(ICashierShardPrimary.Error.CashInAlreadyExecuted)) revert Cashier_CashInAlreadyExecuted();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashInStatus)) revert Cashier_InappropriateCashInStatus();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutStatus)) revert Cashier_InappropriateCashOutStatus();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutAccount)) revert Cashier_InappropriateCashOutAccount();
+            revert Cashier_UnexpectedShardError(err);
         }
     }
 

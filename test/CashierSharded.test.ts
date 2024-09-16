@@ -2380,7 +2380,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       ).to.be.revertedWithCustomError(cashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
     });
 
-    it("The 'processCashOut()' function is reverted if it is called not by the owner", async () => {
+    it("The 'processCashOut()' function is reverted if it is called not by the owner or admin", async () => {
       const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(cashierShards[0], deployer).processCashOut(
@@ -2390,20 +2390,20 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       ).to.be.revertedWithCustomError(cashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
     });
 
-    it("The 'setBitInCashOutFlags()' function is reverted if it is called not by the owner", async () => {
-      const { pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+    it("The 'setBitInCashOutFlags()' function is reverted if it is called not by the owner or admin", async () => {
+      const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(
-        connect(pixCashierShards[0], deployer).setBitInCashOutFlags(
+        connect(cashierShards[0], deployer).setBitInCashOutFlags(
           TRANSACTION_ID1,
           0 // flags
         )
-      ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+      ).to.be.revertedWithCustomError(cashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
     });
 
-    it("The 'resetBitInCashOutFlags()' function is reverted if it is called not by the owner", async () => {
-      const { pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+    it("The 'resetBitInCashOutFlags()' function is reverted if it is called not by the owner or admin", async () => {
+      const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(
-        connect(pixCashierShards[0], deployer).resetBitInCashOutFlags(
+        connect(cashierShards[0], deployer).resetBitInCashOutFlags(
           TRANSACTION_ID1,
           0 // flags
         )

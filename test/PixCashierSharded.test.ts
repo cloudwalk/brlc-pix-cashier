@@ -2390,10 +2390,20 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
     });
 
-    it("The 'setCashOutFlags()' function is reverted if it is called not by the owner", async () => {
+    it("The 'setBitInCashOutFlags()' function is reverted if it is called not by the owner", async () => {
       const { pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(
-        connect(pixCashierShards[0], deployer).setCashOutFlags(
+        connect(pixCashierShards[0], deployer).setBitInCashOutFlags(
+          TRANSACTION_ID1,
+          0 // flags
+        )
+      ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+
+    it("The 'resetBitInCashOutFlags()' function is reverted if it is called not by the owner", async () => {
+      const { pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(pixCashierShards[0], deployer).resetBitInCashOutFlags(
           TRANSACTION_ID1,
           0 // flags
         )

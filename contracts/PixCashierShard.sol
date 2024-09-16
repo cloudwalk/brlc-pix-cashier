@@ -149,11 +149,23 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     /**
      * @inheritdoc IPixCashierShardPrimary
      */
-    function setCashOutFlags(
+    function setBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
-        uint256 flags
+        uint8 bit
     ) external onlyOwnerOrAdmin returns (uint256) {
-        _cashOutOperations[txId].flags = uint8(flags);
+        _cashOutOperations[txId].flags |= bit;
+
+        return uint256(Error.None);
+    }
+
+    /**
+     * @inheritdoc IPixCashierShardPrimary
+     */
+    function resetBitInCashOutFlags(
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint8 bit
+    ) external onlyOwnerOrAdmin returns (uint256) {
+        _cashOutOperations[txId].flags &= ~bit;
 
         return uint256(Error.None);
     }

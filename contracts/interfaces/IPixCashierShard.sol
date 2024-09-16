@@ -105,16 +105,25 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         CashOutStatus status
     ) external returns (uint256 err, address account, uint256 amount, uint256 flags);
 
-    /**
-     * @dev Sets the bit flags of a cash-in operation.
+   /**
+     * @dev Sets a specific bit in the flags of a cash-out operation.
      * @param txId The off-chain transaction identifier of the operation.
-     * @param flags The flags to set.
-     * @return err The error code if the operation fails, otherwise {Error.None}.
+     * @param bit The bit to set.
      */
-    function setCashOutFlags(
+    function setBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
-        uint256 flags
-    ) external returns (uint256 err);
+        uint8 bit
+    ) external returns (uint256);
+
+    /**
+     * @dev Resets a specific bit in the flags of a cash-out operation.
+     * @param txId The off-chain transaction identifier of the operation.
+     * @param bit The bit to reset.
+     */
+    function resetBitInCashOutFlags(
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint8 bit
+    ) external returns (uint256);
 
     /**
      * @dev Returns the data of a single cash-in operation.

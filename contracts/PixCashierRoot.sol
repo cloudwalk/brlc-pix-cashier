@@ -147,24 +147,10 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (account == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
-        }
-        if (amount == 0) {
-            revert PixCashierRoot_AmountZero();
-        }
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
-        if (amount > type(uint64).max) {
-            revert PixCashierRoot_AmountExcess();
-        }
+        _validateAccountAmountTxId(account, amount, txId);
 
         uint256 err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.Executed);
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.CashInAlreadyExecuted)) revert PixCashierRoot_CashInAlreadyExecuted();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         emit CashIn(account, amount, txId);
 
@@ -190,27 +176,10 @@ contract PixCashierRoot is
         bytes32 txId,
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (account == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
-        }
-        if (amount == 0) {
-            revert PixCashierRoot_AmountZero();
-        }
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
-        if (amount > type(uint64).max) {
-            revert PixCashierRoot_AmountExcess();
-        }
-        if (releaseTime == 0) {
-            revert PixCashierRoot_InappropriatePremintReleaseTime();
-        }
+        _validateAccountAmountTxIdReleaseTime(account, amount, txId, releaseTime);
 
         uint256 err = _shard(txId).registerCashIn(account, amount, txId, CashInStatus.PremintExecuted);
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.CashInAlreadyExecuted)) revert PixCashierRoot_CashInAlreadyExecuted();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         emit CashInPremint(account, amount, 0, txId, releaseTime);
 
@@ -230,18 +199,10 @@ contract PixCashierRoot is
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 releaseTime
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
-        if (releaseTime == 0) {
-            revert PixCashierRoot_InappropriatePremintReleaseTime();
-        }
+        _validateTxIdReleaseTime(txId, releaseTime);
 
         (uint256 err, address account, uint256 amount) = _shard(txId).revokeCashIn(txId);
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashInStatus)) revert PixCashierRoot_InappropriateCashInStatus();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         emit CashInPremint(account, 0, amount, txId, releaseTime);
 
@@ -281,25 +242,10 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (account == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
-        }
-        if (amount == 0) {
-            revert PixCashierRoot_AmountZero();
-        }
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
-        if (amount > type(uint64).max) {
-            revert PixCashierRoot_AmountExcess();
-        }
+        _validateAccountAmountTxId(account, amount, txId);
 
         (uint256 err, uint256 flags) = _shard(txId).registerCashOut(account, amount, txId);
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         uint256 cashOutBalance = _cashOutBalances[account] + amount;
         _cashOutBalances[account] = cashOutBalance;
@@ -327,18 +273,13 @@ contract PixCashierRoot is
      * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function confirmCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
+        _validateTxId(txId);
 
         (uint256 err, address account, uint256 amount, uint256 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Confirmed
         );
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         uint256 cashOutBalance = _cashOutBalances[account] - amount;
         _cashOutBalances[account] = cashOutBalance;
@@ -366,18 +307,13 @@ contract PixCashierRoot is
      * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function reverseCashOut(bytes32 txId) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
+        _validateTxId(txId);
 
         (uint256 err, address account, uint256 amount, uint256 flags) = _shard(txId).processCashOut(
             txId,
             CashOutStatus.Reversed
         );
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         uint256 cashOutBalance = _cashOutBalances[account] - amount;
         _cashOutBalances[account] = cashOutBalance;
@@ -411,28 +347,10 @@ contract PixCashierRoot is
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
-        if (to == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
-        }
-        if (from == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
-        }
-        if (amount == 0) {
-            revert PixCashierRoot_AmountZero();
-        }
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
-        if (amount > type(uint64).max) {
-            revert PixCashierRoot_AmountExcess();
-        }
+        _validateAccountAccountAmountTxId(from, to, amount, txId);
 
         (uint256 err, uint256 flags) = _shard(txId).registerInternalCashOut(from, amount, txId);
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         emit InternalCashOut(from, txId, to, amount);
 
@@ -502,9 +420,7 @@ contract PixCashierRoot is
      * - The caller must have the {OWNER_ROLE} role.
      */
     function configureShardAdmin(address account, bool status) external onlyRole(OWNER_ROLE) {
-        if (account == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
-        }
+        _validateAccount(account);
 
         for (uint256 i; i < _shards.length; i++) {
             _shards[i].setAdmin(account, status);
@@ -530,9 +446,7 @@ contract PixCashierRoot is
         address newCallableContract,
         uint256 newHookFlags
     ) external whenNotPaused onlyRole(HOOK_ADMIN_ROLE) {
-        if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
-        }
+        _validateTxId(txId);
 
         // Resets all the expected flags and checks whether any remains
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
@@ -548,9 +462,7 @@ contract PixCashierRoot is
             cashOutFlags &= uint8(~CASH_OUT_FLAG_SOME_HOOK_CONFIGURED);
         }
         uint256 err = _shard(txId).setCashOutFlags(txId, cashOutFlags);
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            revert PixCashierRoot_UnexpectedShardError(err);
-        }
+        _checkShardError(err);
 
         // Getting the hook configuration structure has been extracted from the function
         // to keep it more generic for the future possible implementation of cash-in hooks.
@@ -685,6 +597,127 @@ contract PixCashierRoot is
     }
 
     // ------------------ Internal functions ---------------------- //
+
+    /**
+     * @dev Validates the provided off-chain transaction identifier.
+     * @param txId The off-chain transaction identifier to be validated.
+     */
+    function _validateTxId(bytes32 txId) internal pure {
+        if (txId == 0) {
+            revert PixCashierRoot_TxIdZero();
+        }
+    }
+
+    /**
+     * @dev Validates the provided amount value.
+     * @param amount The amount of tokens to be validated.
+     */
+    function _validateAmount(uint256 amount) internal pure {
+        if (amount == 0) {
+            revert PixCashierRoot_AmountZero();
+        }
+        if (amount > type(uint64).max) {
+            revert PixCashierRoot_AmountExcess();
+        }
+    }
+
+    /**
+     * @dev Validates the provided account address.
+     * @param account The account address to be validated.
+     */
+    function _validateAccount(address account) internal pure {
+        if (account == address(0)) {
+            revert PixCashierRoot_AccountAddressZero();
+        }
+    }
+
+    /**
+     * @dev Validates the provided release time value.
+     * @param releaseTime The release time to be validated.
+     */
+    function _validateReleaseTime(uint256 releaseTime) internal pure {
+        if (releaseTime == 0) {
+            revert PixCashierRoot_InappropriatePremintReleaseTime();
+        }
+    }
+
+    /**
+     * @dev Validates the provided account, amount and txId values.
+     * @param account The account address to be validated.
+     * @param amount The amount of tokens to be validated.
+     * @param txId The off-chain transaction identifier to be validated.
+     */
+    function _validateAccountAmountTxId(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) internal pure {
+        _validateAccount(account);
+        _validateAmount(amount);
+        _validateTxId(txId);
+    }
+
+    /**
+     * @dev Validates the provided accounts, amount and txId values.
+     * @param account1 The first account address to be validated.
+     * @param account2 The second account address to be validated.
+     * @param amount The amount of tokens to be validated.
+     * @param txId The off-chain transaction identifier to be validated.
+     */
+    function _validateAccountAccountAmountTxId(
+        address account1,
+        address account2,
+        uint256 amount,
+        bytes32 txId
+    ) internal pure {
+        _validateAccount(account1);
+        _validateAccount(account2);
+        _validateAmount(amount);
+        _validateTxId(txId);
+    }
+
+    /**
+     * @dev Validates the provided account, amount, txId and releaseTime values.
+     * @param account The account address to be validated.
+     * @param amount The amount of tokens to be validated.
+     * @param txId The off-chain transaction identifier to be validated.
+     * @param releaseTime The release time to be validated.
+     */
+    function _validateAccountAmountTxIdReleaseTime(
+        address account,
+        uint256 amount,
+        bytes32 txId,
+        uint256 releaseTime
+    ) internal pure {
+        _validateAccount(account);
+        _validateAmount(amount);
+        _validateTxId(txId);
+        _validateReleaseTime(releaseTime);
+    }
+
+    /**
+     * @dev Validates the provided txId and releaseTime values.
+     * @param txId The off-chain transaction identifier to be validated.
+     * @param releaseTime The release time to be validated.
+     */
+    function _validateTxIdReleaseTime(bytes32 txId, uint256 releaseTime) internal pure {
+        _validateTxId(txId);
+        _validateReleaseTime(releaseTime);
+    }
+
+    /**
+     * @dev Checks the error code returned by the shard contract and reverts with the appropriate error message.
+     * @param err The error code returned by the shard contract.
+     */
+    function _checkShardError(uint256 err) internal pure {
+        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
+            if (err == uint256(IPixCashierShardPrimary.Error.CashInAlreadyExecuted)) revert PixCashierRoot_CashInAlreadyExecuted();
+            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashInStatus)) revert PixCashierRoot_InappropriateCashInStatus();
+            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
+            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();
+            revert PixCashierRoot_UnexpectedShardError(err);
+        }
+    }
 
     /**
      * @dev Returns the shard contract by the off-chain transaction identifier.

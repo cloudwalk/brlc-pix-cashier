@@ -189,7 +189,7 @@ contract Cashier is
     /**
      * @inheritdoc ICashierPrimary
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.

@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 /**
  * @title ICashierHook interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the hook function that can be called by the cashier contract during some operations.
+ * @dev Defines the hook function that can be called by the cashier contract during operations.
  */
 interface ICashierHook {
     /**

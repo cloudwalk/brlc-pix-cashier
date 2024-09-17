@@ -77,7 +77,7 @@ interface ICashierErrors {
 /**
  * @title ICashierPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary interface of the contract responsible for cashier operations on the underlying token contract.
+ * @dev The primary part of the cashier contract interface.
  */
 interface ICashierPrimary is ICashierTypes {
     // ------------------ Events ---------------------------------- //
@@ -369,7 +369,7 @@ interface ICashierPrimary is ICashierTypes {
 /**
  * @title ICashierConfiguration interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev The configuration interface of the contract responsible for cashier operations.
+ * @dev The configuration part of the cashier contract interface.
  */
 interface ICashierConfiguration {
     // ------------------ Events ---------------------------------- //
@@ -438,7 +438,7 @@ interface ICashierConfiguration {
 /**
  * @title ICashier interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev The interface of the contract responsible for cashier operations on the underlying token contract.
+ * @dev The full interface of the cashier contract.
  */
 interface ICashier is
     ICashierErrors, // Tools: this comment prevents Prettier from formatting into a single line.

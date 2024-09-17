@@ -17,18 +17,18 @@ interface ICashierShardErrors {
 /**
  * @title ICashierShardPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary interface of the contract responsible for sharded storage of data about cashier operations.
+ * @dev The primary part of the cashier shard contract interface.
  */
 interface ICashierShardPrimary is ICashierTypes {
     /**
      * @dev Possible function errors of the shard contract.
      *
      * The values:
-     * - None = 0 ------------------------- There is no error. The function was executed successfully.
-     * - CashInAlreadyExecuted = 1 -------- The cash-in operation has already been executed.
-     * - InappropriateCashInStatus = 2 ---- The cash-in operation status is inappropriate.
-     * - InappropriateCashOutStatus = 3 --- The cash-out operation status is inappropriate.
-     * - InappropriateCashOutAccount = 4 -- The cash-out operation account is inappropriate.
+     * - None = 0 ------------------------ There is no error. The function was executed successfully.
+     * - CashInAlreadyExecuted = 1 ------- The cash-in operation has already been executed.
+     * - InappropriateCashInStatus = 2 --- The cash-in operation status is inappropriate.
+     * - InappropriateCashOutStatus = 3 -- The cash-out operation status is inappropriate.
+     * - InappropriateCashOutAccount = 4 - The cash-out operation account is inappropriate.
      */
     enum Error {
         None,
@@ -157,7 +157,7 @@ interface ICashierShardPrimary is ICashierTypes {
 /**
  * @title ICashierShardConfiguration interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The configuration interface of the contract responsible for sharded storage of data about cashier operations.
+ * @dev The configuration part of the cashier shard contract interface.
  */
 interface ICashierShardConfiguration {
     /**
@@ -184,7 +184,7 @@ interface ICashierShardConfiguration {
 /**
  * @title ICashierShard interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of the contract responsible for sharded storage of data about cashier operations.
+ * @dev The full interface of the cashier shard contract.
  */
 interface ICashierShard is
     ICashierShardErrors, // Tools: this comment prevents Prettier from formatting into a single line.

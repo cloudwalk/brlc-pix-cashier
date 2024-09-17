@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 /**
  * @title ICashierHookableTypes interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the types used in the CashierHookable contract.
+ * @dev Defines the types used in the cashier hookable contract.
  */
 interface ICashierHookableTypes {
     /**
@@ -17,18 +17,18 @@ interface ICashierHookableTypes {
      *
      * The possible values:
      *
-     * - CashInCommonBefore = 0 --------- Called before the token transfer during a common cash-in operation.
-     * - CashInCommonAfter = 1 ---------- Called before the token transfer during a common cash-in operation.
-     * - CashInPremintBefore = 2 -------- Called before the token transfer during a premint cash-in operation.
-     * - CashInPremintAfter = 3 --------- Called after the token transfer during a premint cash-in operation.
-     * - Reserved1 = 4 ------------------ Reserved for the future.
-     * - Reserved2 = 5 ------------------ Reserved for the future.
-     * - CashOutRequestBefore = 6 ------- Called before the token transfer during a cash-out request operation.
-     * - CashOutRequestAfter = 7 -------- Called after the token transfer during a cash-out request operation.
-     * - CashOutConfirmationBefore = 8 -- Called before the token transfer during a cash-out confirmation operation.
-     * - CashOutConfirmationAfter = 9 --- Called after the token transfer during a cash-out confirmation operation.
-     * - CashOutReversalBefore = 10 ----- Called before the token transfer during a cash-out reversal operation.
-     * - CashOutReversalAfter = 11 ------ Called after the token transfer during a cash-out reversal operation.
+     * - CashInCommonBefore = 0 -------- Called before the token transfer during a common cash-in operation.
+     * - CashInCommonAfter = 1 --------- Called before the token transfer during a common cash-in operation.
+     * - CashInPremintBefore = 2 ------- Called before the token transfer during a premint cash-in operation.
+     * - CashInPremintAfter = 3 -------- Called after the token transfer during a premint cash-in operation.
+     * - Reserved1 = 4 ----------------- Reserved for the future.
+     * - Reserved2 = 5 ----------------- Reserved for the future.
+     * - CashOutRequestBefore = 6 ------ Called before the token transfer during a cash-out request operation.
+     * - CashOutRequestAfter = 7 ------- Called after the token transfer during a cash-out request operation.
+     * - CashOutConfirmationBefore = 8 - Called before the token transfer during a cash-out confirmation operation.
+     * - CashOutConfirmationAfter = 9 -- Called after the token transfer during a cash-out confirmation operation.
+     * - CashOutReversalBefore = 10 ---- Called before the token transfer during a cash-out reversal operation.
+     * - CashOutReversalAfter = 11 ----- Called after the token transfer during a cash-out reversal operation.
      *
      * Notes:
      *
@@ -73,7 +73,7 @@ interface ICashierHookableTypes {
 /**
  * @title ICashierHookable interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of an addition to the Cashier contract that allows to call a hook function during some actions.
+ * @dev The interface of an addition to the cashier contract that allows to call a hook functions.
  */
 interface ICashierHookable is ICashierHookableTypes {
     // ------------------ Events ---------------------------------- //

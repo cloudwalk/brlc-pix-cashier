@@ -12,9 +12,9 @@ interface ICashierTypes {
      * @dev Possible statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Nonexistent = 0 ------ The operation does not exist (the default value).
-     * - Executed = 1 --------- The operation was executed as a common mint.
-     * - PremintExecuted = 2 -- The operation was executed as a premint with some predetermined release time.
+     * - Nonexistent = 0 ----- The operation does not exist (the default value).
+     * - Executed = 1 -------- The operation was executed as a common mint.
+     * - PremintExecuted = 2 - The operation was executed as a premint with some predetermined release time.
      */
     enum CashInStatus {
         Nonexistent,
@@ -26,9 +26,9 @@ interface ICashierTypes {
      * @dev Possible result statuses of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Success = 0 -------------- The operation was executed successfully.
-     * - AlreadyExecuted = 1 ------ The operation was already executed.
-     * - InappropriateStatus = 2 -- The operation has inappropriate status and cannot be modified.
+     * - Success = 0 ------------- The operation was executed successfully.
+     * - AlreadyExecuted = 1 ----- The operation was already executed.
+     * - InappropriateStatus = 2 - The operation has inappropriate status and cannot be modified.
      */
     enum CashInExecutionResult {
         Success,
@@ -40,8 +40,8 @@ interface ICashierTypes {
      * @dev Possible execution policies of a cash-in operation as an enum.
      *
      * The possible values:
-     * - Revert = 0 -- In case of failure the operation will be reverted.
-     * - Skip = 1 ---- In case of failure the operation will be skipped.
+     * - Revert = 0 - In case of failure the operation will be reverted.
+     * - Skip = 1 --- In case of failure the operation will be skipped.
      */
     enum CashInExecutionPolicy {
         Revert,
@@ -52,11 +52,11 @@ interface ICashierTypes {
      * @dev Possible statuses of a cash-out operation as an enum.
      *
      * The possible values:
-     * - Nonexistent = 0 -- The operation does not exist (the default value).
-     * - Pending = 1 ------ The status immediately after the operation requesting.
-     * - Reversed = 2 ----- The operation was reversed.
-     * - Confirmed = 3 ---- The operation was confirmed.
-     * - Internal = 4 ----- The operation executed internally
+     * - Nonexistent = 0 - The operation does not exist (the default value).
+     * - Pending = 1 ----- The status immediately after the operation requesting.
+     * - Reversed = 2 ---- The operation was reversed.
+     * - Confirmed = 3 --- The operation was confirmed.
+     * - Internal = 4 ---- The operation executed internally
      */
     enum CashOutStatus {
         Nonexistent,
@@ -69,7 +69,7 @@ interface ICashierTypes {
     /**
      * @dev Indexes of bit flags that are used to process cash-in operations:
      *
-     * - SomeHookRegistered = 0 -- The flag that indicates whether a hook function is registered for the operation.
+     * - SomeHookRegistered = 0 - The flag that indicates whether a hook function is registered for the operation.
      *
      * Notes:
      * - 1. This enum is not used in the current implementation.
@@ -86,7 +86,7 @@ interface ICashierTypes {
     /**
      * @dev Indexes of bit flags that are used to process cash-out operations:
      *
-     * - SomeHookRegistered = 0 -- The flag that indicates whether a hook function is registered for the operation.
+     * - SomeHookRegistered = 0 - The flag that indicates whether a hook function is registered for the operation.
      *
      * Note: an example of the code to convert a `CashInFlagIndex` value to a bit flag:
      *

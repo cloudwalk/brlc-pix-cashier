@@ -64,6 +64,11 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
+     * - The cash-in operation with the provided `txId` must not be already executed.
      */
     function registerCashIn(
         address account,
@@ -86,6 +91,12 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
+     * - The cash-in operation with the provided `txId` must have the `PremintExecuted` status.
      */
     function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (uint256, address, uint256) {
         CashInOperation storage operation = _cashInOperations[txId];
@@ -106,6 +117,12 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
+     * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
+     * - If the cash-out operation has the `Reversed` status its `account` field must equal the `account` argument.
      */
     function registerCashOut(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -117,6 +134,12 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
+     * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
+     * - If the cash-out operation has the `Reversed` status its account address must equal the `from` argument.
      */
     function registerInternalCashOut(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -128,6 +151,11 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
+     * - The cash-out operation corresponded the provided `txId` value must have the pending status.
      */
     function processCashOut(
         bytes32 txId,
@@ -148,6 +176,10 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
      */
     function setBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -160,6 +192,10 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
      */
     function resetBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -172,6 +208,10 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
 
     /**
      * @inheritdoc ICashierShardConfiguration
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
      */
     function setAdmin(address account, bool status) external onlyOwnerOrAdmin {
         _admins[account] = status;

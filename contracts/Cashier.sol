@@ -187,13 +187,14 @@ contract Cashier is
     }
 
     /**
-     * @dev See {ICashier-cashInPremintRevoke}.
+     * @inheritdoc ICashierPrimary
      *
      * Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
      * - The provided `account`, `txId` and `releaseTime` values must not be zero.
+     * - The cash-in operation with the provided `txId` must have the `PremintExecuted` status.
      */
     function cashInPremintRevoke(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.

@@ -498,7 +498,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     return cashOuts;
   }
 
-  async function executeCashIn(cashierRoot: Contract, tokenMock: Contract,  cashIn: TestCashIn) {
+  async function executeCashIn(cashierRoot: Contract, tokenMock: Contract, cashIn: TestCashIn) {
     const tx = connect(cashierRoot, cashier).cashIn(
       cashIn.account.address,
       cashIn.amount,
@@ -567,8 +567,12 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     await checkCashInStructuresOnBlockchain(cashierRoot, [cashIn]);
   }
 
-  async function executeRequestCashOut(cashierRoot: Contract, tokenMock: Contract, cashOut: TestCashOut): Promise<void> {
-    await checkCashierState(tokenMock, cashierRoot , [cashOut]);
+  async function executeRequestCashOut(
+    cashierRoot: Contract,
+    tokenMock: Contract,
+    cashOut: TestCashOut
+  ): Promise<void> {
+    await checkCashierState(tokenMock, cashierRoot, [cashOut]);
     const tx = connect(cashierRoot, cashier).requestCashOutFrom(
       cashOut.account.address,
       cashOut.amount,
@@ -590,7 +594,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     await checkCashierState(tokenMock, cashierRoot, [cashOut]);
   }
 
-  async function executeCashOutConfirm (cashierRoot: Contract, tokenMock: Contract, cashOut: TestCashOut): Promise<void> {
+  async function executeCashOutConfirm(
+    cashierRoot: Contract,
+    tokenMock: Contract,
+    cashOut: TestCashOut
+  ): Promise<void> {
     await requestCashOuts(cashierRoot, [cashOut]);
     await checkCashierState(tokenMock, cashierRoot, [cashOut]);
     const tx = connect(cashierRoot, cashier).confirmCashOut(cashOut.txId);
@@ -610,7 +618,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     await checkCashierState(tokenMock, cashierRoot, [cashOut]);
   }
 
-  async function executeReverseCashOut(cashierRoot: Contract, tokenMock: Contract, cashOut: TestCashOut): Promise<void> {
+  async function executeReverseCashOut(
+    cashierRoot: Contract,
+    tokenMock: Contract,
+    cashOut: TestCashOut
+  ): Promise<void> {
     await requestCashOuts(cashierRoot, [cashOut]);
     await checkCashierState(tokenMock, cashierRoot, [cashOut]);
     const tx = connect(cashierRoot, cashier).reverseCashOut(cashOut.txId);
@@ -629,7 +641,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     await checkCashierState(tokenMock, cashierRoot, [cashOut]);
   }
 
-  async function executeUpgradeShardsTo(cashierRoot: Contract, cashierShards: Contract[], targetShardImplementationAddress: string) {
+  async function executeUpgradeShardsTo(
+    cashierRoot: Contract,
+    cashierShards: Contract[],
+    targetShardImplementationAddress: string
+  ) {
     const oldImplementationAddresses: string[] = await getImplementationAddresses(cashierShards);
     oldImplementationAddresses.forEach((_, i) => {
       expect(oldImplementationAddresses[i]).to.not.eq(
@@ -736,7 +752,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
   describe("Function 'upgradeToAndCall()'", async () => {
     it("Executes as expected for the root contract", async () => {
       const { cashierRoot } = await setUpFixture(deployContracts);
-      await checkContractUupsUpgrading(cashierRoot, cashierFactory)
+      await checkContractUupsUpgrading(cashierRoot, cashierFactory);
     });
 
     it("Executes as expected for the shard contract", async () => {
@@ -1050,11 +1066,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
 
       const tx1 = await proveTx(cashierRoot.configureShardAdmin(user.address, true));
       await expect(tx1)
-      .to.emit(cashierRoot, EVENT_NAME_SHARD_ADMIN_CONFIGURED)
-      .withArgs(
-        user.address,
-        true
-      );
+        .to.emit(cashierRoot, EVENT_NAME_SHARD_ADMIN_CONFIGURED)
+        .withArgs(
+          user.address,
+          true
+        );
 
       for (const cashierShard of cashierShards) {
         expect(await cashierShard.isAdmin(user.address)).to.eq(true);
@@ -1062,11 +1078,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
 
       const tx2 = await proveTx(cashierAdmin.configureShardAdmin(user.address, false));
       await expect(tx2)
-      .to.emit(cashierAdmin, EVENT_NAME_SHARD_ADMIN_CONFIGURED)
-      .withArgs(
-        user.address,
-        false
-      );
+        .to.emit(cashierAdmin, EVENT_NAME_SHARD_ADMIN_CONFIGURED)
+        .withArgs(
+          user.address,
+          false
+        );
 
       for (const cashierShard of cashierShards) {
         expect(await cashierShard.isAdmin(user.address)).to.eq(false);

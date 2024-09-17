@@ -203,26 +203,26 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
   const REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
 
   // Errors of the contracts under test
-  const REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO = "Cashier_RootAddressZero";
-  const REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO = "Cashier_ShardAddressZero";
-  const REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO = "Cashier_TokenAddressZero";
   const REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO = "Cashier_AccountAddressZero";
   const REVERT_ERROR_IF_AMOUNT_EXCESS = "Cashier_AmountExcess";
   const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "Cashier_AmountZero";
   const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "Cashier_CashInAlreadyExecuted";
-  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "Cashier_TxIdZero";
-  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "Cashier_TokenMintingFailure";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "Cashier_InappropriateCashOutAccount";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "Cashier_InappropriateCashOutStatus";
-  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "Cashier_InappropriatePremintReleaseTime";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "Cashier_InappropriateCashInStatus";
+  const REVERT_ERROR_IF_CASH_IN_STATUS_INAPPROPRIATE = "Cashier_CashInStatusInappropriate";
+  const REVERT_ERROR_IF_CASH_OUT_ACCOUNT_INAPPROPRIATE = "Cashier_CashOutAccountInappropriate";
+  const REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE = "Cashier_CashOutStatusInappropriate";
   const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "Cashier_HookCallableContractAddressZero";
   const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "Cashier_HookCallableContractAddressNonZero";
+  const REVERT_ERROR_IF_HOOK_FLAGS_ALREADY_REGISTERED = "Cashier_HookFlagsAlreadyRegistered";
   const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "Cashier_HookFlagsInvalid";
-  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "Cashier_HooksAlreadyRegistered";
+  const REVERT_ERROR_IF_PREMINT_RELEASE_TIME_INAPPROPRIATE = "Cashier_PremintReleaseTimeInappropriate";
+  const REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO = "Cashier_RootAddressZero";
+  const REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO = "Cashier_ShardAddressZero";
   const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "Cashier_ShardCountExcess";
   const REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS = "Cashier_ShardReplacementCountExcess";
-  const REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR = "Cashier_UnexpectedShardError";
+  const REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO = "Cashier_TokenAddressZero";
+  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "Cashier_TokenMintingFailure";
+  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "Cashier_TxIdZero";
+  const REVERT_ERROR_IF_SHARD_ERROR_UNEXPECTED = "Cashier_ShardErrorUnexpected";
 
   // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
@@ -1200,7 +1200,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
           TRANSACTION_ID1,
           RELEASE_TIMESTAMP_ZERO
         )
-      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_PREMINT_RELEASE_TIME_INAPPROPRIATE);
     });
 
     it("Is reverted if the account address is zero", async () => {
@@ -1289,7 +1289,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(cashierRoot, cashier).cashInPremintRevoke(TRANSACTION_ID1, RELEASE_TIMESTAMP_ZERO)
-      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME);
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_PREMINT_RELEASE_TIME_INAPPROPRIATE);
     });
 
     it("Is reverted if the off-chain transaction ID is zero", async () => {
@@ -1305,7 +1305,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     it("Is reverted if the cash-in with the provided txId does not exist", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(connect(cashierRoot, cashier).cashInPremintRevoke(TRANSACTION_ID1, RELEASE_TIMESTAMP))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_IN_STATUS_INAPPROPRIATE);
     });
   });
 
@@ -1412,7 +1412,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
       await expect(connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
     });
 
     it("Is reverted if the cash-out with the provided txId is already confirmed", async () => {
@@ -1420,7 +1420,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
       await connect(cashierRoot, cashier).confirmCashOut(TRANSACTION_ID1);
       await expect(connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
     });
 
     it("Is reverted if txId of a reversed cash-out operation is reused for another account", async () => {
@@ -1428,7 +1428,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
       await connect(cashierRoot, cashier).reverseCashOut(TRANSACTION_ID1);
       await expect(connect(cashierRoot, cashier).requestCashOutFrom(deployer.address, TOKEN_AMOUNT, TRANSACTION_ID1))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_ACCOUNT_INAPPROPRIATE);
     });
 
     it("Is reverted if the user has not enough tokens", async () => {
@@ -1479,7 +1479,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     it("Is reverted if the cash-out with the provided txId was not requested previously", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(connect(cashierRoot, cashier).confirmCashOut(TRANSACTION_ID1))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
     });
   });
 
@@ -1519,7 +1519,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     it("Is reverted if the cash-out with the provided txId was not requested previously", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(connect(cashierRoot, cashier).reverseCashOut(TRANSACTION_ID1))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
     });
   });
 
@@ -1647,7 +1647,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         )
       ).to.be.revertedWithCustomError(
         cashierRoot,
-        REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
       );
     });
 
@@ -1664,7 +1664,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         )
       ).to.be.revertedWithCustomError(
         cashierRoot,
-        REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
       );
     });
 
@@ -1681,7 +1681,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         )
       ).to.be.revertedWithCustomError(
         cashierRoot,
-        REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT
+        REVERT_ERROR_IF_CASH_OUT_ACCOUNT_INAPPROPRIATE
       );
     });
 
@@ -1857,7 +1857,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
           ADDRESS_ZERO, // newCallableContract
           0 // newHookFlags
         )
-      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED);
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_HOOK_FLAGS_ALREADY_REGISTERED);
 
       // Try previously configured callable contract address and flags
       await proveTx(connect(cashierRoot, hookAdmin).configureCashOutHooks(
@@ -1871,7 +1871,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
           user.address, // newCallableContract
           ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
         )
-      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED);
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_HOOK_FLAGS_ALREADY_REGISTERED);
     });
 
     it("Is reverted if non-zero hook flags are configured for the zero callable contract address", async () => {
@@ -2192,11 +2192,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
 
       // After reversing a cash-out with the same txId can't be reversed again.
       await expect(connect(cashierRoot, cashier).reverseCashOut(cashOut.txId))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
 
       // After reversing a cash-out with the same txId can't be confirmed.
       await expect(connect(cashierRoot, cashier).confirmCashOut(cashOut.txId))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
 
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE);
 
@@ -2216,11 +2216,11 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
 
       // After confirming a cash-out with the same txId can't be reversed again.
       await expect(connect(cashierRoot, cashier).reverseCashOut(cashOut.txId))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
 
       // After confirming a cash-out with the same txId can't be confirmed.
       await expect(connect(cashierRoot, cashier).confirmCashOut(cashOut.txId))
-        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS);
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
 
       expect(await tokenMock.balanceOf(cashOut.account.address)).to.equal(INITIAL_USER_BALANCE - cashOut.amount);
     });
@@ -2426,7 +2426,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         operation.txId
       )).to.be.revertedWithCustomError(
         cashierRoot,
-        REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR
+        REVERT_ERROR_IF_SHARD_ERROR_UNEXPECTED
       ).withArgs(
         unexpectedError
       );

@@ -636,7 +636,7 @@ contract Cashier is
      */
     function _validateReleaseTime(uint256 releaseTime) internal pure {
         if (releaseTime == 0) {
-            revert Cashier_InappropriatePremintReleaseTime();
+            revert Cashier_PremintReleaseTimeInappropriate();
         }
     }
 
@@ -713,12 +713,12 @@ contract Cashier is
             if (err == uint256(ICashierShardPrimary.Error.CashInAlreadyExecuted))
                 revert Cashier_CashInAlreadyExecuted();
             if (err == uint256(ICashierShardPrimary.Error.InappropriateCashInStatus))
-                revert Cashier_InappropriateCashInStatus();
+                revert Cashier_CashInStatusInappropriate();
             if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutStatus))
-                revert Cashier_InappropriateCashOutStatus();
+                revert Cashier_CashOutStatusInappropriate();
             if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutAccount))
-                revert Cashier_InappropriateCashOutAccount();
-            revert Cashier_UnexpectedShardError(err);
+                revert Cashier_CashOutAccountInappropriate();
+            revert Cashier_ShardErrorUnexpected(err);
         }
     }
 
@@ -748,7 +748,7 @@ contract Cashier is
         address oldCallableContract = hooksConfig.callableContract;
         uint256 oldHookFlags = hooksConfig.hookFlags;
         if (oldCallableContract == newCallableContract && oldHookFlags == newHookFlags) {
-            revert Cashier_HooksAlreadyRegistered();
+            revert Cashier_HookFlagsAlreadyRegistered();
         }
         if (newHookFlags != 0 && newCallableContract == address(0)) {
             revert Cashier_HookCallableContractAddressZero();

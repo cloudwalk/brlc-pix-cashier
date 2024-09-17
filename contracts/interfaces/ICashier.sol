@@ -10,68 +10,68 @@ import { ICashierTypes } from "./ICashierTypes.sol";
  * @dev Defines the custom errors used in the cashier contract.
  */
 interface ICashierErrors {
+    /// @dev Thrown if the provided account address is zero.
+    error Cashier_AccountAddressZero();
+
+    /// @dev Thrown if the provided amount exceeds the maximum allowed value.
+    error Cashier_AmountExcess();
+
+    /// @dev Thrown if the provided amount is zero.
+    error Cashier_AmountZero();
+
+    /// @dev The same hook flags for an operation are already configured.
+    error Cashier_HookFlagsAlreadyRegistered();
+
+    /// @dev The provided bit flags to configure the hook logic are invalid.
+    error Cashier_HookFlagsInvalid();
+
+    /// @dev The provided address of the callable contract with the hook function is non-zero but must be.
+    error Cashier_HookCallableContractAddressNonZero();
+
+    /// @dev The provided address of the callable contract with the hook function is zero but must not be.
+    error Cashier_HookCallableContractAddressZero();
+
+    /// @dev Thrown if the cash-in operation with the provided txId is already executed.
+    error Cashier_CashInAlreadyExecuted();
+
+    /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
+    error Cashier_CashInStatusInappropriate();
+
+    /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
+    error Cashier_CashOutAccountInappropriate();
+
+    /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
+    error Cashier_CashOutStatusInappropriate();
+
+    /// @dev Thrown if the provided release time for the premint operation is inappropriate.
+    error Cashier_PremintReleaseTimeInappropriate();
+
     /// @dev Thrown if the provided root address is zero.
     error Cashier_RootAddressZero();
 
     /// @dev Thrown if the provided shard address is zero.
     error Cashier_ShardAddressZero();
 
-    /// @dev Thrown if the provided token address is zero.
-    error Cashier_TokenAddressZero();
-
-    /// @dev Thrown if the provided account address is zero.
-    error Cashier_AccountAddressZero();
-
-    /// @dev Thrown if the provided amount is zero.
-    error Cashier_AmountZero();
-
-    /// @dev Thrown if the provided off-chain transaction identifier is zero.
-    error Cashier_TxIdZero();
-
-    /// @dev Thrown if the provided amount exceeds the maximum allowed value.
-    error Cashier_AmountExcess();
-
-    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
-    error Cashier_TokenMintingFailure();
-
-    /// @dev Thrown if the cash-in operation with the provided txId is already executed.
-    error Cashier_CashInAlreadyExecuted();
-
-    /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
-    error Cashier_InappropriateCashInStatus();
-
-    /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
-    error Cashier_InappropriateCashOutStatus();
-
-    /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
-    error Cashier_InappropriateCashOutAccount();
-
-    /// @dev Thrown if the provided release time for the premint operation is inappropriate.
-    error Cashier_InappropriatePremintReleaseTime();
-
-    /// @dev Thrown if the number of shard contracts to replace is greater than expected.
-    error Cashier_ShardReplacementCountExcess();
+    /// @dev Thrown if the maximum number of shards is exceeded.
+    error Cashier_ShardCountExcess();
 
     /**
      * @dev Thrown if the shard contract returns an unexpected error.
      * @param err The error code returned by the shard contract.
      */
-    error Cashier_UnexpectedShardError(uint256 err);
+    error Cashier_ShardErrorUnexpected(uint256 err);
 
-    /// @dev Thrown if the maximum number of shards is exceeded.
-    error Cashier_ShardCountExcess();
+    /// @dev Thrown if the number of shard contracts to replace is greater than expected.
+    error Cashier_ShardReplacementCountExcess();
 
-    /// @dev The provided bit flags to configure the hook logic are invalid.
-    error Cashier_HookFlagsInvalid();
+    /// @dev Thrown if the provided token address is zero.
+    error Cashier_TokenAddressZero();
 
-    /// @dev The same hooks for an operation are already configured.
-    error Cashier_HooksAlreadyRegistered();
+    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
+    error Cashier_TokenMintingFailure();
 
-    /// @dev The provided address of the callable contract with the hook function is zero but must not be.
-    error Cashier_HookCallableContractAddressZero();
-
-    /// @dev The provided address of the callable contract with the hook function is non-zero but must be.
-    error Cashier_HookCallableContractAddressNonZero();
+    /// @dev Thrown if the provided off-chain transaction identifier is zero.
+    error Cashier_TxIdZero();
 }
 
 /**

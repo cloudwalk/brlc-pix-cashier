@@ -24,11 +24,11 @@ interface ICashierShardPrimary is ICashierTypes {
      * @dev Possible function errors of the shard contract.
      *
      * The values:
-     * - None = 0 ------------------------ There is no error. The function was executed successfully.
-     * - CashInAlreadyExecuted = 1 ------- The cash-in operation has already been executed.
-     * - InappropriateCashInStatus = 2 --- The cash-in operation status is inappropriate.
-     * - InappropriateCashOutStatus = 3 -- The cash-out operation status is inappropriate.
-     * - InappropriateCashOutAccount = 4 - The cash-out operation account is inappropriate.
+     * - None = 0 ------------------------- There is no error. The function was executed successfully.
+     * - CashInAlreadyExecuted = 1 -------- The cash-in operation has already been executed.
+     * - InappropriateCashInStatus = 2 ---- The cash-in operation status is inappropriate.
+     * - InappropriateCashOutStatus = 3 --- The cash-out operation status is inappropriate.
+     * - InappropriateCashOutAccount = 4 -- The cash-out operation account is inappropriate.
      */
     enum Error {
         None,

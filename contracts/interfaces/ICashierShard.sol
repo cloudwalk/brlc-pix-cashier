@@ -109,21 +109,23 @@ interface ICashierShardPrimary is ICashierTypes {
      * @dev Sets a specific bit in the flags of a cash-out operation.
      * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to set.
+     * @return err The error code if the operation fails, otherwise {Error.None}.
      */
     function setBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint8 bit
-    ) external returns (uint256);
+    ) external returns (uint256 err);
 
     /**
      * @dev Resets a specific bit in the flags of a cash-out operation.
      * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to reset.
+     * @return err The error code if the operation fails, otherwise {Error.None}.
      */
     function resetBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
         uint8 bit
-    ) external returns (uint256);
+    ) external returns (uint256 err);
 
     /**
      * @dev Returns the data of a single cash-in operation.

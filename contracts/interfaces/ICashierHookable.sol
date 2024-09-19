@@ -3,16 +3,16 @@
 pragma solidity ^0.8.0;
 
 /**
- * @title PixHookable types interface
+ * @title ICashierHookableTypes interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the types used in the PixHookable contract.
+ * @dev Defines the types used in the cashier hookable contract.
  */
-interface IPixHookableTypes {
+interface ICashierHookableTypes {
     /**
      * @dev Possible indexes of hooks that are used to apply additional external actions during some operation steps.
      *
      * Those actions are triggered through the hook function that are implemented in external contracts and
-     * called by the PixCashier contract at concrete moments.
+     * called by the Cashier contract at concrete moments.
      * The index of the hook is passed to the hook function to indicate when it was called.
      *
      * The possible values:
@@ -59,26 +59,33 @@ interface IPixHookableTypes {
     }
 
     /**
-     * @dev The hook configuration for a concrete PIX operation.
+     * @dev The hook configuration for a concrete cashier operation.
      *
      * See notes for the {HookIndex} enumeration.
      */
     struct HookConfig {
-        address callableContract; // The address of the contract that implements the hook function.
-        uint32 hookFlags;         // The bit flags that define when the hook function should be called
-        // uint64 __reserved;     // Reserved for future use until the end of the storage slot.
+        address callableContract; // -- The address of the contract that implements the hook function.
+        uint32 hookFlags; // ---------- The bit flags that define when the hook function should be called
+        // uint64 __reserved; // ------ Reserved for future use until the end of the storage slot.
     }
 }
 
 /**
- * @title PixHookable interface
+ * @title ICashierHookable interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of an addition to the PixCashier contract that allows to call a hook function during some actions.
+ * @dev The interface of an addition to the cashier contract that allows to call a hook functions.
  */
-interface IPixHookable is IPixHookableTypes {
+interface ICashierHookable is ICashierHookableTypes {
     // ------------------ Events ---------------------------------- //
 
-    /// @dev Emitted when the hook configuration is changed for a PIX cash-out operation.
+    /**
+     * @dev Emitted when the hook configuration is changed for a cash-out operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
+     * @param newCallableContract The new address of the callable contract on the hook configuration.
+     * @param oldCallableContract The old address of the callable contract on the hook configuration.
+     * @param newHookFlags The new bit flags of the hook configuration.
+     * @param oldHookFlags The old bit flags of the hook configuration.
+     */
     event CashOutHooksConfigured(
         bytes32 indexed txId, // Tools: this comment prevents Prettier from formatting into a single line.
         address newCallableContract,
@@ -87,7 +94,12 @@ interface IPixHookable is IPixHookableTypes {
         uint256 oldHookFlags
     );
 
-    /// @dev Emitted when a hook function is called.
+    /**
+     * @dev Emitted when a hook function is called.
+     * @param txId The unique off-chain transaction identifier of the related operation.
+     * @param hookIndex The index of the related hook.
+     * @param callableContract The address of the contract that implements the hook function.
+     */
     event HookInvoked(
         bytes32 indexed txId, // Tools: this comment prevents Prettier from formatting into a single line.
         uint256 indexed hookIndex,
@@ -97,8 +109,8 @@ interface IPixHookable is IPixHookableTypes {
     // ------------------ Functions ------------------------------- //
 
     /**
-     * @dev Configures the hook logic for a PIX cash-out operation.
-     * @param txId The unique off-chain transaction identifier of the related PIX operation.
+     * @dev Configures the hook logic for a cash-out operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
      * @param newCallableContract The address of the contract that implements the hook function to be called.
      * @param newHookFlags The bit flags that define when the hook function should be called.
      *        See notes for the {HookIndex} enumeration.
@@ -106,8 +118,8 @@ interface IPixHookable is IPixHookableTypes {
     function configureCashOutHooks(bytes32 txId, address newCallableContract, uint256 newHookFlags) external;
 
     /**
-     * @dev Returns the current hook configuration for a PIX cash-out operation.
-     * @param txId The unique off-chain transaction identifier of the PIX operation.
+     * @dev Returns the current hook configuration for a cash-out operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
      * @return The hook configuration structure.
      */
     function getCashOutHookConfig(bytes32 txId) external view returns (HookConfig memory);

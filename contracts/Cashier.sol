@@ -11,30 +11,30 @@ import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
 
-import { IPixCashierRoot } from "./interfaces/IPixCashierRoot.sol";
-import { IPixCashierRootPrimary } from "./interfaces/IPixCashierRoot.sol";
-import { IPixCashierRootConfiguration } from "./interfaces/IPixCashierRoot.sol";
-import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
-import { IPixCashierShardPrimary } from "./interfaces/IPixCashierShard.sol";
-import { IPixHook } from "./interfaces/IPixHook.sol";
-import { IPixHookable } from "./interfaces/IPixHookable.sol";
+import { ICashier } from "./interfaces/ICashier.sol";
+import { ICashierPrimary } from "./interfaces/ICashier.sol";
+import { ICashierConfiguration } from "./interfaces/ICashier.sol";
+import { ICashierShard } from "./interfaces/ICashierShard.sol";
+import { ICashierShardPrimary } from "./interfaces/ICashierShard.sol";
+import { ICashierHook } from "./interfaces/ICashierHook.sol";
+import { ICashierHookable } from "./interfaces/ICashierHookable.sol";
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
-import { PixCashierRootStorage } from "./PixCashierRootStorage.sol";
+import { CashierStorage } from "./CashierStorage.sol";
 
 /**
- * @title PixCashierRoot contract
+ * @title Cashier contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Entry point contract for PIX cash-in and cash-out operations.
+ * @dev Entry point contract for cash-in and cash-out operations.
  */
-contract PixCashierRoot is
-    PixCashierRootStorage,
+contract Cashier is
+    CashierStorage,
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
     UUPSUpgradeable,
-    IPixCashierRoot,
-    IPixHookable
+    ICashier,
+    ICashierHookable
 {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -75,7 +75,7 @@ contract PixCashierRoot is
      * @param token_ The address of the token to set as the underlying one.
      */
     function initialize(address token_) external initializer {
-        __PixCashierRoot_init(token_);
+        __Cashier_init(token_);
     }
 
     /**
@@ -85,7 +85,7 @@ contract PixCashierRoot is
      *
      * @param token_ The address of the token to set as the underlying one.
      */
-    function __PixCashierRoot_init(address token_) internal onlyInitializing {
+    function __Cashier_init(address token_) internal onlyInitializing {
         __Context_init_unchained();
         __ERC165_init_unchained();
         __AccessControl_init_unchained();
@@ -95,7 +95,7 @@ contract PixCashierRoot is
         __Rescuable_init_unchained(OWNER_ROLE);
         __UUPSUpgradeable_init_unchained();
 
-        __PixCashierRoot_init_unchained(token_);
+        __Cashier_init_unchained(token_);
     }
 
     /**
@@ -109,9 +109,9 @@ contract PixCashierRoot is
      *
      * @param token_ The address of the token to set as the underlying one.
      */
-    function __PixCashierRoot_init_unchained(address token_) internal onlyInitializing {
+    function __Cashier_init_unchained(address token_) internal onlyInitializing {
         if (token_ == address(0)) {
-            revert PixCashierRoot_TokenAddressZero();
+            revert Cashier_TokenAddressZero();
         }
 
         _token = token_;
@@ -132,7 +132,7 @@ contract PixCashierRoot is
     // ------------------ Functions ------------------------------- //
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -155,12 +155,12 @@ contract PixCashierRoot is
         emit CashIn(account, amount, txId);
 
         if (!IERC20Mintable(_token).mint(account, amount)) {
-            revert PixCashierRoot_TokenMintingFailure();
+            revert Cashier_TokenMintingFailure();
         }
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -187,13 +187,14 @@ contract PixCashierRoot is
     }
 
     /**
-     * @dev See {IPixCashier-cashInPremintRevoke}.
+     * @inheritdoc ICashierPrimary
      *
-     * Requirements:
+     * @dev Requirements:
      *
      * - The contract must not be paused.
      * - The caller must have the {CASHIER_ROLE} role.
      * - The provided `account`, `txId` and `releaseTime` values must not be zero.
+     * - The cash-in operation with the provided `txId` must have the `PremintExecuted` status.
      */
     function cashInPremintRevoke(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -210,7 +211,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -227,7 +228,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -263,7 +264,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -297,7 +298,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -331,7 +332,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      *
      * @dev Requirements:
      *
@@ -365,7 +366,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      *
      * @dev Requirements:
      *
@@ -374,18 +375,18 @@ contract PixCashierRoot is
      */
     function addShards(address[] memory shards) external onlyRole(OWNER_ROLE) {
         if (_shards.length + shards.length > MAX_SHARD_COUNT) {
-            revert PixCashierRoot_ShardCountExcess();
+            revert Cashier_ShardCountExcess();
         }
 
         uint256 count = shards.length;
         for (uint256 i; i < count; i++) {
-            _shards.push(IPixCashierShard(shards[i]));
+            _shards.push(ICashierShard(shards[i]));
             emit ShardAdded(shards[i]);
         }
     }
 
     /**
-     * @inheritdoc IPixCashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      *
      * @dev Requirements:
      *
@@ -398,7 +399,7 @@ contract PixCashierRoot is
         }
         count -= fromIndex;
         if (count < shards.length) {
-            revert PixCashierRoot_ShardReplacementCountExcess();
+            revert Cashier_ShardReplacementCountExcess();
         }
         if (count > shards.length) {
             count = shards.length;
@@ -407,13 +408,13 @@ contract PixCashierRoot is
             uint256 k = fromIndex + i;
             address oldShard = address(_shards[k]);
             address newShard = shards[i];
-            _shards[k] = IPixCashierShard(newShard);
+            _shards[k] = ICashierShard(newShard);
             emit ShardReplaced(newShard, oldShard);
         }
     }
 
     /**
-     * @inheritdoc IPixCashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      *
      * @dev Requirements:
      *
@@ -430,7 +431,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixHookable
+     * @inheritdoc ICashierHookable
      *
      * @dev Requirements:
      *
@@ -450,7 +451,7 @@ contract PixCashierRoot is
 
         // Resets all the expected flags and checks whether any remains
         if ((newHookFlags & ~ALL_CASH_OUT_HOOK_FLAGS) != 0) {
-            revert PixCashierRoot_HookFlagsInvalid();
+            revert Cashier_HookFlagsInvalid();
         }
 
         if (newHookFlags != 0) {
@@ -472,14 +473,14 @@ contract PixCashierRoot is
     // ------------------ View functions -------------------------- //
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _shard(txId).getCashIn(txId);
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -491,14 +492,14 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory) {
         return _shard(txId).getCashOut(txId);
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -510,7 +511,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function getPendingCashOutTxIds(uint256 index, uint256 limit) external view returns (bytes32[] memory) {
         uint256 len = _pendingCashOutTxIds.length();
@@ -532,42 +533,42 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function cashOutBalanceOf(address account) external view returns (uint256) {
         return _cashOutBalances[account];
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function pendingCashOutCounter() external view returns (uint256) {
         return _pendingCashOutTxIds.length();
     }
 
     /**
-     * @inheritdoc IPixCashierRootPrimary
+     * @inheritdoc ICashierPrimary
      */
     function underlyingToken() external view returns (address) {
         return _token;
     }
 
     /**
-     * @inheritdoc IPixCashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      */
     function getShardCount() external view returns (uint256) {
         return _shards.length;
     }
 
     /**
-     * @inheritdoc IPixCashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      */
     function getShardByTxId(bytes32 txId) external view returns (address) {
         return address(_shard(txId));
     }
 
     /**
-     * @inheritdoc IPixCashierRootConfiguration
+     * @inheritdoc ICashierConfiguration
      */
     function getShardRange(uint256 index, uint256 limit) external view returns (address[] memory) {
         uint256 len = _shards.length;
@@ -589,7 +590,7 @@ contract PixCashierRoot is
     }
 
     /**
-     * @inheritdoc IPixHookable
+     * @inheritdoc ICashierHookable
      */
     function getCashOutHookConfig(bytes32 txId) external view returns (HookConfig memory) {
         return _cashOutHookConfigs[txId];
@@ -603,7 +604,7 @@ contract PixCashierRoot is
      */
     function _validateTxId(bytes32 txId) internal pure {
         if (txId == 0) {
-            revert PixCashierRoot_TxIdZero();
+            revert Cashier_TxIdZero();
         }
     }
 
@@ -613,10 +614,10 @@ contract PixCashierRoot is
      */
     function _validateAmount(uint256 amount) internal pure {
         if (amount == 0) {
-            revert PixCashierRoot_AmountZero();
+            revert Cashier_AmountZero();
         }
         if (amount > type(uint64).max) {
-            revert PixCashierRoot_AmountExcess();
+            revert Cashier_AmountExcess();
         }
     }
 
@@ -626,7 +627,7 @@ contract PixCashierRoot is
      */
     function _validateAccount(address account) internal pure {
         if (account == address(0)) {
-            revert PixCashierRoot_AccountAddressZero();
+            revert Cashier_AccountAddressZero();
         }
     }
 
@@ -636,7 +637,7 @@ contract PixCashierRoot is
      */
     function _validateReleaseTime(uint256 releaseTime) internal pure {
         if (releaseTime == 0) {
-            revert PixCashierRoot_InappropriatePremintReleaseTime();
+            revert Cashier_PremintReleaseTimeInappropriate();
         }
     }
 
@@ -709,20 +710,24 @@ contract PixCashierRoot is
      * @param err The error code returned by the shard contract.
      */
     function _checkShardError(uint256 err) internal pure {
-        if (err != uint256(IPixCashierShardPrimary.Error.None)) {
-            if (err == uint256(IPixCashierShardPrimary.Error.CashInAlreadyExecuted)) revert PixCashierRoot_CashInAlreadyExecuted();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashInStatus)) revert PixCashierRoot_InappropriateCashInStatus();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutStatus)) revert PixCashierRoot_InappropriateCashOutStatus();
-            if (err == uint256(IPixCashierShardPrimary.Error.InappropriateCashOutAccount)) revert PixCashierRoot_InappropriateCashOutAccount();
-            revert PixCashierRoot_UnexpectedShardError(err);
+        if (err != uint256(ICashierShardPrimary.Error.None)) {
+            if (err == uint256(ICashierShardPrimary.Error.CashInAlreadyExecuted))
+                revert Cashier_CashInAlreadyExecuted();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashInStatus))
+                revert Cashier_CashInStatusInappropriate();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutStatus))
+                revert Cashier_CashOutStatusInappropriate();
+            if (err == uint256(ICashierShardPrimary.Error.InappropriateCashOutAccount))
+                revert Cashier_CashOutAccountInappropriate();
+            revert Cashier_ShardErrorUnexpected(err);
         }
     }
 
     /**
      * @dev Returns the shard contract by the off-chain transaction identifier.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
-    function _shard(bytes32 txId) internal view returns (IPixCashierShardPrimary) {
+    function _shard(bytes32 txId) internal view returns (ICashierShardPrimary) {
         uint256 i = uint256(keccak256(abi.encodePacked(txId)));
         i %= _shards.length;
         return _shards[i];
@@ -730,7 +735,7 @@ contract PixCashierRoot is
 
     /**
      * @dev Configures the hook logic for a cash-out operation internally.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param newCallableContract The address of the contract that implements the hook function to be called.
      * @param newHookFlags The bit flags of the hook functions.
      * @param hooksConfig The storage reference to the hook configuration structure.
@@ -744,13 +749,13 @@ contract PixCashierRoot is
         address oldCallableContract = hooksConfig.callableContract;
         uint256 oldHookFlags = hooksConfig.hookFlags;
         if (oldCallableContract == newCallableContract && oldHookFlags == newHookFlags) {
-            revert PixCashierRoot_HooksAlreadyRegistered();
+            revert Cashier_HookFlagsAlreadyRegistered();
         }
         if (newHookFlags != 0 && newCallableContract == address(0)) {
-            revert PixCashierRoot_HookCallableContractAddressZero();
+            revert Cashier_HookCallableContractAddressZero();
         }
         if (newHookFlags == 0 && newCallableContract != address(0)) {
-            revert PixCashierRoot_HookCallableContractAddressNonZero();
+            revert Cashier_HookCallableContractAddressNonZero();
         }
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);
@@ -766,23 +771,23 @@ contract PixCashierRoot is
 
     /**
      * @dev Calls the hook function if it is configured for a cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @param hookIndex The index of the hook.
+     * @param txId The off-chain transaction identifier of the related operation.
+     * @param hookIndex The index of the related hook.
      */
     function _callCashOutHookIfConfigured(bytes32 txId, uint256 hookIndex) internal {
         _callHookIfConfigured(txId, hookIndex, _cashOutHookConfigs[txId]);
     }
 
     /**
-     * @dev Calls the hook function if it is configured for a PIX operation.
-     * @param txId The off-chain transaction identifier of the operation.
-     * @param hookIndex The index of the hook.
+     * @dev Calls the hook function if it is configured for an operation.
+     * @param txId The off-chain transaction identifier of the related operation.
+     * @param hookIndex The index of the related hook.
      * @param hooksConfig The storage reference to the hook configuration structure.
      */
     function _callHookIfConfigured(bytes32 txId, uint256 hookIndex, HookConfig storage hooksConfig) internal {
         if ((hooksConfig.hookFlags & (1 << hookIndex)) != 0) {
-            IPixHook callableContract = IPixHook(hooksConfig.callableContract);
-            callableContract.onPixHook(hookIndex, txId);
+            ICashierHook callableContract = ICashierHook(hooksConfig.callableContract);
+            callableContract.onCashierHook(hookIndex, txId);
             emit HookInvoked(
                 txId, // Tools: This comment prevents Prettier from formatting into a single line.
                 hookIndex,
@@ -815,7 +820,7 @@ contract PixCashierRoot is
      */
     function upgradeShardsTo(address newImplementation) external onlyRole(OWNER_ROLE) {
         if (newImplementation == address(0)) {
-            revert PixCashierRoot_ShardAddressZero();
+            revert Cashier_ShardAddressZero();
         }
 
         for (uint256 i = 0; i < _shards.length; i++) {
@@ -830,10 +835,10 @@ contract PixCashierRoot is
      */
     function upgradeRootAndShardsTo(address newRootImplementation, address newShardImplementation) external {
         if (newRootImplementation == address(0)) {
-            revert PixCashierRoot_RootAddressZero();
+            revert Cashier_RootAddressZero();
         }
         if (newShardImplementation == address(0)) {
-            revert PixCashierRoot_ShardAddressZero();
+            revert Cashier_ShardAddressZero();
         }
 
         upgradeToAndCall(newRootImplementation, "");

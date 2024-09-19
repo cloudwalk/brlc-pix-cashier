@@ -2,24 +2,24 @@
 
 pragma solidity ^0.8.0;
 
-import { IPixCashierTypes } from "./IPixCashierTypes.sol";
+import { ICashierTypes } from "./ICashierTypes.sol";
 
 /**
- * @title IPixCashierShardErrors interface
+ * @title ICashierShardErrors interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Defines the custom errors used in the pix-cashier shard contract.
+ * @dev Defines the custom errors used in the cashier shard contract.
  */
-interface IPixCashierShardErrors {
+interface ICashierShardErrors {
     /// @dev Thrown if the caller is not an admin.
-    error PixCashierShard_Unauthorized();
+    error CashierShard_Unauthorized();
 }
 
 /**
- * @title IPixCashierShardPrimary interface
+ * @title ICashierShardPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary interface of the contract responsible for sharded storage of data about pix-cashier operations.
+ * @dev The primary part of the cashier shard contract interface.
  */
-interface IPixCashierShardPrimary is IPixCashierTypes {
+interface ICashierShardPrimary is ICashierTypes {
     /**
      * @dev Possible function errors of the shard contract.
      *
@@ -105,9 +105,9 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
         CashOutStatus status
     ) external returns (uint256 err, address account, uint256 amount, uint256 flags);
 
-   /**
+    /**
      * @dev Sets a specific bit in the flags of a cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to set.
      */
     function setBitInCashOutFlags(
@@ -117,7 +117,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
 
     /**
      * @dev Resets a specific bit in the flags of a cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param bit The bit to reset.
      */
     function resetBitInCashOutFlags(
@@ -127,7 +127,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
 
     /**
      * @dev Returns the data of a single cash-in operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-in operation in the form of a structure.
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory operation);
@@ -141,7 +141,7 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
 
     /**
      * @dev Returns the data of a single cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-out operation in the form of a structure.
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory operation);
@@ -155,11 +155,11 @@ interface IPixCashierShardPrimary is IPixCashierTypes {
 }
 
 /**
- * @title IPixCashierShardConfiguration interface
+ * @title ICashierShardConfiguration interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The configuration interface of the contract responsible for sharded storage of data about pix-cashier operations.
+ * @dev The configuration part of the cashier shard contract interface.
  */
-interface IPixCashierShardConfiguration {
+interface ICashierShardConfiguration {
     /**
      * @dev Sets the admin status of an account.
      * @param account The address of the account to configure.
@@ -182,12 +182,12 @@ interface IPixCashierShardConfiguration {
 }
 
 /**
- * @title IPixCashierShard interface
+ * @title ICashierShard interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of the contract responsible for sharded storage of data about pix-cashier operations.
+ * @dev The full interface of the cashier shard contract.
  */
-interface IPixCashierShard is
-    IPixCashierShardErrors,
-    IPixCashierShardPrimary,
-    IPixCashierShardConfiguration
+interface ICashierShard is
+    ICashierShardErrors, // Tools: this comment prevents Prettier from formatting into a single line.
+    ICashierShardPrimary,
+    ICashierShardConfiguration
 {}

@@ -2,130 +2,170 @@
 
 pragma solidity ^0.8.0;
 
-import { IPixCashierTypes } from "./IPixCashierTypes.sol";
+import { ICashierTypes } from "./ICashierTypes.sol";
 
 /**
- * @title IPixCashierRootErrors interface
+ * @title ICashierErrors interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev Defines the custom errors used in the pix-cashier contract.
+ * @dev Defines the custom errors used in the cashier contract.
  */
-interface IPixCashierRootErrors {
-    /// @dev Thrown if the provided root address is zero.
-    error PixCashierRoot_RootAddressZero();
-
-    /// @dev Thrown if the provided shard address is zero.
-    error PixCashierRoot_ShardAddressZero();
-
-    /// @dev Thrown if the provided token address is zero.
-    error PixCashierRoot_TokenAddressZero();
-
+interface ICashierErrors {
     /// @dev Thrown if the provided account address is zero.
-    error PixCashierRoot_AccountAddressZero();
-
-    /// @dev Thrown if the provided amount is zero.
-    error PixCashierRoot_AmountZero();
-
-    /// @dev Thrown if the provided off-chain transaction identifier is zero.
-    error PixCashierRoot_TxIdZero();
+    error Cashier_AccountAddressZero();
 
     /// @dev Thrown if the provided amount exceeds the maximum allowed value.
-    error PixCashierRoot_AmountExcess();
+    error Cashier_AmountExcess();
 
-    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
-    error PixCashierRoot_TokenMintingFailure();
+    /// @dev Thrown if the provided amount is zero.
+    error Cashier_AmountZero();
 
-    /// @dev Thrown if the cash-in operation with the provided txId is already executed.
-    error PixCashierRoot_CashInAlreadyExecuted();
-
-    /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
-    error PixCashierRoot_InappropriateCashInStatus();
-
-    /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
-    error PixCashierRoot_InappropriateCashOutStatus();
-
-    /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
-    error PixCashierRoot_InappropriateCashOutAccount();
-
-    /// @dev Thrown if the provided release time for the premint operation is inappropriate.
-    error PixCashierRoot_InappropriatePremintReleaseTime();
-
-    /// @dev Thrown if the number of shard contracts to replace is greater than expected.
-    error PixCashierRoot_ShardReplacementCountExcess();
-
-    /// @dev Thrown if the shard contract returns an unexpected error.
-    error PixCashierRoot_UnexpectedShardError(uint256 err);
-
-    /// @dev Thrown if the maximum number of shards is exceeded.
-    error PixCashierRoot_ShardCountExcess();
+    /// @dev The same hook flags for an operation are already configured.
+    error Cashier_HookFlagsAlreadyRegistered();
 
     /// @dev The provided bit flags to configure the hook logic are invalid.
-    error PixCashierRoot_HookFlagsInvalid();
+    error Cashier_HookFlagsInvalid();
 
-    /// @dev The same hooks for a PIX operation are already configured.
-    error PixCashierRoot_HooksAlreadyRegistered();
+    /// @dev The provided address of the callable contract with the hook function is non-zero but must be.
+    error Cashier_HookCallableContractAddressNonZero();
 
-    /// @dev The provided address of the callable contract with the PIX hook function is zero but must not be
-    error PixCashierRoot_HookCallableContractAddressZero();
+    /// @dev The provided address of the callable contract with the hook function is zero but must not be.
+    error Cashier_HookCallableContractAddressZero();
 
-    /// @dev The provided address of the callable contract with the PIX hook function is non-zero but must be
-    error PixCashierRoot_HookCallableContractAddressNonZero();
+    /// @dev Thrown if the cash-in operation with the provided txId is already executed.
+    error Cashier_CashInAlreadyExecuted();
+
+    /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
+    error Cashier_CashInStatusInappropriate();
+
+    /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
+    error Cashier_CashOutAccountInappropriate();
+
+    /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
+    error Cashier_CashOutStatusInappropriate();
+
+    /// @dev Thrown if the provided release time for the premint operation is inappropriate.
+    error Cashier_PremintReleaseTimeInappropriate();
+
+    /// @dev Thrown if the provided root address is zero.
+    error Cashier_RootAddressZero();
+
+    /// @dev Thrown if the provided shard address is zero.
+    error Cashier_ShardAddressZero();
+
+    /// @dev Thrown if the maximum number of shards is exceeded.
+    error Cashier_ShardCountExcess();
+
+    /**
+     * @dev Thrown if the shard contract returns an unexpected error.
+     * @param err The error code returned by the shard contract.
+     */
+    error Cashier_ShardErrorUnexpected(uint256 err);
+
+    /// @dev Thrown if the number of shard contracts to replace is greater than expected.
+    error Cashier_ShardReplacementCountExcess();
+
+    /// @dev Thrown if the provided token address is zero.
+    error Cashier_TokenAddressZero();
+
+    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
+    error Cashier_TokenMintingFailure();
+
+    /// @dev Thrown if the provided off-chain transaction identifier is zero.
+    error Cashier_TxIdZero();
 }
 
 /**
- * @title PixCashier interface
+ * @title ICashierPrimary interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The primary interface of the contract responsible for pix-cashier operations on the underlying token contract.
+ * @dev The primary part of the cashier contract interface.
  */
-interface IPixCashierRootPrimary is IPixCashierTypes {
+interface ICashierPrimary is ICashierTypes {
     // ------------------ Events ---------------------------------- //
 
-    /// @dev Emitted when a new cash-in operation is executed.
+    /**
+     * @dev Emitted when a new cash-in operation is executed.
+     * @param account The account that receives tokens.
+     * @param amount The amount of tokens to receive.
+     * @param txId The off-chain transaction identifier.
+     */
     event CashIn(
-        address indexed account, // The account that receives tokens.
-        uint256 amount,          // The amount of tokens to receive.
-        bytes32 indexed txId     // The off-chain transaction identifier.
+        address indexed account, // Tools: this comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 indexed txId
     );
 
-    /// @dev Emitted when a cash-in premint operation is executed or changed.
+    /**
+     * @dev Emitted when a cash-in premint operation is executed or changed.
+     * @param account The account that will receive the preminted tokens.
+     * @param newAmount The new amount of preminted tokens.
+     * @param oldAmount The old amount of preminted tokens.
+     * @param txId The off-chain transaction identifier for the operation.
+     * @param releaseTime The timestamp when the preminted tokens will become available for usage.
+     */
     event CashInPremint(
-        address indexed account, // The account that will receive the preminted tokens.
-        uint256 newAmount,       // The new amount of preminted tokens.
-        uint256 oldAmount,       // The old amount of preminted tokens.
-        bytes32 indexed txId,    // The off-chain transaction identifier for the operation.
-        uint256 releaseTime      // The timestamp when the preminted tokens will become available for usage.
+        address indexed account,
+        uint256 newAmount,
+        uint256 oldAmount,
+        bytes32 indexed txId,
+        uint256 releaseTime
     );
 
-    /// @dev Emitted when a new cash-out operation is initiated.
+    /**
+     * @dev Emitted when a new cash-out operation is initiated.
+     * @param account The account that owns the tokens to cash-out.
+     * @param amount The amount of tokens to cash-out.
+     * @param balance The new pending cash-out balance of the account.
+     * @param txId The off-chain transaction identifier.
+     * @param sender The account that initiated the cash-out.
+     */
     event RequestCashOut(
-        address indexed account, // The account that owns the tokens to cash-out.
-        uint256 amount,          // The amount of tokens to cash-out.
-        uint256 balance,         // The new pending cash-out balance of the account.
-        bytes32 indexed txId,    // The off-chain transaction identifier.
-        address indexed sender   // The account that initiated the cash-out.
+        address indexed account,
+        uint256 amount,
+        uint256 balance,
+        bytes32 indexed txId,
+        address indexed sender
     );
 
-    /// @dev Emitted when a cash-out operation is confirmed.
+    /**
+     * @dev Emitted when a cash-out operation is confirmed.
+     * @param account The account that owns the tokens to cash-out.
+     * @param amount The amount of tokens to cash-out.
+     * @param balance The new pending cash-out balance of the account.
+     * @param txId The off-chain transaction identifier.
+     */
     event ConfirmCashOut(
-        address indexed account, // The account that owns the tokens to cash-out.
-        uint256 amount,          // The amount of tokens to cash-out.
-        uint256 balance,         // The new pending cash-out balance of the account.
-        bytes32 indexed txId     // The off-chain transaction identifier.
+        address indexed account, // Tools: this comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        uint256 balance,
+        bytes32 indexed txId
     );
 
-    /// @dev Emitted when a cash-out operation is reversed.
+    /**
+     * @dev Emitted when a cash-out operation is reversed.
+     * @param account The account that owns the tokens to cash-out.
+     * @param amount The amount of tokens to cash-out.
+     * @param balance The new pending cash-out balance of the account.
+     * @param txId The off-chain transaction identifier.
+     */
     event ReverseCashOut(
-        address indexed account, // The account that owns the tokens to cash-out.
-        uint256 amount,          // The amount of tokens to cash-out.
-        uint256 balance,         // The new pending cash-out balance of the account.
-        bytes32 indexed txId     // The off-chain transaction identifier.
+        address indexed account, // Tools: this comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        uint256 balance,
+        bytes32 indexed txId
     );
 
-    /// @dev Emitted when an internal cash-out operation is executed.
+    /**
+     * @dev Emitted when an internal cash-out operation is executed.
+     * @param from The account that owns the tokens to cash-out.
+     * @param txId The off-chain transaction identifier.
+     * @param to The account that received the tokens through the internal cash-out.
+     * @param amount The amount of tokens to cash-out.
+     */
     event InternalCashOut(
-        address indexed from, // The account that owns the tokens to cash-out.
-        bytes32 indexed txId, // The off-chain transaction identifier.
-        address indexed to,   // The account that received the tokens through the internal cash-out.
-        uint256 amount        // The amount of tokens to cash-out.
+        address indexed from, // Tools: this comment prevents Prettier from formatting into a single line.
+        bytes32 indexed txId,
+        address indexed to,
+        uint256 amount
     );
 
     // ------------------ Functions ------------------------------- //
@@ -140,7 +180,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function cashIn(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -158,7 +198,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      *
      * @param account The address of the tokens recipient.
      * @param amount The amount of tokens to be received.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param releaseTime The timestamp when the minted tokens will become available for usage.
      */
     function cashInPremint(
@@ -176,7 +216,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      *
      * Emits a {CashInPremint} event.
      *
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @param releaseTime The timestamp of the premint that will be revoked.
      */
     function cashInPremintRevoke(
@@ -206,7 +246,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      *
      * @param account The account on that behalf the operation is made.
      * @param amount The amount of tokens to be cash-outed.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function requestCashOutFrom(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -223,7 +263,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      *
      * Emits a {CashOutConfirm} event for the operation.
      *
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function confirmCashOut(bytes32 txId) external;
 
@@ -236,7 +276,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      *
      * Emits a {CashOutReverse} event for the operation.
      *
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function reverseCashOut(bytes32 txId) external;
 
@@ -252,7 +292,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
      * @param from The account that owns the tokens to cash-out.
      * @param to The account that will receive the tokens.
      * @param amount The amount of tokens to be cash-outed.
-     * @param txId The unique off-chain transaction identifier of the operation.
+     * @param txId The unique off-chain transaction identifier of the related operation.
      */
     function makeInternalCashOut(
         address from, // Tools: this comment prevents Prettier from formatting into a single line.
@@ -265,7 +305,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
 
     /**
      * @dev Returns the data of a single cash-in operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-in operation in the form of a structure.
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory operation);
@@ -279,7 +319,7 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
 
     /**
      * @dev Returns the data of a single cash-out operation.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      * @return operation The data of the cash-out operation in the form of a structure.
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory operation);
@@ -327,11 +367,11 @@ interface IPixCashierRootPrimary is IPixCashierTypes {
 }
 
 /**
- * @title IBalanceFreezerConfiguration interface
+ * @title ICashierConfiguration interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev The configuration interface of the contract responsible for pix-cashier operations.
+ * @dev The configuration part of the cashier contract interface.
  */
-interface IPixCashierRootConfiguration {
+interface ICashierConfiguration {
     // ------------------ Events ---------------------------------- //
 
     /**
@@ -383,7 +423,7 @@ interface IPixCashierRootConfiguration {
 
     /**
      * @dev Returns the shard address by the off-chain transaction identifier.
-     * @param txId The off-chain transaction identifier of the operation.
+     * @param txId The off-chain transaction identifier of the related operation.
      */
     function getShardByTxId(bytes32 txId) external view returns (address);
 
@@ -396,12 +436,12 @@ interface IPixCashierRootConfiguration {
 }
 
 /**
- * @title IBalanceFreezer interface
+ * @title ICashier interface
  * @author CloudWalk Inc. (See https://cloudwalk.io)
- * @dev The interface of the contract responsible for pix-cashier operations on the underlying token contract.
+ * @dev The full interface of the cashier contract.
  */
-interface IPixCashierRoot is
-    IPixCashierRootErrors,
-    IPixCashierRootPrimary,
-    IPixCashierRootConfiguration
+interface ICashier is
+    ICashierErrors, // Tools: this comment prevents Prettier from formatting into a single line.
+    ICashierPrimary,
+    ICashierConfiguration
 {}

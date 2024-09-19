@@ -1,4 +1,4 @@
-# Pix Cashier
+# Cashier
 
 <p align="center">
   <img src="./docs/media/brlc-cover.png">
@@ -8,7 +8,7 @@
 ![example branch parameter](https://github.com/cloudwalk/brlc-pix-cashier/actions/workflows/build.yml/badge.svg?branch=main)
 ![example branch parameter](https://github.com/cloudwalk/brlc-pix-cashier/actions/workflows/test.yml/badge.svg?branch=main)
 
-This repository contains Pix Cashier smart contracts.</br>
+This repository contains Cashier smart contracts.</br>
 
 ## Project Setup
 1. Clone the repo.

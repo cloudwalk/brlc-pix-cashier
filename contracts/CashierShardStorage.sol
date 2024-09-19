@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.0;
 
-import { IPixCashierTypes } from "./interfaces/IPixCashierTypes.sol";
+import { ICashierTypes } from "./interfaces/ICashierTypes.sol";
 
 /**
- * @title PixCashierShard storage version 1
+ * @title CashierShard storage version 1
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
-abstract contract PixCashierShardStorageV1 is IPixCashierTypes {
+abstract contract CashierShardStorageV1 is ICashierTypes {
     /// @dev The mapping of a cash-in operation structure for a given off-chain transaction identifier.
     mapping(bytes32 => CashInOperation) internal _cashInOperations;
 
@@ -17,25 +17,25 @@ abstract contract PixCashierShardStorageV1 is IPixCashierTypes {
 }
 
 /**
- * @title PixCashierShard storage version 2
+ * @title CashierShard storage version 2
  */
-abstract contract PixCashierShardStorageV2 is IPixCashierTypes {
+abstract contract CashierShardStorageV2 is ICashierTypes {
     /// @dev The mapping of an account to its admin status (True if admin, False otherwise).
     mapping(address => bool) internal _admins;
 }
 
 /**
- * @title PixCashierShard storage
+ * @title CashierShard storage
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev Contains storage variables of the {PixCashierShard} contract.
+ * @dev Contains storage variables of the {CashierShard} contract.
  *
  * We are following Compound's approach of upgrading new contract implementations.
  * See https://github.com/compound-finance/compound-protocol.
- * When we need to add new storage variables, we create a new version of PixCashierShardStorage
- * e.g. PixCashierShardStorage<versionNumber>, so finally it would look like
- * "contract PixCashierShardStorage is PixCashierShardStorageV1, PixCashierShardStorageV2".
+ * When we need to add new storage variables, we create a new version of CashierShardStorage
+ * e.g. CashierShardStorage<versionNumber>, so finally it would look like
+ * "contract CashierShardStorage is CashierShardStorageV1, CashierShardStorageV2".
  */
-abstract contract PixCashierShardStorage is PixCashierShardStorageV1, PixCashierShardStorageV2 {
+abstract contract CashierShardStorage is CashierShardStorageV1, CashierShardStorageV2 {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

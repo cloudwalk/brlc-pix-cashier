@@ -6,6 +6,8 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import { IPixCashierShard } from "./interfaces/IPixCashierShard.sol";
+import { IPixCashierShardPrimary } from "./interfaces/IPixCashierShard.sol";
+import { IPixCashierShardConfiguration } from "./interfaces/IPixCashierShard.sol";
 import { PixCashierShardStorage } from "./PixCashierShardStorage.sol";
 
 /**
@@ -14,11 +16,6 @@ import { PixCashierShardStorage } from "./PixCashierShardStorage.sol";
  * @dev The contract responsible for storing sharded cash-in and cash-out operations.
  */
 contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgradeable, IPixCashierShard {
-    // ------------------ Errors ---------------------------------- //
-
-    /// @dev Throws if the caller is not the owner or admin.
-    error Unauthorized();
-
     // ------------------ Initializers ---------------------------- //
 
     /**
@@ -51,7 +48,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
 
     modifier onlyOwnerOrAdmin() {
         if (msg.sender != owner() && !_admins[msg.sender]) {
-            revert Unauthorized();
+            revert PixCashierShard_Unauthorized();
         }
         _;
     }
@@ -66,52 +63,35 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     // ----------------------- Functions -------------------------- //
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function registerCashIn(
         address account,
         uint256 amount,
         bytes32 txId,
         CashInStatus targetStatus
-    ) external onlyOwnerOrAdmin returns (Error) {
-        if (account == address(0)) {
-            return Error.ZeroAccount;
-        }
-        if (amount == 0) {
-            return Error.ZeroAmount;
-        }
-        if (txId == 0) {
-            return Error.ZeroTxId;
-        }
-        if (amount > type(uint64).max) {
-            return Error.AmountExcess;
-        }
-
+    ) external onlyOwnerOrAdmin returns (uint256) {
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.Nonexistent) {
-            return Error.CashInAlreadyExecuted;
+            return uint256(Error.CashInAlreadyExecuted);
         }
 
         operation.account = account;
         operation.amount = uint64(amount);
         operation.status = targetStatus;
 
-        return Error.None;
+        return uint256(Error.None);
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
-    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (Error, address, uint256) {
-        if (txId == 0) {
-            return (Error.ZeroTxId, address(0), 0);
-        }
-
+    function revokeCashIn(bytes32 txId) external onlyOwnerOrAdmin returns (uint256, address, uint256) {
         CashInOperation storage operation = _cashInOperations[txId];
 
         if (operation.status != CashInStatus.PremintExecuted) {
-            return (Error.InappropriateCashInStatus, address(0), 0);
+            return (uint256(Error.InappropriateCashInStatus), address(0), 0);
         }
 
         address oldAccount = operation.account;
@@ -121,49 +101,45 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         operation.amount = 0;
         operation.status = CashInStatus.Nonexistent;
 
-        return (Error.None, oldAccount, oldAmount);
+        return (uint256(Error.None), oldAccount, oldAmount);
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function registerCashOut(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external onlyOwnerOrAdmin returns (Error, uint8) {
+    ) external onlyOwnerOrAdmin returns (uint256, uint256) {
         return _registerCashOut(account, amount, txId, CashOutStatus.Pending);
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function registerInternalCashOut(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
         uint256 amount,
         bytes32 txId
-    ) external onlyOwnerOrAdmin returns (Error, uint8) {
+    ) external onlyOwnerOrAdmin returns (uint256, uint256) {
         return _registerCashOut(account, amount, txId, CashOutStatus.Internal);
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function processCashOut(
         bytes32 txId,
         CashOutStatus targetStatus
-    ) external onlyOwnerOrAdmin returns (Error, address, uint256, uint8) {
-        if (txId == 0) {
-            return (Error.ZeroTxId, address(0), 0, 0);
-        }
-
+    ) external onlyOwnerOrAdmin returns (uint256, address, uint256, uint256) {
         CashOutOperation storage operation = _cashOutOperations[txId];
 
-        Error err;
+        uint256 err;
         if (operation.status != CashOutStatus.Pending) {
-            err = Error.InappropriateCashOutStatus;
+            err = uint256(Error.InappropriateCashOutStatus);
         } else {
-            err = Error.None;
+            err = uint256(Error.None);
             operation.status = targetStatus;
         }
 
@@ -171,23 +147,31 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
-    function setCashOutFlags(
+    function setBitInCashOutFlags(
         bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
-        uint256 flags
-    ) external onlyOwnerOrAdmin returns (Error) {
-        if (txId == 0) {
-            return Error.ZeroTxId;
-        }
+        uint8 bit
+    ) external onlyOwnerOrAdmin returns (uint256) {
+        _cashOutOperations[txId].flags |= bit;
 
-        _cashOutOperations[txId].flags = uint8(flags);
-
-        return Error.None;
+        return uint256(Error.None);
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
+     */
+    function resetBitInCashOutFlags(
+        bytes32 txId, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint8 bit
+    ) external onlyOwnerOrAdmin returns (uint256) {
+        _cashOutOperations[txId].flags &= ~bit;
+
+        return uint256(Error.None);
+    }
+
+    /**
+     * @inheritdoc IPixCashierShardConfiguration
      */
     function setAdmin(address account, bool status) external onlyOwnerOrAdmin {
         _admins[account] = status;
@@ -196,28 +180,28 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     // ------------------ View functions -------------------------- //
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardConfiguration
      */
     function isAdmin(address account) external view returns (bool) {
         return _admins[account];
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function getCashIn(bytes32 txId) external view returns (CashInOperation memory) {
         return _cashInOperations[txId];
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function getCashOut(bytes32 txId) external view returns (CashOutOperation memory) {
         return _cashOutOperations[txId];
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function getCashIns(bytes32[] memory txIds) external view returns (CashInOperation[] memory) {
         uint256 len = txIds.length;
@@ -229,7 +213,7 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
     }
 
     /**
-     * @inheritdoc IPixCashierShard
+     * @inheritdoc IPixCashierShardPrimary
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory) {
         uint256 len = txIds.length;
@@ -256,30 +240,17 @@ contract PixCashierShard is PixCashierShardStorage, OwnableUpgradeable, UUPSUpgr
         uint256 amount,
         bytes32 txId,
         CashOutStatus newStatus
-    ) internal returns (Error, uint8) {
-        if (account == address(0)) {
-            return (Error.ZeroAccount, 0);
-        }
-        if (amount == 0) {
-            return (Error.ZeroAmount, 0);
-        }
-        if (txId == 0) {
-            return (Error.ZeroTxId, 0);
-        }
-        if (amount > type(uint64).max) {
-            return (Error.AmountExcess, 0);
-        }
-
+    ) internal returns (uint256, uint8) {
         CashOutOperation storage operation = _cashOutOperations[txId];
         CashOutStatus oldStatus = operation.status;
 
-        Error err;
+        uint256 err;
         if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
-            err = Error.InappropriateCashOutStatus;
+            err = uint256(Error.InappropriateCashOutStatus);
         } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
-            err = Error.InappropriateCashOutAccount;
+            err = uint256(Error.InappropriateCashOutAccount);
         } else {
-            err = Error.None;
+            err = uint256(Error.None);
             operation.account = account;
             operation.amount = uint64(amount);
             operation.status = newStatus;

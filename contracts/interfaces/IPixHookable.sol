@@ -17,18 +17,18 @@ interface IPixHookableTypes {
      *
      * The possible values:
      *
-     * - CashInCommonBefore -------- Called before the token transfer during a common cash-in operation.
-     * - CashInCommonAfter --------- Called before the token transfer during a common cash-in operation.
-     * - CashInPremintBefore ------- Called before the token transfer during a premint cash-in operation.
-     * - CashInPremintAfter -------- Called after the token transfer during a premint cash-in operation.
-     * - Reserved1 ----------------- Reserved for the future.
-     * - Reserved2 ----------------- Reserved for the future.
-     * - CashOutRequestBefore ------ Called before the token transfer during a cash-out request operation.
-     * - CashOutRequestAfter ------- Called after the token transfer during a cash-out request operation.
-     * - CashOutConfirmationBefore - Called before the token transfer during a cash-out confirmation operation.
-     * - CashOutConfirmationAfter -- Called after the token transfer during a cash-out confirmation operation.
-     * - CashOutReversalBefore ----- Called before the token transfer during a cash-out reversal operation.
-     * - CashOutReversalAfter ------ Called after the token transfer during a cash-out reversal operation.
+     * - CashInCommonBefore = 0 --------- Called before the token transfer during a common cash-in operation.
+     * - CashInCommonAfter = 1 ---------- Called before the token transfer during a common cash-in operation.
+     * - CashInPremintBefore = 2 -------- Called before the token transfer during a premint cash-in operation.
+     * - CashInPremintAfter = 3 --------- Called after the token transfer during a premint cash-in operation.
+     * - Reserved1 = 4 ------------------ Reserved for the future.
+     * - Reserved2 = 5 ------------------ Reserved for the future.
+     * - CashOutRequestBefore = 6 ------- Called before the token transfer during a cash-out request operation.
+     * - CashOutRequestAfter = 7 -------- Called after the token transfer during a cash-out request operation.
+     * - CashOutConfirmationBefore = 8 -- Called before the token transfer during a cash-out confirmation operation.
+     * - CashOutConfirmationAfter = 9 --- Called after the token transfer during a cash-out confirmation operation.
+     * - CashOutReversalBefore = 10 ----- Called before the token transfer during a cash-out reversal operation.
+     * - CashOutReversalAfter = 11 ------ Called after the token transfer during a cash-out reversal operation.
      *
      * Notes:
      *
@@ -44,18 +44,18 @@ interface IPixHookableTypes {
      *    ```
      */
     enum HookIndex {
-        CashInCommonBefore,        // 0
-        CashInCommonAfter,         // 1
-        CashInPremintBefore,       // 2
-        CashInPremintAfter,        // 3
-        Reserved1,                 // 4
-        Reserved2,                 // 5
-        CashOutRequestBefore,      // 6
-        CashOutRequestAfter,       // 7
-        CashOutConfirmationBefore, // 8
-        CashOutConfirmationAfter,  // 9
-        CashOutReversalBefore,     // 10
-        CashOutReversalAfter       // 11
+        CashInCommonBefore,
+        CashInCommonAfter,
+        CashInPremintBefore,
+        CashInPremintAfter,
+        Reserved1,
+        Reserved2,
+        CashOutRequestBefore,
+        CashOutRequestAfter,
+        CashOutConfirmationBefore,
+        CashOutConfirmationAfter,
+        CashOutReversalBefore,
+        CashOutReversalAfter
     }
 
     /**

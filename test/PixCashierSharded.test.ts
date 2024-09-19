@@ -177,6 +177,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const TRANSACTION_ID2 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID2");
   const TRANSACTION_ID3 = ethers.encodeBytes32String("MOCK_TRANSACTION_ID3");
   const TRANSACTIONS_ARRAY: string[] = [TRANSACTION_ID1, TRANSACTION_ID2, TRANSACTION_ID3];
+  const MAX_SHARD_COUNT = 1100;
   const INITIAL_USER_BALANCE = 1_000_000;
   const TOKEN_AMOUNT = 100;
   const TOKEN_AMOUNTS: number[] = [TOKEN_AMOUNT, 200, 300];
@@ -198,28 +199,30 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const REVERT_ERROR_IF_CONTRACT_IS_PAUSED = "EnforcedPause";
   const REVERT_ERROR_IF_ERC20_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE = "ERC20InsufficientBalance";
   const REVERT_ERROR_IF_OWNABLE_INVALID_OWNER = "OwnableInvalidOwner";
-  const REVERT_ERROR_IF_UNAUTHORIZED = "Unauthorized";
+  const REVERT_ERROR_IF_UNAUTHORIZED = "PixCashierShard_Unauthorized";
   const REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
 
   // Errors of the contracts under test
-  const REVERT_ERROR_IF_ROOT_ADDRESS_IZ_ZERO = "ZeroRootAddress";
-  const REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO = "ZeroShardAddress";
-  const REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO = "ZeroTokenAddress";
-  const REVERT_ERROR_IF_ACCOUNT_IS_ZERO = "ZeroAccount";
-  const REVERT_ERROR_IF_AMOUNT_EXCESS = "AmountExcess";
-  const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "ZeroAmount";
-  const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "CashInAlreadyExecuted";
-  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "ZeroTxId";
-  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "TokenMintingFailure";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "InappropriateCashOutAccount";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "InappropriateCashOutStatus";
-  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "InappropriatePremintReleaseTime";
-  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "InappropriateCashInStatus";
-  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "HookCallableContractAddressZero";
-  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "HookCallableContractAddressNonZero";
-  const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "HookFlagsInvalid";
-  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "HooksAlreadyRegistered";
-  const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "ShardCountExcess";
+  const REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO = "PixCashierRoot_RootAddressZero";
+  const REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO = "PixCashierRoot_ShardAddressZero";
+  const REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO = "PixCashierRoot_TokenAddressZero";
+  const REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO = "PixCashierRoot_AccountAddressZero";
+  const REVERT_ERROR_IF_AMOUNT_EXCESS = "PixCashierRoot_AmountExcess";
+  const REVERT_ERROR_IF_AMOUNT_IS_ZERO = "PixCashierRoot_AmountZero";
+  const REVERT_ERROR_IF_CASH_IN_ALREADY_EXECUTED = "PixCashierRoot_CashInAlreadyExecuted";
+  const REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO = "PixCashierRoot_TxIdZero";
+  const REVERT_ERROR_IF_TOKEN_MINTING_FAILURE = "PixCashierRoot_TokenMintingFailure";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_ACCOUNT = "PixCashierRoot_InappropriateCashOutAccount";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_OUT_STATUS = "PixCashierRoot_InappropriateCashOutStatus";
+  const REVERT_ERROR_IF_INAPPROPRIATE_PREMINT_RELEASE_TIME = "PixCashierRoot_InappropriatePremintReleaseTime";
+  const REVERT_ERROR_IF_INAPPROPRIATE_CASH_IN_STATUS = "PixCashierRoot_InappropriateCashInStatus";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_ZERO = "PixCashierRoot_HookCallableContractAddressZero";
+  const REVERT_ERROR_IF_HOOK_CALLABLE_CONTRACT_ADDRESS_NON_ZERO = "PixCashierRoot_HookCallableContractAddressNonZero";
+  const REVERT_ERROR_IF_HOOK_FLAGS_INVALID = "PixCashierRoot_HookFlagsInvalid";
+  const REVERT_ERROR_IF_HOOKS_ALREADY_REGISTERED = "PixCashierRoot_HooksAlreadyRegistered";
+  const REVERT_ERROR_IF_SHARD_COUNT_EXCESS = "PixCashierRoot_ShardCountExcess";
+  const REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS = "PixCashierRoot_ShardReplacementCountExcess";
+  const REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR = "PixCashierRoot_UnexpectedShardError";
 
   // Events of the contracts under test
   const EVENT_NAME_CASH_IN = "CashIn";
@@ -236,11 +239,13 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
   const EVENT_NAME_MOCK_PREMINT_PREMINT_RESCHEDULING = "MockPremintReleaseRescheduling";
   const EVENT_NAME_SHARD_ADDED = "ShardAdded";
   const EVENT_NAME_SHARD_ADMIN_CONFIGURED = "ShardAdminConfigured";
+  const EVENT_NAME_SHARD_REPLACED = "ShardReplaced";
 
   let pixCashierRootFactory: ContractFactory;
   let pixCashierShardFactory: ContractFactory;
   let tokenMockFactory: ContractFactory;
   let pixHookMockFactory: ContractFactory;
+  let pixCashierShardMockFactory: ContractFactory;
   let deployer: HardhatEthersSigner;
   let cashier: HardhatEthersSigner;
   let hookAdmin: HardhatEthersSigner;
@@ -269,6 +274,8 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
     tokenMockFactory = tokenMockFactory.connect(deployer);
     pixHookMockFactory = await ethers.getContractFactory("PixHookMock");
     pixHookMockFactory = pixHookMockFactory.connect(deployer);
+    pixCashierShardMockFactory = await ethers.getContractFactory("PixCashierShardMock");
+    pixCashierShardMockFactory = pixCashierShardMockFactory.connect(deployer);
   });
 
   async function deployTokenMock(): Promise<Contract> {
@@ -676,6 +683,10 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       // The initial values of counters and pending cash-outs
       expect(await pixCashierRoot.pendingCashOutCounter()).to.equal(0);
       expect(await pixCashierRoot.getPendingCashOutTxIds(0, 1)).to.be.empty;
+
+      // Other parameters and constants
+      expect(await pixCashierRoot.MAX_SHARD_COUNT()).to.equal(MAX_SHARD_COUNT);
+      expect(await pixCashierRoot.getShardCount()).to.equal(0);
     });
 
     it("Configures the shard contract as expected", async () => {
@@ -708,7 +719,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
       await expect(
         anotherPixCashierRoot.initialize(ADDRESS_ZERO)
-      ).to.be.revertedWithCustomError(pixCashierRootFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRootFactory, REVERT_ERROR_IF_TOKEN_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the passed owner address is zero for the shard contract", async () => {
@@ -805,9 +816,8 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
 
     it("Is reverted if the number of shard exceeds the allowed maximum", async () => {
       const { pixCashierRoot } = await setUpFixture(deployContracts);
-      const shardMaxNumber = 1100;
       const fakeShardAddress: string[] = Array.from(
-        { length: shardMaxNumber },
+        { length: MAX_SHARD_COUNT },
         (_v, i) => "0x" + ((i + 1).toString().padStart(40, "0"))
       );
       const additionalFakeShardAddress = user.address;
@@ -816,6 +826,91 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       await expect(
         pixCashierRoot.addShards([additionalFakeShardAddress])
       ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_COUNT_EXCESS);
+    });
+  });
+
+  describe("Function 'replaceShards()'", async () => {
+    it("Executes as expected", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployContracts);
+      const shardCount = 5;
+      const oldShardAddresses = Array.from(
+        { length: shardCount },
+        (_v, i) => "0x" + (i + 1).toString(16).padStart(40, "0")
+      );
+      const newShardAddresses = Array.from(
+        { length: shardCount },
+        (_v, i) => "0x" + (i + 16).toString(16).padStart(40, "0")
+      );
+
+      await proveTx(pixCashierRoot.addShards(oldShardAddresses));
+
+      // The empty array of addresses to replace
+      const tx1 = pixCashierRoot.replaceShards(0, []);
+      await expect(tx1).not.to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED);
+
+      // The start index is outside the array of existing shards
+      const tx2 = pixCashierRoot.replaceShards(oldShardAddresses.length, newShardAddresses);
+      await expect(tx2).not.to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED);
+
+      // Replacing the first shard address
+      const tx3 = pixCashierRoot.replaceShards(0, [newShardAddresses[0]]);
+      await expect(tx3).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+        newShardAddresses[0],
+        oldShardAddresses[0]
+      );
+      oldShardAddresses[0] = newShardAddresses[0];
+      expect(await pixCashierRoot.getShardRange(0, oldShardAddresses.length)).to.deep.eq(oldShardAddresses);
+
+      // Replacing two shards in the middle
+      const tx4 = pixCashierRoot.replaceShards(1, [newShardAddresses[1], newShardAddresses[2]]);
+      await expect(tx4).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+        newShardAddresses[1],
+        oldShardAddresses[1]
+      );
+      await expect(tx4).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+        newShardAddresses[2],
+        oldShardAddresses[2]
+      );
+      oldShardAddresses[1] = newShardAddresses[1];
+      oldShardAddresses[2] = newShardAddresses[2];
+      expect(await pixCashierRoot.getShardRange(0, oldShardAddresses.length)).to.deep.eq(oldShardAddresses);
+
+      // Replacing all shards except the first one.
+      // One address is duplicated in the result shard array.
+      newShardAddresses.pop();
+      const tx5 = pixCashierRoot.replaceShards(1, newShardAddresses);
+      for (let i = 1; i < oldShardAddresses.length; ++i) {
+        await expect(tx5).to.emit(pixCashierRoot, EVENT_NAME_SHARD_REPLACED).withArgs(
+          newShardAddresses[i - 1],
+          oldShardAddresses[i]
+        );
+        oldShardAddresses[i] = newShardAddresses[i - 1];
+      }
+      expect(await pixCashierRoot.getShardRange(0, oldShardAddresses.length)).to.deep.eq(oldShardAddresses);
+    });
+
+    it("Is reverted if the caller is not the owner", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployContracts);
+      const fakeShardAddress = user.address;
+      await expect(
+        connect(pixCashierRoot, user).replaceShards(0, [fakeShardAddress])
+      ).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(user.address, ownerRole);
+    });
+
+    it("Is reverted if the number of shards to replacement is greater than expected", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployContracts);
+      const fakeShardAddresses = Array.from(
+        { length: 3 },
+        (_v, i) => "0x" + (i + 1).toString(16).padStart(40, "0")
+      );
+      await proveTx(pixCashierRoot.addShards(fakeShardAddresses));
+
+      await expect(
+        pixCashierRoot.replaceShards(1, fakeShardAddresses)
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_REPLACEMENT_COUNT_EXCESS);
     });
   });
 
@@ -848,7 +943,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         pixCashierRoot.upgradeShardsTo(ADDRESS_ZERO)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO);
     });
   });
 
@@ -926,7 +1021,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           ADDRESS_ZERO,
           targetShardImplementationAddress
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ROOT_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ROOT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the shard implementation address is zero", async () => {
@@ -941,7 +1036,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           targetRootImplementationAddress,
           ADDRESS_ZERO
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IZ_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_SHARD_ADDRESS_IS_ZERO);
     });
   });
 
@@ -987,6 +1082,16 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
         REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
       ).withArgs(user.address, ownerRole);
     });
+
+    it("Is reverted if the provide account address is zero", async () => {
+      const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        pixCashierRoot.configureShardAdmin(ADDRESS_ZERO, true)
+      ).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO
+      );
+    });
   });
 
   describe("Function 'cashIn()' accompanied by the 'registerCashIn()' one", async () => {
@@ -1019,7 +1124,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(pixCashierRoot, cashier).cashIn(ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -1107,7 +1212,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           TRANSACTION_ID1,
           RELEASE_TIMESTAMP
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -1278,7 +1383,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(pixCashierRoot, cashier).requestCashOutFrom(ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -1478,7 +1583,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       const { pixCashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(pixCashierRoot, cashier).makeInternalCashOut(user.address, ADDRESS_ZERO, TOKEN_AMOUNT, TRANSACTION_ID1)
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token sender address is zero", async () => {
@@ -1490,7 +1595,7 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
           TOKEN_AMOUNT,
           TRANSACTION_ID1
         )
-      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_IS_ZERO);
+      ).to.be.revertedWithCustomError(pixCashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
     });
 
     it("Is reverted if the token amount is zero", async () => {
@@ -2285,14 +2390,46 @@ describe("Contracts 'PixCashierRoot' and `PixCashierShard`", async () => {
       ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
     });
 
-    it("The 'setCashOutFlags()' function is reverted if it is called not by the owner", async () => {
+    it("The 'setBitInCashOutFlags()' function is reverted if it is called not by the owner", async () => {
       const { pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(
-        connect(pixCashierShards[0], deployer).setCashOutFlags(
+        connect(pixCashierShards[0], deployer).setBitInCashOutFlags(
           TRANSACTION_ID1,
           0 // flags
         )
       ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+
+    it("The 'resetBitInCashOutFlags()' function is reverted if it is called not by the owner", async () => {
+      const { pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(pixCashierShards[0], deployer).resetBitInCashOutFlags(
+          TRANSACTION_ID1,
+          0 // flags
+        )
+      ).to.be.revertedWithCustomError(pixCashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+
+    it("The root treats an unexpected error of the shard function properly", async () => {
+      const { pixCashierRoot, pixCashierShards } = await setUpFixture(deployAndConfigureContracts);
+      const [operation] = defineTestCashIns();
+      const mockPixCashierShard = await pixCashierShardMockFactory.deploy() as Contract;
+      await mockPixCashierShard.waitForDeployment();
+      const unexpectedError = await mockPixCashierShard.REGISTER_OPERATION_UNEXPECTED_ERROR();
+      const mockPixCashierShardAddresses = Array(pixCashierShards.length).fill(getAddress(mockPixCashierShard));
+      await proveTx(pixCashierRoot.replaceShards(0, mockPixCashierShardAddresses));
+      const pixCashierRootUnderCashier = connect(pixCashierRoot, cashier);
+
+      await expect(pixCashierRootUnderCashier.cashIn(
+        operation.account,
+        operation.amount,
+        operation.txId
+      )).to.be.revertedWithCustomError(
+        pixCashierRoot,
+        REVERT_ERROR_IF_UNEXPECTED_SHARD_ERROR
+      ).withArgs(
+        unexpectedError
+      );
     });
   });
 });

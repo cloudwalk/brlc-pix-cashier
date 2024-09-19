@@ -5,11 +5,78 @@ pragma solidity ^0.8.0;
 import { IPixCashierTypes } from "./IPixCashierTypes.sol";
 
 /**
+ * @title IPixCashierRootErrors interface
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @dev Defines the custom errors used in the pix-cashier contract.
+ */
+interface IPixCashierRootErrors {
+    /// @dev Thrown if the provided root address is zero.
+    error PixCashierRoot_RootAddressZero();
+
+    /// @dev Thrown if the provided shard address is zero.
+    error PixCashierRoot_ShardAddressZero();
+
+    /// @dev Thrown if the provided token address is zero.
+    error PixCashierRoot_TokenAddressZero();
+
+    /// @dev Thrown if the provided account address is zero.
+    error PixCashierRoot_AccountAddressZero();
+
+    /// @dev Thrown if the provided amount is zero.
+    error PixCashierRoot_AmountZero();
+
+    /// @dev Thrown if the provided off-chain transaction identifier is zero.
+    error PixCashierRoot_TxIdZero();
+
+    /// @dev Thrown if the provided amount exceeds the maximum allowed value.
+    error PixCashierRoot_AmountExcess();
+
+    /// @dev Thrown if the minting of tokens failed during a cash-in operation.
+    error PixCashierRoot_TokenMintingFailure();
+
+    /// @dev Thrown if the cash-in operation with the provided txId is already executed.
+    error PixCashierRoot_CashInAlreadyExecuted();
+
+    /// @dev Thrown if the cash-in operation with the provided txId has an inappropriate status.
+    error PixCashierRoot_InappropriateCashInStatus();
+
+    /// @dev Thrown if the cash-out operation with the provided txId has an inappropriate status.
+    error PixCashierRoot_InappropriateCashOutStatus();
+
+    /// @dev Thrown if the cash-out operation cannot be executed for the provided account and txId.
+    error PixCashierRoot_InappropriateCashOutAccount();
+
+    /// @dev Thrown if the provided release time for the premint operation is inappropriate.
+    error PixCashierRoot_InappropriatePremintReleaseTime();
+
+    /// @dev Thrown if the number of shard contracts to replace is greater than expected.
+    error PixCashierRoot_ShardReplacementCountExcess();
+
+    /// @dev Thrown if the shard contract returns an unexpected error.
+    error PixCashierRoot_UnexpectedShardError(uint256 err);
+
+    /// @dev Thrown if the maximum number of shards is exceeded.
+    error PixCashierRoot_ShardCountExcess();
+
+    /// @dev The provided bit flags to configure the hook logic are invalid.
+    error PixCashierRoot_HookFlagsInvalid();
+
+    /// @dev The same hooks for a PIX operation are already configured.
+    error PixCashierRoot_HooksAlreadyRegistered();
+
+    /// @dev The provided address of the callable contract with the PIX hook function is zero but must not be
+    error PixCashierRoot_HookCallableContractAddressZero();
+
+    /// @dev The provided address of the callable contract with the PIX hook function is non-zero but must be
+    error PixCashierRoot_HookCallableContractAddressNonZero();
+}
+
+/**
  * @title PixCashier interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
- * @dev The interface of the wrapper contract for PIX cash-in and cash-out operations.
+ * @dev The primary interface of the contract responsible for pix-cashier operations on the underlying token contract.
  */
-interface IPixCashierRoot is IPixCashierTypes {
+interface IPixCashierRootPrimary is IPixCashierTypes {
     // ------------------ Events ---------------------------------- //
 
     /// @dev Emitted when a new cash-in operation is executed.
@@ -60,15 +127,6 @@ interface IPixCashierRoot is IPixCashierTypes {
         address indexed to,   // The account that received the tokens through the internal cash-out.
         uint256 amount        // The amount of tokens to cash-out.
     );
-
-    /// @dev Emitted when a new shard is added to the contract.
-    event ShardAdded(address shard);
-
-    /// @dev Emitted when an existing shard is replaced with a new one.
-    event ShardReplaced(address newShard, address oldShard);
-
-    /// @dev Emitted when a shard admin status of an account is configured.
-    event ShardAdminConfigured(address account, bool status);
 
     // ------------------ Functions ------------------------------- //
 
@@ -203,26 +261,6 @@ interface IPixCashierRoot is IPixCashierTypes {
         bytes32 txId
     ) external;
 
-    /**
-     * @dev Sets the shards that are allowed to process cash-out operations.
-     * @param shards The array of shard addresses to add.
-     */
-    function addShards(address[] memory shards) external;
-
-    /**
-     * @dev Replaces the existing shards with a new set of shards.
-     * @param fromIndex The index in the internal array to start replacing from.
-     * @param shards The array of shard addresses to replace with.
-     */
-    function replaceShards(uint256 fromIndex, address[] memory shards) external;
-
-    /**
-     * @dev Configures the shard admin status of an account.
-     * @param account The address of the account to configure.
-     * @param status The new admin status of the account.
-     */
-    function configureShardAdmin(address account, bool status) external;
-
     // ------------------ View functions -------------------------- //
 
     /**
@@ -286,6 +324,57 @@ interface IPixCashierRoot is IPixCashierTypes {
      * @dev Returns the address of the underlying token.
      */
     function underlyingToken() external view returns (address);
+}
+
+/**
+ * @title IBalanceFreezerConfiguration interface
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @dev The configuration interface of the contract responsible for pix-cashier operations.
+ */
+interface IPixCashierRootConfiguration {
+    // ------------------ Events ---------------------------------- //
+
+    /**
+     * @dev Emitted when a new shard contract is added to the contract.
+     * @param shard The address of the added shard contract.
+     */
+    event ShardAdded(address shard);
+
+    /**
+     * @dev Emitted when an existing shard contract is replaced with a new one.
+     * @param newShard The address of the new shard contract.
+     * @param oldShard The address of the replaced shard contract.
+     */
+    event ShardReplaced(address newShard, address oldShard);
+
+    /**
+     * @dev Emitted when a shard admin status of an account is configured on all underlying shard contracts.
+     * @param account The address of the account to configure.
+     * @param status The new admin status of the account.
+     */
+    event ShardAdminConfigured(address account, bool status);
+
+    // ------------------ Functions ------------------------------- //
+
+    /**
+     * @dev Sets the shards that are allowed to process cash-out operations.
+     * @param shards The array of shard addresses to add.
+     */
+    function addShards(address[] memory shards) external;
+
+    /**
+     * @dev Replaces the existing shards with a new set of shards.
+     * @param fromIndex The index in the internal array to start replacing from.
+     * @param shards The array of shard addresses to replace with.
+     */
+    function replaceShards(uint256 fromIndex, address[] memory shards) external;
+
+    /**
+     * @dev Configures the shard admin status of an account.
+     * @param account The address of the account to configure.
+     * @param status The new admin status of the account.
+     */
+    function configureShardAdmin(address account, bool status) external;
 
     /**
      * @dev Returns the number of shards in the proxy.
@@ -305,3 +394,14 @@ interface IPixCashierRoot is IPixCashierTypes {
      */
     function getShardRange(uint256 index, uint256 limit) external view returns (address[] memory);
 }
+
+/**
+ * @title IBalanceFreezer interface
+ * @author CloudWalk Inc. (See https://cloudwalk.io)
+ * @dev The interface of the contract responsible for pix-cashier operations on the underlying token contract.
+ */
+interface IPixCashierRoot is
+    IPixCashierRootErrors,
+    IPixCashierRootPrimary,
+    IPixCashierRootConfiguration
+{}

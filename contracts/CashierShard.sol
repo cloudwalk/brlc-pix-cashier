@@ -139,7 +139,7 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
      *
      * - The caller must be the owner or an admin.
      * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
-     * - If the cash-out operation has the `Reversed` status its account address must equal the `from` argument.
+     * - If the cash-out operation has the `Reversed` status its account address must equal the `account` argument.
      */
     function registerInternalCashOut(
         address account, // Tools: This comment prevents Prettier from formatting into a single line.
@@ -147,6 +147,23 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
         bytes32 txId
     ) external onlyOwnerOrAdmin returns (uint256, uint256) {
         return _registerCashOut(account, amount, txId, CashOutStatus.Internal);
+    }
+
+    /**
+     * @inheritdoc ICashierShardPrimary
+     *
+     * @dev Requirements:
+     *
+     * - The caller must be the owner or an admin.
+     * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
+     * - If the cash-out operation has the `Reversed` status its account address must equal the `account` argument.
+     */
+    function registerForceCashOut(
+        address account, // Tools: This comment prevents Prettier from formatting into a single line.
+        uint256 amount,
+        bytes32 txId
+    ) external onlyOwnerOrAdmin returns (uint256, uint256) {
+        return _registerCashOut(account, amount, txId, CashOutStatus.Forced);
     }
 
     /**
@@ -285,7 +302,7 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
         CashOutStatus oldStatus = operation.status;
 
         uint256 err;
-        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed) {
+        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed || oldStatus == CashOutStatus.Internal || oldStatus == CashOutStatus.Forced) {
             err = uint256(Error.InappropriateCashOutStatus);
         } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
             err = uint256(Error.InappropriateCashOutAccount);

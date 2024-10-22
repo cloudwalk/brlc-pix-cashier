@@ -63,7 +63,8 @@ interface ICashierTypes {
         Pending,
         Reversed,
         Confirmed,
-        Internal
+        Internal,
+        Forced
     }
 
     /**

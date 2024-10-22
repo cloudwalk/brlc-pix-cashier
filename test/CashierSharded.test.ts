@@ -18,7 +18,8 @@ enum CashOutStatus {
   Pending = 1,
   Reversed = 2,
   Confirmed = 3,
-  Internal = 4
+  Internal = 4,
+  Forced = 5
 }
 
 enum HookIndex {
@@ -233,6 +234,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
   const EVENT_NAME_CASH_OUT_REVERSING = "ReverseCashOut";
   const EVENT_NAME_HOOK_INVOKED = "HookInvoked";
   const EVENT_NAME_INTERNAL_CASH_OUT = "InternalCashOut";
+  const EVENT_NAME_FORCE_CASH_OUT = "ForceCashOut";
   const EVENT_NAME_MOCK_CASHIER_HOOK_CALLED = "MockCashierHookCalled";
   const EVENT_NAME_MOCK_PREMINT_INCREASING = "MockPremintIncreasing";
   const EVENT_NAME_MOCK_PREMINT_DECREASING = "MockPremintDecreasing";
@@ -1439,6 +1441,31 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
     });
 
+    it("Is reverted if the cash-out with the provided txId has internal status", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const tx = connect(cashierRoot, cashier).makeInternalCashOut(
+        user.address,
+        receiver.address,
+        TOKEN_AMOUNT,
+        TRANSACTION_ID1
+      );
+      await proveTx(tx);
+      await expect(connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1))
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
+    });
+
+    it("Is reverted if the cash-out with the provided txId has forced status", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const tx = connect(cashierRoot, cashier).makeForceCashOut(
+        user.address,
+        TOKEN_AMOUNT,
+        TRANSACTION_ID1
+      );
+      await proveTx(tx);
+      await expect(connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1))
+        .to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE);
+    });
+
     it("Is reverted if txId of a reversed cash-out operation is reused for another account", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
@@ -1684,6 +1711,49 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       );
     });
 
+    it("Is reverted if the cash-out with the provided txId has internal status", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const tx = connect(cashierRoot, cashier).makeInternalCashOut(
+        user.address,
+        receiver.address,
+        TOKEN_AMOUNT,
+        TRANSACTION_ID1
+      );
+      await proveTx(tx);
+      await expect(
+        connect(cashierRoot, cashier).makeInternalCashOut(
+          user.address,
+          receiver.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if the cash-out with the provided txId has forced status", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const tx = connect(cashierRoot, cashier).makeForceCashOut(
+        user.address,
+        TOKEN_AMOUNT,
+        TRANSACTION_ID1
+      );
+      await proveTx(tx);
+      await expect(
+        connect(cashierRoot, cashier).makeInternalCashOut(
+          user.address,
+          receiver.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
     it("Is reverted if txId of a reversed cash-out operation is reused for another account", async () => {
       const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
       await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
@@ -1708,6 +1778,222 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         connect(cashierRoot, cashier).makeInternalCashOut(
           user.address,
           receiver.address,
+          tokenAmount,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        tokenMock,
+        REVERT_ERROR_IF_ERC20_TOKEN_TRANSFER_AMOUNT_EXCEEDS_BALANCE
+      ).withArgs(user.address, INITIAL_USER_BALANCE, tokenAmount);
+    });
+  });
+
+  describe("Function 'makeForceCashOut()'", async () => {
+    it("Executes as expected", async () => {
+      const { cashierRoot, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+      const [cashOut] = defineTestCashOuts();
+      await checkCashierState(tokenMock, cashierRoot, [cashOut]);
+      const tx = connect(cashierRoot, cashier).makeForceCashOut(
+        cashOut.account.address,
+        cashOut.amount,
+        cashOut.txId
+      );
+      await expect(tx).to.changeTokenBalances(
+        tokenMock,
+        [cashierRoot, cashier, cashOut.account],
+        [0, 0, -cashOut.amount]
+      );
+      await expect(tx).to.emit(cashierRoot, EVENT_NAME_FORCE_CASH_OUT).withArgs(
+        cashOut.account.address, // from
+        cashOut.amount,
+        cashOut.txId,
+        cashier.address
+      );
+      cashOut.status = CashOutStatus.Forced;
+      await checkCashierState(tokenMock, cashierRoot, [cashOut]);
+    });
+
+    it("Is reverted if the contract is paused", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await pauseContract(cashierRoot);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_CONTRACT_IS_PAUSED);
+    });
+
+    it("Is reverted if the caller does not have the cashier role", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(cashierRoot, deployer).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(deployer.address, cashierRole);
+    });
+
+    it("Is reverted if the token sender address is zero", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          ADDRESS_ZERO,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_ACCOUNT_ADDRESS_IS_ZERO);
+    });
+
+    it("Is reverted if the token amount is zero", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT_ZERO,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_AMOUNT_IS_ZERO);
+    });
+
+    it("Is reverted if the token amount is greater than 64-bit unsigned integer", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const amount: bigint = BigInt("0x10000000000000000");
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          amount,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_AMOUNT_EXCESS);
+    });
+
+    it("Is reverted if the off-chain transaction ID is zero", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID_ZERO
+        )
+      ).to.be.revertedWithCustomError(cashierRoot, REVERT_ERROR_IF_TRANSACTION_ID_IS_ZERO);
+    });
+
+    it("Is reverted if the cash-out with the provided txId is already pending", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if the cash-out with the provided txId is already confirmed", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await connect(cashierRoot, cashier).confirmCashOut(TRANSACTION_ID1);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if the cash-out with the provided txId has internal status", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const tx = connect(cashierRoot, cashier).makeInternalCashOut(
+        user.address,
+        receiver.address,
+        TOKEN_AMOUNT,
+        TRANSACTION_ID1
+      );
+      await proveTx(tx);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if the cash-out with the provided txId has forced status", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      const tx = connect(cashierRoot, cashier).makeForceCashOut(
+        user.address,
+        TOKEN_AMOUNT,
+        TRANSACTION_ID1
+      );
+      await proveTx(tx);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if the cash-out with the provided txId is already confirmed", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await connect(cashierRoot, cashier).confirmCashOut(TRANSACTION_ID1);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_STATUS_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if txId of a reversed cash-out operation is reused for another account", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await connect(cashierRoot, cashier).requestCashOutFrom(user.address, TOKEN_AMOUNT, TRANSACTION_ID1);
+      await connect(cashierRoot, cashier).reverseCashOut(TRANSACTION_ID1);
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          deployer.address,
+          TOKEN_AMOUNT,
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_CASH_OUT_ACCOUNT_INAPPROPRIATE
+      );
+    });
+
+    it("Is reverted if the user has not enough tokens", async () => {
+      const { cashierRoot, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+      const tokenAmount = INITIAL_USER_BALANCE + 1;
+      await expect(
+        connect(cashierRoot, cashier).makeForceCashOut(
+          user.address,
           tokenAmount,
           TRANSACTION_ID1
         )

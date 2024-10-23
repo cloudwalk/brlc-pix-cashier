@@ -289,8 +289,8 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
      * @param amount The amount of tokens to be received.
      * @param txId The off-chain transaction identifier of the related operation.
      * @param newStatus The new status of the operation to set.
-     * @return err The error code if the operation fails, otherwise None.
-     * @return flags The flags field of the stored cash-out operation structure.
+     * @return The error code if the operation fails, otherwise None.
+     * @return The flags field of the stored cash-out operation structure.
      */
     function _registerCashOut(
         address account, // Tools: this comment prevents Prettier from formatting into a single line.
@@ -333,23 +333,5 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
      */
     function upgradeTo(address newImplementation) external {
         upgradeToAndCall(newImplementation, "");
-    }
-
-    // ------------------ Internal functions ---------------------- //
-
-    /**
-     * @dev Validates the cash-out status, ensuring it is not an ongoing or completed operation.
-     * @param oldStatus The old cash-out operation status to be validated.
-     */
-    function _validateCashOutStatus(CashOutStatus oldStatus) internal pure returns (bool) {
-        if (oldStatus == CashOutStatus.Pending ||
-            oldStatus == CashOutStatus.Confirmed ||
-            oldStatus == CashOutStatus.Internal ||
-            oldStatus == CashOutStatus.Forced
-        ) {
-            return false;
-        }
-
-        return true;
     }
 }

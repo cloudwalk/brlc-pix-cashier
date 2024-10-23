@@ -93,7 +93,7 @@ interface ICashierShardPrimary is ICashierTypes {
     ) external returns (uint256 err, uint256 flags);
 
     /**
-     * @dev Registers an forced cash-out operation.
+     * @dev Registers a forced cash-out operation.
      * @param account The address of the account.
      * @param amount The amount of the cash-out operation.
      * @param txId The off-chain identifier of the cash-out operation.

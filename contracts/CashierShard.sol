@@ -302,7 +302,7 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
         CashOutStatus oldStatus = operation.status;
 
         uint256 err;
-        if (oldStatus == CashOutStatus.Pending || oldStatus == CashOutStatus.Confirmed || oldStatus == CashOutStatus.Internal || oldStatus == CashOutStatus.Forced) {
+        if (!_validateCashOutStatus(oldStatus)) {
             err = uint256(Error.InappropriateCashOutStatus);
         } else if (oldStatus == CashOutStatus.Reversed && operation.account != account) {
             err = uint256(Error.InappropriateCashOutAccount);
@@ -332,5 +332,23 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeabl
      */
     function upgradeTo(address newImplementation) external {
         upgradeToAndCall(newImplementation, "");
+    }
+
+    // ------------------ Internal functions ---------------------- //
+
+    /**
+     * @dev Validates the cash-out status, ensuring it is not an ongoing or completed operation.
+     * @param oldStatus The old cash-out operation status to be validated.
+     */
+    function _validateCashOutStatus(CashOutStatus oldStatus) internal pure returns (bool) {
+        if (oldStatus == CashOutStatus.Pending ||
+            oldStatus == CashOutStatus.Confirmed ||
+            oldStatus == CashOutStatus.Internal ||
+            oldStatus == CashOutStatus.Forced
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

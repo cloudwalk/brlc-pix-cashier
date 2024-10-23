@@ -386,7 +386,7 @@ contract Cashier is
         (uint256 err, uint256 flags) = _shard(txId).registerForceCashOut(account, amount, txId);
         _checkShardError(err);
 
-        emit ForceCashOut(account, amount, txId, msg.sender);
+        emit ForceCashOut(account, txId, amount);
 
         if (flags & CASH_OUT_FLAG_SOME_HOOK_CONFIGURED != 0) {
             _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutRequestBefore));

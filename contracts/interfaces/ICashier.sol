@@ -171,15 +171,13 @@ interface ICashierPrimary is ICashierTypes {
     /**
      * @dev Emitted when a force cash-out operation is initiated.
      * @param account The account that owns the tokens to cash-out.
-     * @param amount The amount of tokens to cash-out.
      * @param txId The off-chain transaction identifier.
-     * @param sender The account that initiated the cash-out.
+     * @param amount The amount of tokens to cash-out.
      */
     event ForceCashOut(
         address indexed account,
-        uint256 amount,
         bytes32 indexed txId,
-        address indexed sender
+        uint256 amount
     );
 
     // ------------------ Functions ------------------------------- //

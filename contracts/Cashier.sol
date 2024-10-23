@@ -376,17 +376,17 @@ contract Cashier is
      * - The cash-out operation with the provided `txId` must have the `Nonexistent` or `Reversed` status.
      * - If the cash-out operation has the `Reversed` status its `account` field must equal the `account` argument.
      */
-    function makeForceCashOut(
+    function forceCashOut(
         address account,
         uint256 amount,
         bytes32 txId
     ) external whenNotPaused onlyRole(CASHIER_ROLE) {
         _validateAccountAmountTxId(account, amount, txId);
 
-        (uint256 err, uint256 flags) = _shard(txId).registerForceCashOut(account, amount, txId);
+        (uint256 err, uint256 flags) = _shard(txId).registerForcedCashOut(account, amount, txId);
         _checkShardError(err);
 
-        emit ForceCashOut(account, txId, amount);
+        emit ForcedCashOut(account, txId, amount);
 
         if (flags & CASH_OUT_FLAG_SOME_HOOK_CONFIGURED != 0) {
             _callCashOutHookIfConfigured(txId, uint256(HookIndex.CashOutRequestBefore));

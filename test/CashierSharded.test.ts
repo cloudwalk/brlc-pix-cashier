@@ -830,6 +830,16 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         ownerRole
       );
     });
+
+    it("Is reverted if the caller is not the owner", async () => {
+      const { cashierRoot } = await setUpFixture(deployContracts);
+      await expect(
+        connect(cashierRoot, cashier).initHookAdminRole()
+      ).to.be.revertedWithCustomError(
+        cashierRoot,
+        REVERT_ERROR_IF_UNAUTHORIZED_ACCOUNT
+      ).withArgs(cashier.address, ownerRole);
+    });
   });
 
   describe("Function 'addShards()'", async () => {
@@ -1085,7 +1095,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     });
   });
 
-  describe("Function 'configureShardAdmin()'", async () => {
+  describe("Function 'configureShardAdmin()' accompanied by the 'setAdmin()' one", async () => {
     it("Executes as expected", async () => {
       const { cashierRoot, cashierAdmin, cashierShards } = await setUpFixture(deployAndConfigureContracts);
 
@@ -2737,6 +2747,14 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
   });
 
   describe("Special scenarios for shard functions", async () => {
+    it("The 'setAdmin()' function is reverted if it is called not by the owner or admin", async () => {
+      const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
+      await expect(connect(cashierShards[0], deployer).setAdmin(
+        user.address, // account
+        true // status
+      )).to.be.revertedWithCustomError(cashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+
     it("The 'registerCashIn()' function is reverted if it is called not by the owner or admin", async () => {
       const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(connect(cashierShards[0], deployer).registerCashIn(
@@ -2838,5 +2856,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         unexpectedError
       );
     });
+
+
   });
 });

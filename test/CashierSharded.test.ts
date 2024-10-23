@@ -2856,7 +2856,5 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
         unexpectedError
       );
     });
-
-
   });
 });

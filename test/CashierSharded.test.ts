@@ -242,6 +242,7 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
   const EVENT_NAME_SHARD_ADDED = "ShardAdded";
   const EVENT_NAME_SHARD_ADMIN_CONFIGURED = "ShardAdminConfigured";
   const EVENT_NAME_SHARD_REPLACED = "ShardReplaced";
+  const EVENT_NAME_ROLE_ADMIN_CHANGED = "RoleAdminChanged";
 
   let cashierFactory: ContractFactory;
   let cashierShardFactory: ContractFactory;
@@ -816,6 +817,18 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
 
       await expect(connect(anotherCashierShard, user).upgradeTo(user.address))
         .to.be.revertedWithCustomError(anotherCashierShard, REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+  });
+
+  describe("Function 'initHookAdminRole()'", async () => {
+    it("Executes as expected", async () => {
+      const { cashierRoot } = await setUpFixture(deployContracts);
+      const tx = cashierRoot.initHookAdminRole();
+      await expect(tx).to.emit(cashierRoot, EVENT_NAME_ROLE_ADMIN_CHANGED).withArgs(
+        hookAdminRole,
+        ownerRole,
+        ownerRole
+      );
     });
   });
 

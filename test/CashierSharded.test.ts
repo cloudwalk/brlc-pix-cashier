@@ -382,6 +382,20 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     return Promise.all(txs);
   }
 
+  async function makeForceCashOuts(cashierRoot: Contract, cashOuts: TestCashOut[]): Promise<TransactionResponse[]> {
+    const txs: Promise<TransactionResponse>[] = [];
+    for (const cashOut of cashOuts) {
+      const tx = connect(cashierRoot, cashier).makeForceCashOut(
+        cashOut.account.address,
+        cashOut.amount,
+        cashOut.txId
+      );
+      txs.push(tx);
+      cashOut.status = CashOutStatus.Pending;
+    }
+    return Promise.all(txs);
+  }
+
   function defineExpectedCashierState(cashOuts: TestCashOut[]): CashierState {
     let tokenBalance: number = 0;
     let pendingCashOutCounter: number = 0;
@@ -2481,6 +2495,71 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutConfirmationAfter, hookCallCounter: 1 });
       await checkHookTotalCalls(fixture, 1);
     });
+
+    it("All hooks are invoked for an force cash-out operation", async () => {
+      const fixture = await setUpFixture(deployAndConfigureContracts);
+      const { cashierRoot, cashierHookMock } = fixture;
+      const [cashOut] = defineTestCashOuts();
+      cashOut.txId = TRANSACTION_ID1;
+
+      await proveTx(connect(cashierRoot, hookAdmin).configureCashOutHooks(
+        cashOut.txId,
+        getAddress(cashierHookMock), // newCallableContract,
+        ALL_CASH_OUT_HOOK_FLAGS // newHookFlags
+      ));
+      expect(await cashierHookMock.hookCallCounter()).to.eq(0);
+
+      const [tx] = await makeForceCashOuts(cashierRoot, [cashOut]);
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutRequestBefore, hookCallCounter: 1 });
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutRequestAfter, hookCallCounter: 2 });
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutConfirmationBefore, hookCallCounter: 3 });
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutConfirmationAfter, hookCallCounter: 4 });
+      await checkHookTotalCalls(fixture, 4);
+    });
+
+    it("Only 'before' hooks are invoked for an force cash-out operation", async () => {
+      const fixture = await setUpFixture(deployAndConfigureContracts);
+      const { cashierRoot, cashierHookMock } = fixture;
+      const [cashOut] = defineTestCashOuts();
+      cashOut.txId = TRANSACTION_ID1;
+      const hookFlags =
+        (1 << HookIndex.CashOutRequestBefore) +
+        (1 << HookIndex.CashOutConfirmationBefore);
+
+      await proveTx(connect(cashierRoot, hookAdmin).configureCashOutHooks(
+        cashOut.txId,
+        getAddress(cashierHookMock), // newCallableContract,
+        hookFlags // newHookFlags
+      ));
+      expect(await cashierHookMock.hookCallCounter()).to.eq(0);
+
+      const [tx] = await makeForceCashOuts(cashierRoot, [cashOut]);
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutRequestBefore, hookCallCounter: 1 });
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutConfirmationBefore, hookCallCounter: 2 });
+      await checkHookTotalCalls(fixture, 2);
+    });
+
+    it("Only 'after' hooks are invoked for an force cash-out operation", async () => {
+      const fixture = await setUpFixture(deployAndConfigureContracts);
+      const { cashierRoot, cashierHookMock } = fixture;
+      const [cashOut] = defineTestCashOuts();
+      cashOut.txId = TRANSACTION_ID1;
+      const hookFlags =
+        (1 << HookIndex.CashOutRequestAfter) + // Is not called for internal cash-outs but still configured
+        (1 << HookIndex.CashOutConfirmationAfter);
+
+      await proveTx(connect(cashierRoot, hookAdmin).configureCashOutHooks(
+        cashOut.txId,
+        getAddress(cashierHookMock), // newCallableContract,
+        hookFlags // newHookFlags
+      ));
+      expect(await cashierHookMock.hookCallCounter()).to.eq(0);
+
+      const [tx] = await makeForceCashOuts(cashierRoot, [cashOut]);
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutRequestAfter, hookCallCounter: 1 });
+      await checkHookEvents(fixture, { tx, hookIndex: HookIndex.CashOutConfirmationAfter, hookCallCounter: 2 });
+      await checkHookTotalCalls(fixture, 2);
+    });
   });
 
   describe("Complex scenarios without hooks", async () => {
@@ -2675,6 +2754,17 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
       const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
       await expect(
         connect(cashierShards[0], deployer).registerInternalCashOut(
+          user.address, // account
+          1, // amount
+          TRANSACTION_ID1
+        )
+      ).to.be.revertedWithCustomError(cashierShards[0], REVERT_ERROR_IF_UNAUTHORIZED);
+    });
+
+    it("The 'registerForceCashOut()' function is reverted if it is called not by the owner or admin", async () => {
+      const { cashierShards } = await setUpFixture(deployAndConfigureContracts);
+      await expect(
+        connect(cashierShards[0], deployer).registerForceCashOut(
           user.address, // account
           1, // amount
           TRANSACTION_ID1

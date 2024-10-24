@@ -364,6 +364,11 @@ interface ICashierPrimary is ICashierTypes {
      * @dev Returns the address of the underlying token.
      */
     function underlyingToken() external view returns (address);
+
+    /**
+      * @dev Determines whether the contract is the cashier root contract.
+     */
+    function IS_ROOT() external view returns (bool);
 }
 
 /**

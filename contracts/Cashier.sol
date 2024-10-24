@@ -41,6 +41,9 @@ contract Cashier is
 
     // ------------------ Constants ------------------------------- //
 
+    /// @dev A flag indicating that the contract is the cashier root contract.
+    bool public constant IS_ROOT = true;
+
     /// @dev The maximum number of shards.
     uint256 public constant MAX_SHARD_COUNT = 1100;
 

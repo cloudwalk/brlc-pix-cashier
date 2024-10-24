@@ -154,6 +154,11 @@ interface ICashierShardPrimary is ICashierTypes {
      * @return operations The data of the cash-out operations in the form of a structure.
      */
     function getCashOuts(bytes32[] memory txIds) external view returns (CashOutOperation[] memory operations);
+
+    /**
+      * @dev Determines whether the contract is the cashier shard contract.
+     */
+    function IS_SHARD() external view returns (bool);
 }
 
 /**

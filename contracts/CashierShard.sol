@@ -16,6 +16,10 @@ import { CashierShardStorage } from "./CashierShardStorage.sol";
  * @dev The contract responsible for storing sharded cash-in and cash-out operations.
  */
 contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSUpgradeable, ICashierShard {
+
+    /// @dev A flag indicating that the contract is the cashier shard contract.
+    bool public constant IS_SHARD = true;
+
     // ------------------ Initializers ---------------------------- //
 
     /**

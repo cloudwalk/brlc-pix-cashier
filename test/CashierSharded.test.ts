@@ -2004,6 +2004,20 @@ describe("Contracts 'Cashier' and `CashierShard`", async () => {
     });
   });
 
+  describe("Function 'IS_ROOT()'", async () => {
+    it("Returns expected value", async () => {
+      const { cashierRoot } = await setUpFixture(deployAndConfigureContracts);
+      await expect(await cashierRoot.IS_ROOT()).to.equal(true);
+    });
+  });
+
+  describe("Function 'IS_SHARD()'", async () => {
+    it("Returns expected value", async () => {
+      const { cashierRoot, cashierShards } = await setUpFixture(deployAndConfigureContracts);
+      await expect(await cashierShards[0].IS_SHARD()).to.equal(true);
+    });
+  });
+
   describe("Scenarios with configured hooks", async () => {
     async function checkHookEvents(fixture: Fixture, props: {
       tx: TransactionResponse;
